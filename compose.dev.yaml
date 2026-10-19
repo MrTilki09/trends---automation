@@ -1,0 +1,54 @@
+# Dev overrides: source is bind-mounted, web runs `next dev`, worker runs `tsx watch`.
+# Start:  docker compose -f compose.yaml -f compose.dev.yaml up --build   (= npm run dev)
+#
+# node_modules and .next live in named volumes (not on the host), so Linux binaries never
+# mix with a Windows/macOS host install.
+
+x-dev: &dev
+  build:
+    context: .
+    target: dev
+  image: trend-pool:dev
+  volumes:
+    - .:/app
+    - node_modules:/app/node_modules
+  environment: &dev-env
+    NODE_ENV: development
+    # File watching through Docker Desktop bind mounts needs polling.
+    WATCHPACK_POLLING: "true"
+    CHOKIDAR_USEPOLLING: "true"
+
+services:
+  db:
+    ports:
+      - "127.0.0.1:5432:5432"
+
+  migrate:
+    <<: *dev
+    # Installs deps into the node_modules volume (fast when nothing changed), then migrates + seeds.
+    command: ["sh", "-c", "npm install --no-audit --no-fund && npx tsx worker/migrate.ts"]
+    environment:
+      <<: *dev-env
+      SERVICE_NAME: migrate
+
+  web:
+    <<: *dev
+    command: ["npx", "next", "dev", "-H", "0.0.0.0", "-p", "3000"]
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+      - next_cache:/app/.next
+    environment:
+      <<: *dev-env
+      SERVICE_NAME: web
+
+  worker:
+    <<: *dev
+    command: ["npx", "tsx", "watch", "--clear-screen=false", "worker/index.ts"]
+    environment:
+      <<: *dev-env
+      SERVICE_NAME: worker
+
+volumes:
+  node_modules:
+  next_cache:

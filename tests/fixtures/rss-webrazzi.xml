@@ -1,0 +1,578 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"
+	 xmlns:content="http://purl.org/rss/1.0/modules/content/"
+	 xmlns:wfw="http://wellformedweb.org/CommentAPI/"
+	 xmlns:dc="http://purl.org/dc/elements/1.1/"
+	 xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+	 xmlns:slash="http://purl.org/rss/1.0/modules/slash/"
+	 xmlns:georss="http://www.georss.org/georss" xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#"
+	 xmlns:media="http://search.yahoo.com/mrss/"
+	 xmlns:custom="http://webrazzi.com/custom-feed">
+	<channel>
+		<title>Webrazzi</title>
+		<link>https://webrazzi.com</link>
+		<description><![CDATA[Girişimcilik, teknoloji, sosyal medya]]></description>
+		<atom:link href="https://webrazzi.com/feed" rel="self" type="application/rss+xml" />
+		<language>tr</language>
+		<lastBuildDate>Mon, 19 Oct 2026 13:00:00 +0000</lastBuildDate>
+		<sy:updatePeriod>hourly</sy:updatePeriod>
+		<sy:updateFrequency>1</sy:updateFrequency>
+		<item>
+			<title><![CDATA[Sam Altman'ın World'ünden bankalara özel kimlik doğrulama çözümü]]></title>
+			<category><![CDATA[Yapay Zeka]]></category>
+			<link>https://webrazzi.com/2026/10/19/sam-altman-in-world-unden-bankalara-ozel-kimlik-dogrulama-cozumu/</link>
+			<comments>https://webrazzi.com/2026/10/19/sam-altman-in-world-unden-bankalara-ozel-kimlik-dogrulama-cozumu/#comments</comments>
+			<description><![CDATA[Sam Altman ve Alex Blania'nın kurucu ortakları arasında yer aldığı World, bankalar ve finans kuruluşlarına yönelik ilk sektörel World ID çözümünü kullanıma sundu. Alex Blania tarafından Las Vegas'taki...]]></description>
+			<content:encoded><![CDATA[<p><strong>Sam Altman </strong>ve<strong> Alex Blania</strong>'nın kurucu ortakları arasında yer aldığı World, bankalar ve finans kuruluşlarına yönelik ilk sektörel <a href="https://world.org/blog/announcements/world-id-banking-finance-ai-safe" target="_blank">World ID çözümünü</a> kullanıma sundu. Alex Blania tarafından Las Vegas'taki Money20/20 etkinliğinde tanıtılan World ID for banking and finance, finans kuruluşlarının müşteriler, çalışanlar ve yapay zeka ajanlarıyla gerçekleştirdiği işlemlerde kişinin gerçek bir insan olduğunu doğrulamasını amaçlıyor. </p>
+<p>Yeni paket aslında  <strong>World ID app, World ID for Agents </strong>ve<strong> <a href="https://world.org/solutions/world-id-for-zoom" target="_blank">World ID for Zoom</a></strong> olmak üzere World'ün daha önce geliştirdiği üç teknolojiyi bir araya getiriyor. Sistem, Proof of Human, Proof of Presence ve Proof of Attributes olarak adlandırılan kriptografik doğrulamalardan yararlanıyor. Proof of Human, kullanıcının gerçek ve benzersiz bir insan olduğunu; Proof of Presence kişinin o anda işlemi gerçekleştirdiğini; Proof of Attributes ise yaş veya vatandaşlık gibi belirli bilgileri, diğer kişisel verileri paylaşmadan doğrulamayı mümkün kılıyor.</p>
+<p><img class="lazyload " data-src="https://cdn.webrazzi.com/uploads/2026/10/srs1qhz7ew3olfu9-world-id-hq-20261016-app-proofs-6759fd67-453.png" title="srs1qhz7ew3olfu9-world-id-hq-20261016-app-proofs-6759fd67-453" alt=""></p>
+<p>World'e göre finans kuruluşları bu doğrulamaları yeni hesap açılışı, yüksek tutarlı para transferleri ve hesap kurtarma gibi hassas işlemlerde kullanabilecek. Şirket, böylece kurumların kullanıcı hakkında daha fazla kişisel veri toplamadan belirli bilgileri doğrulayabileceğini belirtiyor. </p>
+<h2>World ID for Zoom genel kullanıma açıldı </h2>
+<p>Paketin öne çıkan parçalarından biri ise<strong> World ID for Zoom</strong>. Nisan ayında sınırlı beta olarak duyurulan özellik artık Zoom'un kurumsal müşterileri için Zoom Marketplace üzerinden genel kullanıma sunuluyor. Sistem, video görüşmesindeki kişinin daha önce World ID ile doğrulanmış gerçek kişi olduğunu teyit etmeyi amaçlıyor.</p>
+<p><img class="lazyload " data-src="https://cdn.webrazzi.com/uploads/2026/10/zoom-id-828.png" title="zoom-id-828" alt=""></p>
+<p>Doğrulama sırasında kullanıcının Orb ile oluşturduğu World ID, cihaz üzerinden gerçekleştirilen canlı yüz doğrulaması ve Zoom görüşmesindeki görüntü karşılaştırılıyor. Doğrulama başarılı olduğunda kullanıcının görüntüsünde bir Human Badge gösteriliyor. World, bu süreçte Zoom'a kişisel bilgi aktarılmadığını belirtiyor. Ayrıca toplantı sahiplerinin ilerleyen dönemde katılımcılardan toplantıya girmeden önce Proof of Presence doğrulaması istemesi planlanıyor.</p>
+<p>Paketin diğer bileşeni <strong>AgentKit </strong>ise yapay zeka ajanlarını kapsıyor. Halen beta aşamasında olan sistem, kullanıcıların belirli World ID doğrulamalarını bir AI ajanına devretmesine imkan tanıyor. Böylece ajan, kullanıcı adına işlem yaparken arkasında doğrulanmış gerçek bir kişinin bulunduğunu üçüncü taraf hizmetlere kanıtlayabiliyor.</p>
+<p> World, <strong>Bain Capital, OpenExchange, Outtake, Pantera Capital ve VanEck Funds</strong>'ı çözümün ilk tasarım ortakları arasında gösteriyor. Ancak şirket şu ana kadar sistemi kullanmaya başlayan herhangi bir bankanın adını açıklamadı. Ürünün fiyatlandırmasına ilişkin de bilgi paylaşılmadığını belirtelim.</p>
+<p><img class="lazyload " data-src="https://cdn.webrazzi.com/uploads/2026/10/world-619.png" title="world-619" alt=""></p>
+<p>World'ün paylaştığı verilere göre bugün <strong>18 milyondan fazla kişi Proof of Human sahibi.</strong> Şirketin finans sektörüne yönelmesinin arkasında ise hızla büyüyen yapay zeka destekli dolandırıcılık riski bulunuyor. World'ün de atıfta bulunduğu Deloitte tahminlerine göre ABD'deki yapay zeka destekli dolandırıcılıktan kaynaklanan kayıpların <strong>2023'teki 12,3 milyar dolar </strong>seviyesinden<strong> 2027'de 40 milyar dolara </strong>ulaşması bekleniyor.</p>
+<p> World'ün yeni hamlesi, şirketin Orb tabanlı kimlik doğrulama sistemini kripto para ekosisteminin ötesine taşıyarak kurumsal kimlik ve güvenlik altyapısına dönüştürme stratejisinin de önemli bir parçası olarak değerlendirilebilir. Özellikle yapay zeka ajanlarının finansal işlemlerde daha aktif rol almaya başlamasıyla birlikte, işlemin arkasında kimin veya neyin bulunduğunu doğrulayan sistemlerin önemi de artıyor.</p>
+]]></content:encoded>
+			<guid isPermaLink="false">https://webrazzi.com/2026/10/19/sam-altman-in-world-unden-bankalara-ozel-kimlik-dogrulama-cozumu/</guid>
+			<dc:creator><![CDATA[Tuğçe İçözü]]></dc:creator>
+			<pubDate>Mon, 19 Oct 2026 13:00:00 +0000</pubDate>
+			<wfw:commentRss>https://webrazzi.com/2026/10/19/sam-altman-in-world-unden-bankalara-ozel-kimlik-dogrulama-cozumu/feed</wfw:commentRss>
+			<slash:comments>0</slash:comments>
+			<media:content url="https://cdn.webrazzi.com/uploads/2026/10/orb-307.png" width="240" height="135" medium="image"   />
+			<media:thumbnail url="https://cdn.webrazzi.com/uploads/2026/10/orb-307_240x135.png" width="240" height="135"   />
+			<custom:socialShare>true</custom:socialShare>
+		</item>
+		<item>
+			<title><![CDATA[MetropolCard ve Bilet.com’un yeni döneminin tüm detayları]]></title>
+			<category><![CDATA[Röportaj]]></category>
+			<category><![CDATA[Webrazzi TV]]></category>
+			<link>https://webrazzi.com/2026/10/19/metropolcard-ve-bilet-com-un-yeni-doneminin-tum-detaylari/</link>
+			<comments>https://webrazzi.com/2026/10/19/metropolcard-ve-bilet-com-un-yeni-doneminin-tum-detaylari/#comments</comments>
+			<description><![CDATA[MetropolCard'ın Bilet.com’un yüzde 51’ini satın aldığını geçtiğimiz Eylül ayında sizlere aktarmıştık. MetropolCard ile seyahat teknolojileri markası Bilet.com, yeni dönemin yol haritasını İstanbul’da ...]]></description>
+			<content:encoded><![CDATA[<p><a href="https://metropolcard.com/" target="_blank"><strong>MetropolCard</strong></a>'ın <a href="https://www.bilet.com/" target="_blank"><strong>Bilet.com</strong></a>’un yüzde 51’ini satın aldığını geçtiğimiz Eylül ayında sizlere <a href="https://webrazzi.com/2026/09/08/metropolcard-biletcomun-yuzde-51ini-satin-aliyor/" target="_blank"><strong>aktarmıştık</strong></a>. MetropolCard ile seyahat teknolojileri markası Bilet.com, yeni dönemin yol haritasını İstanbul’da düzenlenen özel lansmanla tanıttı. Etkinlik çerçevesinde <strong>MetropolCard CEO'su Uğur Yıldırım</strong> ve <strong>Bilet.com Genel Müdürü Akif Enes Kütük</strong> ile keyifli bir sohbet gerçekleştirdik.</p>
+<p>Şirketin yemek kartından çalışan faydalarına, dijital ödemelere, sürdürülebilirliğe ve elektrikli mobiliteye uzanan yolculuğunu aktaran MetropolCard CEO’su Uğur Yıldırım, Bilet.com’la bu alana seyahat, konaklama, ulaşım ve deneyim hizmetlerinin de eklendiğini söyledi. Yıldırım tarafından aktarılan bilgilere göre MetropolCard şu an <strong>81 il ve 922 ilçede, 50 binden fazla üye iş yeriyle</strong> hizmet veriyor.</p>
+<p>Bilet.com Genel Müdürü Akif Enes Kütük ise platformun artık yalnızca bilet satılan bir yer olmadığını belirtti. Kütük'ün paylaştığı bilgilere göre uçak, otobüs ve feribot biletlerinin yanı sıra otel, araç kiralama, havalimanı transferi, İstanbulkart bakiye yükleme ve etkinlik biletleri de aynı platformda yer alıyor. Kütük, platformda <strong>450'den fazla otobüs firması, 1,5 milyondan fazla otel seçeneği ve 200'ü aşkın araç kiralama firması </strong>bulunduğunu da sözlerine ekledi.</p>
+<p>İki markanın ortak planlarında <strong>teknoloji, kişiselleştirme ve yapay zeka yatırımları</strong> öne çıkıyor. Kullanıcı verisinden yararlanarak ihtiyaca göre kampanyalar geliştirmek ve günlük yaşamla seyahat arasındaki temas noktalarını birleştirmek hedefleniyor. MetropolCard kullanıcılarının Bilet.com’daki seyahat ve deneyim seçeneklerinden, Bilet.com kullanıcılarının da MetropolCard’ın ödeme ekosisteminden yararlanabileceği yeni iş modelleri üzerinde çalışılıyor. </p>
+<p>MetropolCard ve Bilet.com’un yeni döneminin tüm detaylarını videomuzda bulabilirsiniz. <strong>İyi</strong> <strong>seyirler</strong>.</p>
+<p><a href="https://youtu.be/QcC3UZURFq0" target="_blank">
+<p><div class="responsive-embed widescreen youtube"><iframe data-type="video" width="200" height="113" src="https://www.youtube.com/embed/QcC3UZURFq0?feature=oembed" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen title="MetropolCard ve Bilet.com’un yeni döneminin tüm detayları"></iframe></div></p>
+<p></a></p>
+]]></content:encoded>
+			<guid isPermaLink="false">https://webrazzi.com/2026/10/19/metropolcard-ve-bilet-com-un-yeni-doneminin-tum-detaylari/</guid>
+			<dc:creator><![CDATA[MetropolCard]]></dc:creator>
+			<pubDate>Mon, 19 Oct 2026 12:41:38 +0000</pubDate>
+			<wfw:commentRss>https://webrazzi.com/2026/10/19/metropolcard-ve-bilet-com-un-yeni-doneminin-tum-detaylari/feed</wfw:commentRss>
+			<slash:comments>0</slash:comments>
+			<media:content url="https://cdn.webrazzi.com/uploads/2026/10/metropolcard-828.png" width="240" height="135" medium="image"   />
+			<media:thumbnail url="https://cdn.webrazzi.com/uploads/2026/10/metropolcard-828_240x135.png" width="240" height="135"   />
+			<custom:socialShare>true</custom:socialShare>
+		</item>
+		<item>
+			<title><![CDATA[Disney, Character.AI çalışanlarının çoğunu işe almayı kabul etti]]></title>
+			<category><![CDATA[Yapay Zeka]]></category>
+			<category><![CDATA[Kariyer]]></category>
+			<link>https://webrazzi.com/2026/10/19/disney-character-ai-calisanlarinin-cogunu-ise-almayi-kabul-etti/</link>
+			<comments>https://webrazzi.com/2026/10/19/disney-character-ai-calisanlarinin-cogunu-ise-almayi-kabul-etti/#comments</comments>
+			<description><![CDATA[Yapay zeka destekli sohbet platformu Character.AI'ın sahibi Character Technologies'in iflas korumasına başvurduğunu ve şirketin varlıklarının satışı için resmi süreç başlattığını sizlere geçen hafta a...]]></description>
+			<content:encoded><![CDATA[<p>Yapay zeka destekli sohbet platformu <strong><a href="https://character.ai/" target="_blank">Character.AI</a></strong>'ın sahibi <strong>Character Technologies</strong>'in iflas korumasına başvurduğunu ve şirketin varlıklarının satışı için resmi süreç başlattığını sizlere geçen hafta <strong><a href="https://webrazzi.com/2026/10/13/characterai-iflas-korumasina-basvurdu-disney-20-milyon-dolarlik-teklifle-devrede/" target="_blank">aktarmıştık</a></strong>. Bu süreçte <strong><a href="https://webrazzi.com/etiket/disney/" target="_blank">Disney</a></strong>'in <strong>20 milyon dolarlık</strong> teklifle devreye girdiğini de belirtmiştik.</p>
+<p> Şimdi ise Disney ile yapılan anlaşmanın yeni ayrıntıları ortaya çıktı. Disney, <strong><a href="https://webrazzi.com/etiket/characterai/" target="_blank">Character.AI</a></strong> çalışanlarının çoğunu işe almayı kabul ederken<strong> en az 60 çalışana</strong> teklif götürdü. Disney'in Character.AI çalışanlarına yaptığı tekliflerin yıllık toplam maliyetinin <strong>yaklaşık 60 milyon dolar</strong> olması bekleniyor.</p>
+<p> Bloomberg'ün ulaştığı mahkeme belgelerine <strong><a href="https://www.bloomberg.com/news/newsletters/2026-10-17/disney-offers-soft-landing-to-staff-at-troubled-character-ai" target="_blank">göre</a></strong>, iş teklifi alan çalışanların çok büyük bir bölümü Disney'de çalışmayı kabul etti. Character.AI'ın eski CEO'su Karandeep Anand da kısa süre önce Disney'in ilk CTO'su olarak göreve başlamıştı. Ancak anlaşma, Character.AI'ın varlıklarının satış sürecinin tamamlandığı anlamına gelmiyor. Disney'in teklifi, başka şirketlerin daha yüksek teklifler sunmasına olanak tanıyan mahkeme gözetimindeki satış sürecinin bir parçası. </p>
+<p> Öte yandan Character.AI, yüksek işletme maliyetleri ve çocuk güvenliğine ilişkin hukuki süreçler nedeniyle zor durumda. Şirket, 14 yaşındaki oğlunun platformdaki sohbet robotlarından biriyle kurduğu etkileşimin ardından intihar ettiğini öne süren bir annenin açtığı davayla karşı karşıya. Platform hakkında çocuk güvenliğine ilişkin endişeler nedeniyle kamu kurumları tarafından da soruşturmalar yürütülüyor.</p>
+]]></content:encoded>
+			<guid isPermaLink="false">https://webrazzi.com/2026/10/19/disney-character-ai-calisanlarinin-cogunu-ise-almayi-kabul-etti/</guid>
+			<dc:creator><![CDATA[Candeğer Muradoğlu]]></dc:creator>
+			<pubDate>Mon, 19 Oct 2026 12:00:00 +0000</pubDate>
+			<wfw:commentRss>https://webrazzi.com/2026/10/19/disney-character-ai-calisanlarinin-cogunu-ise-almayi-kabul-etti/feed</wfw:commentRss>
+			<slash:comments>0</slash:comments>
+			<media:content url="https://cdn.webrazzi.com/uploads/2025/06/character-ai-475.png" width="240" height="135" medium="image"   />
+			<media:thumbnail url="https://cdn.webrazzi.com/uploads/2025/06/character-ai-475_240x135.png" width="240" height="135"   />
+			<custom:socialShare>true</custom:socialShare>
+		</item>
+		<item>
+			<title><![CDATA[Apple'ın iPhone Duo ön sipariş kararı, tedarik kısıtları nedeniyle eleştirildi]]></title>
+			<category><![CDATA[Teknoloji]]></category>
+			<link>https://webrazzi.com/2026/10/19/applein-iphone-duo-on-siparis-karari-tedarik-kisitlari-nedeniyle-elestirildi/</link>
+			<comments>https://webrazzi.com/2026/10/19/applein-iphone-duo-on-siparis-karari-tedarik-kisitlari-nedeniyle-elestirildi/#comments</comments>
+			<description><![CDATA[Apple’ın iPhone Duo için ön siparişleri 16 Ekim Cuma günü başlatma kararı, tedarik kısıtları nedeniyle eleştiri aldı. Bloomberg'ün güvenilir kaynağı Mark Gurman, Power On bülteninde, şirketin üretim z...]]></description>
+			<content:encoded><![CDATA[<p><strong><a href="https://webrazzi.com/etiket/apple/" target="_blank">Apple</a></strong>’ın <strong><a href="https://webrazzi.com/etiket/iphone-duo/" target="_blank">iPhone Duo</a></strong> için ön siparişleri 16 Ekim Cuma günü başlatma kararı, tedarik kısıtları nedeniyle eleştiri aldı. Bloomberg'ün güvenilir kaynağı Mark Gurman, <strong><a href="https://www.bloomberg.com/news/newsletters/2026-10-18/apple-homeview-with-robotic-arm-new-mac-ipad-mini-nov-6-release-iphone-duo" target="_blank">Power On bülteninde</a></strong>, şirketin üretim zorlukları ve ciddi arz kısıtlarıyla karşılaşacağını bildiği halde siparişleri açmasını “büyük bir hata” olarak nitelendirdi. </p>
+<p>Gurman’a göre Apple, daha fazla ürün hazır olana kadar ön siparişleri ertelemek yerine iPhone Duo’yu mali yılının ilk çeyreğinin başında pazara sunmayı tercih etti. Bu kararın, talebi karşılamaktan çok cihazı erken dönemde satışa çıkarmaya öncelik verdiğini savundu. Gurman, tercihin ürünü ilk alanlar arasında yer almak isteyen pek çok müşteriyi hayal kırıklığına uğratacağını söyledi. Değerlendirmesinde Apple’ın tedarik sorunlarını önceden bildiğini ve buna rağmen daha fazla stok beklemeden ön siparişleri başlattığını vurguladı.</p>
+<p>Apple’ın ilk planı, iPhone Duo’yu önce yalnızca ABD ve Çin’de satışa sunmak, ardından diğer ülkelere açmaktı. Şirket sonrasında ön siparişleri <strong>70’ten fazla</strong> ülkede aynı anda başlatmaya karar verdi. Başlangıçta yalnızca iki ülke öngörülürken, son kararla ön sipariş takvimine 70’ten fazla ülke aynı anda dahil edildi. Bu geniş kapsamlı açılışta stokların sınırlı kalması, teslimat sürelerinin hızla uzamasına yansıdı.</p>
+<p>Ön siparişlerin başlamasından 30 dakikadan kısa süre sonra, iPhone Duo için tahmini gönderim tarihleri çoğu ülkede 25 Ocak civarına kaydı. 25 Ocak, kesinleşmiş bir teslimat günü değil, sipariş ekranlarında görülen tahmini gönderim tarihiydi. Apple’ın geçmişte teslimat tahminlerini genellikle temkinli verip daha erken teslimat yapması, bazı müşterilerin tarihlerinin en azından bir miktar öne çekilebileceği umudunu doğurdu.</p>
+]]></content:encoded>
+			<guid isPermaLink="false">https://webrazzi.com/2026/10/19/applein-iphone-duo-on-siparis-karari-tedarik-kisitlari-nedeniyle-elestirildi/</guid>
+			<dc:creator><![CDATA[İdil Dilber]]></dc:creator>
+			<pubDate>Mon, 19 Oct 2026 11:00:00 +0000</pubDate>
+			<wfw:commentRss>https://webrazzi.com/2026/10/19/applein-iphone-duo-on-siparis-karari-tedarik-kisitlari-nedeniyle-elestirildi/feed</wfw:commentRss>
+			<slash:comments>0</slash:comments>
+			<media:content url="https://cdn.webrazzi.com/uploads/2026/09/iphone-duo-866.png" width="240" height="135" medium="image"   />
+			<media:thumbnail url="https://cdn.webrazzi.com/uploads/2026/09/iphone-duo-866_240x135.png" width="240" height="135"   />
+			<custom:socialShare>true</custom:socialShare>
+		</item>
+		<item>
+			<title><![CDATA[Meta, yapay zeka eğitimi tartışmalarının ardından kullanım koşullarını değiştirdi]]></title>
+			<category><![CDATA[Yapay Zeka]]></category>
+			<link>https://webrazzi.com/2026/10/19/meta-yapay-zeka-egitimi-tartismalarinin-ardindan-kullanim-kosullarini-degistirdi/</link>
+			<comments>https://webrazzi.com/2026/10/19/meta-yapay-zeka-egitimi-tartismalarinin-ardindan-kullanim-kosullarini-degistirdi/#comments</comments>
+			<description><![CDATA[Meta, kısa süre önce güncellediği ticari kullanım koşullarında yeniden değişikliğe gitti. Şirket, işletme hesaplarıyla bağlantılı alan adları, web sayfaları veya URL'lerde bulunan içeriklerin Meta ürü...]]></description>
+			<content:encoded><![CDATA[<p> Meta, kısa süre önce güncellediği <a href="https://www.facebook.com/legal/commercial_terms_preview" target="_blank">ticari kullanım koşullarında</a> yeniden değişikliğe gitti. Şirket, işletme hesaplarıyla bağlantılı alan adları, web sayfaları veya URL'lerde bulunan içeriklerin Meta ürünlerini "eğitmek" için kullanılabileceğini belirten ifadeyi koşullardan çıkardı. </p>
+<p>Meta'nın daha önce yayınladığı koşullarda şirketin, bir işletme hesabına bağlı web sitelerindeki içerikleri ürün ve hizmetlerini sunmak, geliştirmek, iyileştirmek, araştırmak, eğitmek ve güvenliğini sağlamak amacıyla kullanabileceği <a href="https://www.niemanlab.org/2026/10/metas-new-commercial-terms-will-allow-the-scraping-of-news-sites-legal-experts-say/" target="_blank">belirtiliyordu</a>. Söz konusu ifade, özellikle yayıncılar ve hukuk uzmanları arasında Meta'nın işletme hesabına sahip yayın kuruluşlarının internet sitelerini tarayarak içerikleri yapay zeka modellerinin eğitiminde kullanabileceği yönünde endişelere yol açmıştı.</p>
+<h2> Web sitelerini taramaya devam edecek </h2>
+<p>30 Ekim'de yürürlüğe girmesi planlanan yeni koşullarda ise "eğitmek" ifadesi kaldırıldı. Bununla birlikte Meta'nın web scraper, bot ve crawler gibi otomatik araçlarla işletmelerin bağlantılı web sitelerine erişmesine ve buradaki içerikleri toplamasına imkan tanıyan hükümler devam ediyor. Şirket artık bu işlemin reklam ve işletme ürünlerini geliştirmek, iyileştirmek, araştırmak ve sürdürmek amacıyla gerçekleştirildiğini belirtiyor.</p>
+<p> Meta, yapılan değişikliğin şirketin mevcut web tarama uygulamalarında herhangi bir değişiklik anlamına gelmediğini savunuyor. Şirketten yapılan açıklamada, daha önce tek bir başlık altında toplanan web tarama koşullarının yalnızca reklam ve işletme ürünleri için geçerli olduğu ve bunun yeni metinde daha açık hale getirildiği ifade edildi. </p>
+<p><strong>Meta sözcüsü Daniel Roberts </strong>ayrıca web sitesi sahiplerinin, robots.txt dosyaları üzerinden otomatik tarayıcıların sitelerine erişimine ilişkin tercihlerini belirtmeye devam edebileceğini söyledi. <strong>Meta İletişim Başkan Yardımcısı Andy Stone</strong> ise düzenlemenin haber sitelerindeki içerikleri yapay zeka eğitimi için toplamak amacıyla hazırlanmadığını; reklamlar ve içerik önerilerinde kullanılacak doğru ürün bilgilerine erişmeyi hedeflediğini <a href="https://x.com/andymstone/status/2111101865769201850" target="_blank">belirtti</a>. </p>
+<p>Meta'nın ifadeyi koşullardan tamamen çıkarması, yayıncılar tarafından dile getirilen yapay zeka eğitimi ve telif hakkı endişelerinin şirket üzerinde etkili olduğunu gösteriyor. Ancak Meta'nın işletmelere bağlı web sitelerini otomatik araçlarla tarama hakkını koruması nedeniyle tartışmanın tamamen sona erdiğini söylemek zor.</p>
+]]></content:encoded>
+			<guid isPermaLink="false">https://webrazzi.com/2026/10/19/meta-yapay-zeka-egitimi-tartismalarinin-ardindan-kullanim-kosullarini-degistirdi/</guid>
+			<dc:creator><![CDATA[Tuğçe İçözü]]></dc:creator>
+			<pubDate>Mon, 19 Oct 2026 10:00:00 +0000</pubDate>
+			<wfw:commentRss>https://webrazzi.com/2026/10/19/meta-yapay-zeka-egitimi-tartismalarinin-ardindan-kullanim-kosullarini-degistirdi/feed</wfw:commentRss>
+			<slash:comments>0</slash:comments>
+			<media:content url="https://cdn.webrazzi.com/uploads/2025/10/meta-yapay-zeka-522.png" width="240" height="135" medium="image"   />
+			<media:thumbnail url="https://cdn.webrazzi.com/uploads/2025/10/meta-yapay-zeka-522_240x135.png" width="240" height="135"   />
+			<custom:socialShare>true</custom:socialShare>
+		</item>
+		<item>
+			<title><![CDATA[Anthropic, hisselerinin yüzde 5'ini kamu yararına yönelik bir fona ayıracak]]></title>
+			<category><![CDATA[Yapay Zeka]]></category>
+			<link>https://webrazzi.com/2026/10/19/anthropic-hisselerinin-yuzde-5-ini-kamu-yararina-yonelik-bir-fona-ayiracak/</link>
+			<comments>https://webrazzi.com/2026/10/19/anthropic-hisselerinin-yuzde-5-ini-kamu-yararina-yonelik-bir-fona-ayiracak/#comments</comments>
+			<description><![CDATA[Claude'un geliştiricisi Anthropic, toplumsal fayda sağlayan projeleri desteklemek için Anthropic Public Benefit Fund adlı bir fon kuracağını açıkladı. Şirket, hissedarların onayına bağlı olarak hissel...]]></description>
+			<content:encoded><![CDATA[<p data-pm-slice="0 0 ">Claude'un geliştiricisi <a href="https://www.anthropic.com/" target="_blank">Anthropic</a>, toplumsal fayda sağlayan projeleri desteklemek için <strong>Anthropic Public Benefit Fund</strong> adlı bir fon kuracağını <a href="https://www.anthropic.com/news/public-benefit-fund" target="_blank">açıkladı</a>. Şirket, hissedarların onayına bağlı olarak hisselerinin yüzde 5'ini bu yapıya ayırmayı planlıyor. Belirlenen başlangıç değerinin üzerindeki her yüzde 50'lik değer artışında ise yönetim kurulunun kararıyla fona ilave yüzde 2 hisse aktarılabilecek.</p>
+<p>Fon, tamamen Anthropic'e ait bir limited şirket olarak kurulacak. Şirket, bu yapının farklı destek modellerini uygulama konusunda esneklik sağlayacağını belirtiyor. Olası kullanım alanları arasında kâr amacı gütmeyen kuruluşlara büyük ölçekli bağışlar ve belirli topluluklara doğrudan kaynak aktarımı bulunuyor.</p>
+<p><strong>Yapay zekanın iş gücü piyasasına etkileri</strong>, fonun odaklanabileceği konular arasında yer alıyor. Anthropic, bu etkileri araştırmak ve ele almak için daha önce 200 milyon dolar ayırmayı taahhüt etmişti. Şirket, teknolojinin ilerleme hızının daha kapsamlı adımlar gerektirebileceğini ifade ediyor. Fonun elindeki hisseler ise lobi faaliyetleri veya siyasi bağışlar için kullanılmayacak. </p>
+<p>Anthropic'in kurucu ortakları, şirketin kuruluşunda kendi hisselerinin yüzde 80’ini bağışlama sözü vermişti. Çalışanların yaklaşık yarısı da şirketin eşleştirme desteği sunduğu hisse bağış programına katılıyor. Anthropic'e göre yeni fonla birlikte kamu yararına ayrılması taahhüt edilen hisselerin toplam oranı yaklaşık yüzde 20’ye ulaşacak.</p>
+<p>Fonun yönetimi, yapısı ve ek hisse aktarımını mümkün kılacak değerleme eşikleriyle ilgili ayrıntılar önümüzdeki aylarda paylaşılacak.</p>
+]]></content:encoded>
+			<guid isPermaLink="false">https://webrazzi.com/2026/10/19/anthropic-hisselerinin-yuzde-5-ini-kamu-yararina-yonelik-bir-fona-ayiracak/</guid>
+			<dc:creator><![CDATA[Gözde Ulukan]]></dc:creator>
+			<pubDate>Mon, 19 Oct 2026 09:00:00 +0000</pubDate>
+			<wfw:commentRss>https://webrazzi.com/2026/10/19/anthropic-hisselerinin-yuzde-5-ini-kamu-yararina-yonelik-bir-fona-ayiracak/feed</wfw:commentRss>
+			<slash:comments>0</slash:comments>
+			<media:content url="https://cdn.webrazzi.com/uploads/2026/10/anthropic-982.png" width="240" height="135" medium="image"   />
+			<media:thumbnail url="https://cdn.webrazzi.com/uploads/2026/10/anthropic-982_240x135.png" width="240" height="135"   />
+			<custom:socialShare>true</custom:socialShare>
+		</item>
+		<item>
+			<title><![CDATA[Webrazzi Summit 2026 için son 2 gün!]]></title>
+			<category><![CDATA[Etkinlikler]]></category>
+			<link>https://webrazzi.com/2026/10/19/webrazzi-summit-2026-icin-son-2-gun/</link>
+			<comments>https://webrazzi.com/2026/10/19/webrazzi-summit-2026-icin-son-2-gun/#comments</comments>
+			<description><![CDATA[Türkiye'nin en etkili teknoloji ve girişimcilik konferansı Webrazzi Summit, bu yıl 21 Ekim tarihinde Wyndham Grand İstanbul Levent'te gerçekleşecek.Webrazzi'nin 20. yılında düzenlenecek olan Webrazzi ...]]></description>
+			<content:encoded><![CDATA[<p>Türkiye'nin en etkili teknoloji ve girişimcilik konferansı <strong><a href="https://webrazzi.com/etkinlik/2026/summit/" target="_blank">Webrazzi Summit</a></strong>, bu yıl <strong>21 Ekim tarihinde Wyndham Grand İstanbul Levent</strong>'te gerçekleşecek.</p>
+<p><strong>Webrazzi'nin 20. yılında</strong> düzenlenecek olan <strong>Webrazzi Summit 2026</strong>, <strong>Disrupt, Grow, Venture </strong>ve <strong>Academy</strong> olmak üzere toplamda 4 farklı salonda gerçekleşecek. Katılımcılar ayrıca <strong>Startup Lounge</strong> alanında yer alacak <strong>50 girişimin</strong> standını ziyaret ederek ürün ve hizmetlerini yakından tanıma fırsatı bulacak. Konferansımız, Webrazzi Kurucu ve CEO'su <a href="https://www.linkedin.com/in/akutsal" target="_blank">Arda Kutsal</a>'ın açılış konuşması ile başlayacak.</p>
+<h3>Webrazzi Summit 2026'da bizi neler bekliyor?</h3>
+<p data-pm-slice="1 1 "><strong>Disrupt sahnesinde</strong> yapay zekanın iş dünyasındaki kullanımından ödeme deneyimlerinin geleceğine, global büyümeden ses teknolojilerine uzanan başlıklar ele alınacak. Yapay zeka yatırımlarının geri dönüşü ve modellerin ticari değere dönüşmesi de konuşulacak konular arasında yer alacak.</p>
+<p><strong>Grow salonunda</strong> perakende ve pazarlamanın dönüşümüne odaklanacağız. Ticaretin yeni modelleri, değişen tüketici beklentileri, yeni nesil markaların büyüme stratejileri ve içerik üretiminin ekonomisi bu salonun gündemini oluşturacak.</p>
+<p><strong>Venture sahnesinde</strong> ise Türkiye'den global başarı hikayeleri çıkarmanın yollarını, oyun sektörünün geleceğini ve yapay zeka çağında yatırım yaklaşımlarını tartışacağız. Yapay zeka agent'larının SaaS modellerine etkisi, girişimlerin scale-up aşamasına geçişi ve yatırımdan exit'e uzanan süreç de programda yer alacak.</p>
+<p><strong>Academy salonunda</strong> yatırım trendlerinin yanı sıra uygulamalı yapay zeka workshop'ları katılımcıları bekliyor. Kod yazmadan iş akışlarını agent'lara devretmek ve günlük görevler için bir yapay zeka ekibi oluşturmak gibi konular somut örneklerle ele alınacak.</p>
+<p>Ayrıca Webrazzi Summit'in girişimcilik tarafındaki önemli bölümlerinden <strong>Webrazzi Arena</strong>'nın bu yıl geri döndüğünü daha önce sizlerle <a href="https://webrazzi.com/2026/08/17/webrazzi-arena-2026-basvurulari-acildi/" target="_blank">paylaşmıştık</a>. Webrazzi Arena kapsamında seçilen girişimler, 21 Ekim'de Webrazzi Summit 2026 sahnesinde projelerini jüri ve katılımcılarla paylaşacak.</p>
+<h3>Webrazzi Events uygulamasını indirmeyi unutmayın!</h3>
+<p>Oturumların yanı sıra gün boyunca yeni bağlantılar kurma ve iş birlikleri geliştirme fırsatı da bulabileceksiniz. Etkinliğimizi online olarak takip edecek katılımcılarımız da online networking imkanından faydalanabilecek. Bu noktada hem <a href="https://apps.apple.com/tr/app/webrazzi-events/id6526486354" target="_blank">App Store</a> hem de <a href="https://play.google.com/store/apps/details?id=com.webrazzi.events&hl=en" target="_blank">Google Play Store</a>'da mevcut olan <strong>Webrazzi Events</strong> uygulaması sayesinde etkinlik programına anında ulaşabileceğinizi, toplantılar ayarlayabileceğinizi de hatırlatalım.</p>
+<h3>Ulaşım detayları </h3>
+<p>Etkinliğimize özel aracıyla katılacak olanlar, araçlarını Özdilek AVM otoparkına bırakabilirler. Toplu taşımayı tercih eden katılımcılarımız ise M2 metrosunun Levent istasyonunda inebilirler; otobüsle gelenler için de yine Levent durağı en uygun seçenek olacaktır.</p>
+<p>Webrazzi Summit 2026'nın tüm konuşmacılarına ve konferans programına <a href="https://webrazzi.com/etkinlik/2026/summit/" target="_blank">etkinlik sayfamızdan</a> göz atabilirsiniz. Webrazzi Summit 2026'ya katılmak için, <a href="https://webrazzi.com/order/ticket/summit-2026/" target="_blank">buradan</a> bilet alabileceğinizi de hatırlatalım.</p>
+<p>21 Ekim'de görüşmek üzere!</p>
+<h2>SPONSORLAR</h2>
+<p><strong>Elmas Sponsor</strong></p>
+<p><strong><a href="https://www.isbank.com.tr/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/03/adsiz-tasarim-18-kopyasi-1774518601240.png" alt="Türkiye İş Bankası "></a></strong></p>
+<p><strong>Platin Sponsorlar</strong></p>
+<p><strong><a href="https://www.garantibbvayatirim.com.tr/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/06/adsiz-tasarim-18-kopyasi-4-1780904320454.png" alt="garanti bbva yatırım "></a> <a href="https://www.hepsiburada.com/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/06/adsiz-tasarim-4-kopyasi-178091964252.png" alt="hepsiburada "></a></strong></p>
+<p><strong><a href="https://www.turkcell.com.tr/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/06/adsiz-tasarim-6-kopyasi-178237691623.png" alt="Turkcell "></a></strong></p>
+<p><strong>Altın Sponsor</strong></p>
+<p><strong><a href="https://metropolcard.com/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/03/adsiz-tasarim-18-1774518718457.png" alt="Metropolcard "></a> <a href="https://orfeolabs.com/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/10/adsiz-tasarim-10-179129328469.png" alt="orfeo labs "></a></strong></p>
+<p><strong>Gümüş Sponsorlar</strong></p>
+<p><strong><a href="https://www.bacaciyatirimholding.com/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/03/adsiz-tasarim-18-kopyasi-5-1774518800237.png" alt="Bacacı Yatırım Holding "></a> <a href="https://www.greymore.com/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/03/adsiz-tasarim-18-kopyasi-7-1774518881883.png" alt="Greymore "></a></strong></p>
+<p><strong><a href="https://www.tabgida.com.tr/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/04/adsiz-tasarim-19-177503950334.png" alt="TAB Gıda "></a> <a href="https://www.turk.net/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/08/adsiz-tasarim-7-kopyasi-2-1785842005926.png" alt="Turknet "></a></strong></p>
+<p><strong>Startup Lounge İş Ortakları</strong></p>
+<p><a href="https://ariteknokent.com.tr/tr" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/08/adsiz-tasarim-7-1786442761990.png" alt="itü arı teknokent "></a> <a href="https://ostimteknopark.com.tr/tr" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/08/adsiz-tasarim-18-kopyasi-10-178634288243.png" alt="Ostim Teknopark "></a></p>
+<p><a href="https://oriontekmer.com/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/08/adsiz-tasarim-5-kopyasi-1786342915831.png" alt="Thk & Orion Tekmer "></a> <a href="https://terminal.turkishairlines.com/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/10/adsiz-tasarim-10-kopyasi-1790838898382.png" alt="thy terminal "></a></p>
+<p><a href="https://www.workup.ist/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/10/adsiz-tasarim-11-kopyasi-3-1791963062204.png" alt="workup "></a></p>
+<p><strong>Webrazzi Arena Sponsoru</strong></p>
+<p><strong><a href="https://terminal.turkishairlines.com/turkish-ventures/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/10/adsiz-tasarim-10-1790838837655.png" alt="turkish ventures "></a></strong></p>
+<p><strong>Destekleyen</strong></p>
+<p><a href="https://kopuklu.com.tr/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/10/adsiz-tasarim-11-kopyasi-179189910792.png" alt="köpüklü "></a></p>
+<p><strong>Medya Partnerleri</strong></p>
+<p><a href="https://brandfocus.com.tr/anasayfa-turkce/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/03/adsiz-tasarim-18-kopyasi-6-177451901814.png" alt="Brand Focus "></a> <a href="https://www.ekoturk.com/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/08/adsiz-tasarim-7-kopyasi-2-1787652723698.png" alt="ekotürk "></a></p>
+<p><a href="https://karnaval.com/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/03/adsiz-tasarim-20-kopyasi-1774518945559.png" alt="Karnaval "></a> <a href="https://www.platinonline.com/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/03/adsiz-tasarim-19-kopyasi-1774518979844.png" alt="Platin "></a></p>
+]]></content:encoded>
+			<guid isPermaLink="false">https://webrazzi.com/2026/10/19/webrazzi-summit-2026-icin-son-2-gun/</guid>
+			<dc:creator><![CDATA[Gözde Ulukan]]></dc:creator>
+			<pubDate>Mon, 19 Oct 2026 08:30:00 +0000</pubDate>
+			<wfw:commentRss>https://webrazzi.com/2026/10/19/webrazzi-summit-2026-icin-son-2-gun/feed</wfw:commentRss>
+			<slash:comments>0</slash:comments>
+			<media:content url="https://cdn.webrazzi.com/uploads/2026/10/webrazzi-summit-2026-1920-x-1080-px-6-509.png" width="240" height="135" medium="image"   />
+			<media:thumbnail url="https://cdn.webrazzi.com/uploads/2026/10/webrazzi-summit-2026-1920-x-1080-px-6-509_240x135.png" width="240" height="135"   />
+			<custom:socialShare>true</custom:socialShare>
+		</item>
+		<item>
+			<title><![CDATA[Generative AI’dan Agentic AI’a: Mobil pazarlamada üretimden karara geçiş [Sponsorlu İçerik]]]></title>
+			<category><![CDATA[Genel]]></category>
+			<link>https://webrazzi.com/2026/10/19/generative-aidan-agentic-aia-mobil-pazarlamada-uretimden-karara-gecis/</link>
+			<comments>https://webrazzi.com/2026/10/19/generative-aidan-agentic-aia-mobil-pazarlamada-uretimden-karara-gecis/#comments</comments>
+			<description><![CDATA[Mobil uygulama ekonomisinde rekabetin kuralları değişiyor. Uzun süredir uygulama geliştiricilerin ve pazarlama ekiplerinin önceliği daha fazla kullanıcıya ulaşmak, indirme sayılarını artırmak ve rekla...]]></description>
+			<content:encoded><![CDATA[<p>Mobil uygulama ekonomisinde rekabetin kuralları değişiyor. Uzun süredir uygulama geliştiricilerin ve pazarlama ekiplerinin önceliği daha fazla kullanıcıya ulaşmak, indirme sayılarını artırmak ve reklam bütçelerini verimli kullanmak olurken, bugün bu hedeflerin yanına daha kritik bir soru ekleniyor: Kazanılan kullanıcı ne kadar değer yaratıyor ve bu değer sürdürülebilir biçimde nasıl artırılabilir?</p>
+<p>Yapay zekâdaki gelişmeler, bu sorunun yanıtını bulma biçimini de dönüştürüyor. Generative AI, kişiselleştirilmiş içerik ve deneyimlerin daha hızlı üretilmesini sağlarken Agentic AI olarak adlandırılan yeni yaklaşım, belirlenen hedefler doğrultusunda birden fazla adımı planlayabilen, araçlar arasında işlem yapabilen ve sonuçlara göre aksiyon alabilen sistemleri gündeme getiriyor.</p>
+<p>Bu dönüşümün etkileri, Türkiye gibi mobil kullanımın ve dijital ticaretin güçlü olduğu pazarlarda daha yakından izleniyor. Adjust’ın çok yeni yayımladığı <a href="https://www.adjust.com/tr/resources/ebooks/turkey-app-trends/?ysclid=mvarcicphj811787201" target="_blank"><strong>Türkiye 2026 Mobil Uygulama Trendleri raporu</strong></a>, yerel uygulama ekosistemindeki büyüme dinamiklerini ortaya koyarken yapay zekâ destekli uygulamaların yükselişine de dikkat çekiyor.</p>
+<p>Raporun işaret ettiği tablo, mobil pazarlamanın geleceğinde yalnızca daha fazla veri toplamanın değil, bu veriyi doğru yorumlamanın, kullanıcı davranışını anlamanın ve ölçülebilir sonuçlara dönüştürmenin belirleyici olacağını gösteriyor.</p>
+<h2>Türkiye’de mobil uygulama ekonomisi büyüyor</h2>
+<p>Türkiye, güçlü mobil kullanımı ve gelişen dijital ekonomisiyle uygulama pazarı için önemli bir büyüme alanı sunuyor. Adjust’ın Türkiye 2026 Mobil Uygulama Trendleri raporuna göre, ülkede 2025’te e-ticaret hacmi 115 milyar doları aşarken Türk oyun stüdyolarının gelirleri 2,76 milyar dolara ulaştı.</p>
+<p>Rapora göre 2026’nın ilk yarısında oyun uygulamalarındaki oturumlar yıllık bazda yüzde 6, e-ticaret uygulamalarındaki oturumlar ise yüzde 4 arttı. Küresel e-ticaret uygulamalarında aynı dönemde kaydedilen yüzde 0,3’lük artış, Türkiye pazarındaki hareketliliği öne çıkarıyor.</p>
+<p>Bu tablo, mobil uygulamalarda rekabetin yalnızca kullanıcı kazanmakla sınırlı kalmadığını gösteriyor. Yapay zekâ destekli kişiselleştirme, kullanıcı deneyimi ve pazarlama optimizasyonu, uygulamaların büyüme stratejilerinde giderek daha önemli bir rol üstleniyor.</p>
+<h2>Generative AI, mobil pazarlamada kişiselleştirmeyi hızlandırıyor</h2>
+<p>Generative AI, mobil pazarlamada içerik üretiminin ötesine geçerek kullanıcı deneyimini kişiselleştirme ve kampanyaları optimize etme süreçlerinde öne çıkıyor. Reklam içeriklerinin farklı kullanıcı segmentlerine göre uyarlanması ve kampanya performansına göre yeni içeriklerin hızla test edilmesi, pazarlama ekiplerine daha çevik hareket etme imkânı sunuyor.</p>
+<p>Bu dönüşümle birlikte markalar, herkese aynı mesajı iletmek yerine kullanıcı davranışlarına göre şekillenen deneyimler sunabiliyor. Böylece yapay zekâ, yalnızca pazarlama süreçlerini hızlandıran bir araç olmaktan çıkarak kullanıcı kazanımı ve büyüme stratejilerinin önemli bir parçası haline geliyor.</p>
+<h2>Agentic AI, mobil pazarlamada otomasyonu bir adım ileri taşıyor</h2>
+<p>Generative AI içerik üretimini dönüştürürken Agentic AI, pazarlama süreçlerinde analizden aksiyona uzanan iş akışlarını otomatikleştirme potansiyeliyle öne çıkıyor. Bu sistemler, kampanya performansını analiz edebiliyor, optimizasyon fırsatlarını belirleyebiliyor ve belirlenen yetkiler dahilinde sonraki adımları planlayabiliyor.</p>
+<p>Mobil pazarlama açısından bu yaklaşım; reklam bütçelerinin daha verimli yönetilmesi, performans değişimlerine daha hızlı yanıt verilmesi ve farklı kanallardaki kampanyaların optimize edilmesi anlamına geliyor. Böylece pazarlama ekiplerinin odağı, rutin operasyonlardan stratejik kararlara kayabilir. İnsan denetimi ve güvenilir veri altyapısı ise bu dönüşümün temel koşulları olmaya devam ediyor.</p>
+<h2>Yapay zekâ çağında ölçümleme ve veri bütünlüğü öne çıkıyor</h2>
+<p>Mobil kullanıcıların farklı platformlar ve kanallar arasında hareket etmesi, pazarlama yatırımlarının gerçek etkisini ölçmeyi zorlaştırıyor. Yapay zekâ destekli optimizasyonun başarısı da bu kullanıcı yolculuklarını ne kadar doğru analiz edebildiğine bağlı.</p>
+<p>Adjust’ın Mobile App Trends 2026 raporuna göre, 2025’te küresel uygulama yüklemeleri yüzde 10, oturum sayıları ise yüzde 7 arttı. Büyüyen uygulama ekonomisinde markalar için kritik konu, bu hareketliliği doğru ölçümleyerek pazarlama bütçelerini daha verimli kullanmak.</p>
+<p>Adjust, mobil ölçümleme, ilişkilendirme ve analiz çözümleriyle ekiplerin kampanya performansını değerlendirmesine ve optimizasyon fırsatlarını belirlemesine yardımcı oluyor. Yapay zekânın bu süreçlere entegrasyonu ise veriyi yalnızca raporlanan bir çıktı olmaktan çıkarıp daha hızlı ve bilinçli kararların temel bileşenlerinden biri haline getiriyor.</p>
+<h2>Adjust'ın AI yaklaşımı: Veriden aksiyona uzanan dönüşüm</h2>
+<p>Adjust'ın küresel ölçekte yayımladığı 2026 raporu, yapay zekânın pazarlamadaki rolünü stratejik bir yardımcı olmaktan çıkarak temel bir operasyon altyapısına dönüşmesi üzerinden ele alıyor. Veri analizi asistanları, akıllı kitle segmentasyonu ve üretken yapay zekânın iş süreçlerine entegrasyonu, bu dönüşümün öne çıkan başlıkları arasında yer alıyor.</p>
+<p>Şirketin yapay zekâ yaklaşımındaki örneklerden biri olan Adjust Growth Copilot, pazarlama ekiplerinin ölçümleme ve analiz verilerinden daha hızlı içgörü elde etmesine yardımcı olmayı hedefliyor. Daha geniş ölçekte ise Adjust'ın AI odaklı çalışmaları, veri analizi, kampanya performansının anlaşılması ve büyüme süreçlerinde karar desteği sağlanması gibi alanlara uzanıyor. Bu yaklaşımın önemi, yapay zekâyı mevcut iş akışlarından bağımsız bir araç olarak konumlandırmak yerine pazarlama ekiplerinin kullandığı veri ve ölçümleme altyapısıyla ilişkilendirmesinde yatıyor. Çünkü bir kampanyanın neden başarılı olduğunu anlamak, yalnızca bir yapay zekâ modelinden yorum almakla sınırlı değil. Bu yorumun güvenilir verilere dayanması, kullanılan metriklerin doğru tanımlanması ve önerilen aksiyonların iş sonuçlarıyla ilişkilendirilebilmesi gerekiyor.</p>
+<p>Adjust'ın Türkiye raporunda da vurgulanan tahmine dayalı yapay zekâ analitiği ile gizlilik odaklı ölçümlemeyi birlikte değerlendirme yaklaşımı, bu açıdan önemli bir çerçeve sunuyor.</p>
+<p>Türkiye'deki uygulama geliştiricileri ve pazarlama ekipleri için fırsat, yalnızca yeni AI araçlarını kullanmaya başlamak değil,  bu araçların ürettiği içgörüleri ölçülebilir ve sürdürülebilir büyüme hedeflerine bağlamak.</p>
+<h2>Gizlilik ve güven, AI destekli büyümenin temel koşulu</h2>
+<p>Yapay zekâ sistemleri daha fazla kararı destekledikçe, bu sistemlerin hangi verilerle çalıştığı ve sonuçlarını nasıl ürettiği daha önemli hale geliyor.</p>
+<p>Kullanıcı gizliliği, platform politikaları ve veri kullanımına ilişkin düzenlemeler, mobil pazarlama ekiplerinin ölçümleme stratejilerini doğrudan etkiliyor. Bu ortamda daha fazla kişiselleştirme ve otomasyon sağlamak, sınırsız veri erişimi anlamına gelmiyor. Aksine, izin verilen verilerin doğru kullanılması, ölçümleme yöntemlerinin sınırlarının anlaşılması ve kullanıcı güveninin korunması gerekiyor. Yapay zekâ tarafından oluşturulan önerilerin denetlenebilir olması ve otomatik aksiyonların açık kurallarla sınırlandırılması da önem kazanıyor.</p>
+<p>Bu çerçevede gizlilik odaklı ölçümleme, AI destekli pazarlama için sonradan eklenen bir uyum adımı değil, sistemin tasarımından itibaren dikkate alınması gereken bir unsur olarak değerlendirilmeli.</p>
+<h2>Mobil pazarlamanın geleceğinde rekabet, karar kalitesinde şekillenecek</h2>
+<p>Türkiye mobil uygulama pazarı büyümeyi sürdürürken uygulama kategorileri arasındaki farklılaşma, kullanıcı edinimi maliyetleri ve kullanıcıların değişen beklentileri, büyüme stratejilerini daha karmaşık hale getiriyor.</p>
+<p>Generative AI, içerik üretimini ve kişiselleştirmeyi hızlandırırken Agentic AI, analizden aksiyona uzanan süreçlerin daha fazla otomasyona açılmasını mümkün kılabilir. Ancak bu teknolojilerin gerçek etkisi, yalnızca ne kadar hızlı çalıştıklarıyla değil, ne kadar doğru kararları destekledikleriyle ölçülecek.</p>
+<p>Adjust'ın Türkiye 2026 Mobil Uygulama Trendleri raporu, oyun, e-ticaret ve finans kategorilerindeki farklı performans dinamiklerini ortaya koyarak bu dönüşümün yerel pazardaki yansımalarını anlamak için bir başlangıç noktası sunuyor. Küresel ölçekteki eğilimler ise çok platformlu kullanıcı yolculuklarının, bütünleşik ölçümlemenin ve yapay zekâ destekli analizlerin önemini artırıyor.</p>
+<p>Önümüzdeki dönemde rekabet avantajı, yalnızca daha fazla kullanıcı kazanan uygulamalarda değil, doğru kullanıcıyı anlayan, kullanıcı deneyimini sürekli geliştiren, pazarlama yatırımının etkisini güvenilir biçimde ölçen ve elde ettiği içgörüleri somut sonuçlara dönüştürebilen ekiplerde şekillenecek.</p>
+<p>Mobil uygulama ekonomisinde yapay zekâ, bu nedenle yalnızca yeni bir teknoloji dalgası değil. Doğru veri, güvenilir ölçümleme ve insan denetimiyle birlikte ele alındığında, büyümenin nasıl planlandığını ve yönetildiğini yeniden tanımlayabilecek bir altyapı dönüşümü.</p>
+<p><img class="lazyload " data-src="https://cdn.webrazzi.com/uploads/2026/10/mert-altunkas-209.jpg" title="mert-altunkas-209" alt=""></p>
+<p>Adjust’ın Türkiye 2026 Mobil Uygulama Trendleri raporu, oyun, e-ticaret ve finans uygulamalarında büyümenin farklı dinamiklerini ortaya koyuyor. Generative AI ve Agentic AI ise mobil pazarlamada içerik üretiminden kişiselleştirmeye, kampanya optimizasyonundan büyüme kararlarına uzanan daha kapsamlı bir dönüşümün önünü açıyor.
+<strong>MERT ALTUNKAŞ, Adjust Türkiye ve Afrika Satış Lideri</strong></p>
+]]></content:encoded>
+			<guid isPermaLink="false">https://webrazzi.com/2026/10/19/generative-aidan-agentic-aia-mobil-pazarlamada-uretimden-karara-gecis/</guid>
+			<dc:creator><![CDATA[Webrazzi]]></dc:creator>
+			<pubDate>Mon, 19 Oct 2026 07:30:00 +0000</pubDate>
+			<wfw:commentRss>https://webrazzi.com/2026/10/19/generative-aidan-agentic-aia-mobil-pazarlamada-uretimden-karara-gecis/feed</wfw:commentRss>
+			<slash:comments>0</slash:comments>
+			<media:content url="https://cdn.webrazzi.com/uploads/2026/10/adjust-510.png" width="240" height="135" medium="image"   />
+			<media:thumbnail url="https://cdn.webrazzi.com/uploads/2026/10/adjust-510_240x135.png" width="240" height="135"   />
+			<custom:socialShare>true</custom:socialShare>
+		</item>
+		<item>
+			<title><![CDATA[Robotik kola sahip HomeView modelinin 2027'de piyasaya sürülmesi bekleniyor]]></title>
+			<category><![CDATA[Genel]]></category>
+			<link>https://webrazzi.com/2026/10/19/robotik-kola-sahip-homeview-modelinin-2027-de-piyasaya-surulmesi-bekleniyor/</link>
+			<comments>https://webrazzi.com/2026/10/19/robotik-kola-sahip-homeview-modelinin-2027-de-piyasaya-surulmesi-bekleniyor/#comments</comments>
+			<description><![CDATA[Şirketlerin akıllı ev teknolojilerine yönelik çalışmaları devam ederken Apple'ın da bu alandaki ürünleri için yeni planları gündeme geliyor. Şirketin, mevcut modelden farklı özelliklere sahip yeni bir...]]></description>
+			<content:encoded><![CDATA[<p>Şirketlerin akıllı ev teknolojilerine yönelik çalışmaları devam ederken <strong><a href="https://webrazzi.com/etiket/apple/" target="_blank">Apple</a></strong>'ın da bu alandaki ürünleri için yeni planları gündeme geliyor. Şirketin, mevcut modelden farklı özelliklere sahip yeni bir <strong>HomeView</strong> üzerinde çalıştığı belirtiliyor. </p>
+<p>Bloomberg'den <strong>Mark Gurman</strong>'ın Power On bülteninde aktardığı bilgilere <strong><a href="https://www.bloomberg.com/news/newsletters/2026-10-18/apple-homeview-with-robotic-arm-new-mac-ipad-mini-nov-6-release-iphone-duo" target="_blank">göre</a></strong> Apple, 9 inçlik ekranı ve robotik koluyla öne çıkan yeni bir HomeView modeli geliştirmeyi planlıyor. <strong>J595 kod adıyl</strong><strong>a</strong> anılan cihazın 2027 yılında piyasaya sürmesi bekleniyor. Ancak yine de cihazın çıkış tarihi ve nihai adı henüz kesinleşmiş değil.</p>
+<p>Yeni modelin en dikkat çekici özelliği, tabanına bağlı motorlu kol olacak. 360 derece dönebilmesi planlanan kol, cihazın ekranını farklı yönlere çevirebilecek. Ses tanıma özelliği sayesinde HomeView'in konuşan kişinin yönünü algılayarak otomatik olarak o tarafa dönmesi de bekleniyor. </p>
+<p>Dokuz inçlik ekranıyla mevcut modelden daha büyük olması beklenen cihaz, kullanıcıların karşısında sabit duran bir ekran yerine hareket edebilen bir ekran deneyimi sunacak. Böylece kullanıcıların ekrana doğru yönelmesi gerekmeyecek; cihaz, konuşan kişinin bulunduğu yöne dönebilecek.</p>
+<p> Apple'ın bu modeli mevcut HomeView'in doğrudan halefi olarak konumlandırmayı planlamadığı belirtiliyor. Daha üst segmentte yer alması beklenen cihazın nihai ürün adı henüz belli değil. Şirketin tamamen yeni bir isim tercih edebileceği gibi HomeView adına Max veya Ultra gibi bir ek getirmesi de gündemde.</p>
+<p><em>Görsel Kaynak: Apple</em></p>
+]]></content:encoded>
+			<guid isPermaLink="false">https://webrazzi.com/2026/10/19/robotik-kola-sahip-homeview-modelinin-2027-de-piyasaya-surulmesi-bekleniyor/</guid>
+			<dc:creator><![CDATA[Candeğer Muradoğlu]]></dc:creator>
+			<pubDate>Mon, 19 Oct 2026 07:00:00 +0000</pubDate>
+			<wfw:commentRss>https://webrazzi.com/2026/10/19/robotik-kola-sahip-homeview-modelinin-2027-de-piyasaya-surulmesi-bekleniyor/feed</wfw:commentRss>
+			<slash:comments>0</slash:comments>
+			<media:content url="https://cdn.webrazzi.com/uploads/2026/10/apple-homeview-kapak-386.png" width="240" height="135" medium="image"   />
+			<media:thumbnail url="https://cdn.webrazzi.com/uploads/2026/10/apple-homeview-kapak-386_240x135.png" width="240" height="135"   />
+			<custom:socialShare>true</custom:socialShare>
+		</item>
+		<item>
+			<title><![CDATA[Yapay zeka altyapısı geliştiren Mueon, 65 milyon dolar yatırım aldı]]></title>
+			<category><![CDATA[Yatırım]]></category>
+			<category><![CDATA[Yapay Zeka]]></category>
+			<link>https://webrazzi.com/2026/10/16/yapay-zeka-altyapisi-gelistiren-mueon-65-milyon-dolar-yatirim-aldi/</link>
+			<comments>https://webrazzi.com/2026/10/16/yapay-zeka-altyapisi-gelistiren-mueon-65-milyon-dolar-yatirim-aldi/#comments</comments>
+			<description><![CDATA[Yapay zeka altyapısı geliştiren Mueon, 65 milyon dolar yatırım aldı. Şirketin 65 milyon dolarlık A serisi yatırım turuna Maverick Silicon liderlik etti. ABD merkezli Mueon'un yatırım turunda Intel Cap...]]></description>
+			<content:encoded><![CDATA[<p>Yapay zeka altyapısı geliştiren <strong><a href="https://mueon.com/" target="_blank">Mueon</a></strong>, <strong>65 milyon dolar</strong> yatırım aldı. Şirketin 65 milyon dolarlık A serisi yatırım turuna <strong><a href="https://www.maverickcapital.com/silicon" target="_blank">Maverick Silicon</a></strong> liderlik etti. ABD merkezli Mueon'un yatırım turunda Intel Capital, Geodesic Alliances Fund, Oregon Venture Fund, M-Ventures, Wellington Capital, IQT ve Defined yer aldı. </p>
+<p>Şirket, yeni yatırımı mühendislik ekibini büyütmek, Cubelet sisteminin tasarımını geliştirmek ve müşterilerin yapay zeka uygulamalarını donanımında çalıştırmasını sağlayacak yazılımlar geliştirmek için kullanacağını açıkladı. </p>
+<p>Mueon, <strong>Wilfred Gomes</strong> ve <strong>Jack Hwang</strong> tarafından 2025 yılında hayata geçirildi. Şirket, veri merkezlerinde kullanılan sunucuların daha az enerji tüketmesini ve daha düşük maliyetle çalışmasını sağlayacak donanımlar geliştiriyor. Mueon'un Cubelet adını verdiği sistemi, geleneksel sunucularda yan yana yerleştirilen bilgi işlem ve bellek bileşenlerini üst üste konumlandırıyor. Bu tasarım, bileşenler arasındaki veri aktarım mesafesini kısaltarak işlem hızını artırmayı ve enerji tüketimini azaltmayı amaçlıyor. </p>
+<p>Cubelet, yalnızca işlemci ve bellek bileşenlerinden oluşmuyor. Sistem, sunucuların çalışması için gereken güç dağıtımı, bağlantı ve sıcaklık kontrolü donanımlarını da içeriyor. Özellikle yapay zeka sistemlerinde yoğun işlem gücü ihtiyacı ve donanımların ürettiği ısı önemli sorunlar arasında yer alıyor.</p>
+<p> Mueon, geliştirdiği mimariyle bu sorunları çözmeyi ve donanımların daha verimli çalışmasını sağlamayı hedefliyor. Şirketin geliştirdiği sistemler, yapay zeka uygulamaları ve büyük ölçekli veri merkezlerindeki iş yükleri için tasarlanıyor. Cubelet, grafik işlemciler ve Arm tabanlı işlemciler gibi farklı yonga türlerini destekleyebiliyor. Mueon ayrıca müşterilerin yaygın olarak kullanılan yapay zeka yazılımlarını kendi donanımlarında çalıştırabilmesi için yazılım geliştiriyor. </p>
+]]></content:encoded>
+			<guid isPermaLink="false">https://webrazzi.com/2026/10/16/yapay-zeka-altyapisi-gelistiren-mueon-65-milyon-dolar-yatirim-aldi/</guid>
+			<dc:creator><![CDATA[Candeğer Muradoğlu]]></dc:creator>
+			<pubDate>Fri, 16 Oct 2026 14:30:00 +0000</pubDate>
+			<wfw:commentRss>https://webrazzi.com/2026/10/16/yapay-zeka-altyapisi-gelistiren-mueon-65-milyon-dolar-yatirim-aldi/feed</wfw:commentRss>
+			<slash:comments>0</slash:comments>
+			<media:content url="https://cdn.webrazzi.com/uploads/2026/10/mueon-kapak-961.png" width="240" height="135" medium="image"   />
+			<media:thumbnail url="https://cdn.webrazzi.com/uploads/2026/10/mueon-kapak-961_240x135.png" width="240" height="135"   />
+			<custom:socialShare>true</custom:socialShare>
+		</item>
+		<item>
+			<title><![CDATA[Bluesky'ın yapay zeka aracı Attie ile web sitesi, oyun ve uygulama oluşturulabilecek]]></title>
+			<category><![CDATA[Yapay Zeka]]></category>
+			<link>https://webrazzi.com/2026/10/16/bluesky-in-yapay-zeka-araci-attie-ile-web-sitesi-oyun-ve-uygulama-olusturulabilecek/</link>
+			<comments>https://webrazzi.com/2026/10/16/bluesky-in-yapay-zeka-araci-attie-ile-web-sitesi-oyun-ve-uygulama-olusturulabilecek/#comments</comments>
+			<description><![CDATA[Bluesky, yapay zeka destekli deneysel platformu Attie'ye yeni özellikler ekliyor. Şirketin duyurduğu güncellemeyle birlikte Attie, kullanıcıların herhangi bir kodlama bilgisine ihtiyaç duymadan web si...]]></description>
+			<content:encoded><![CDATA[<p> Bluesky, yapay zeka destekli deneysel platformu <a href="https://attie.ai/login" target="_blank">Attie</a>'ye yeni özellikler ekliyor. Şirketin duyurduğu güncellemeyle birlikte Attie, kullanıcıların herhangi bir kodlama bilgisine ihtiyaç duymadan <strong>web siteleri, oyunlar, anketler, testler </strong>ve<strong> farklı interaktif deneyimler </strong>oluşturmasına olanak tanıyor. </p>
+<p>Attie, bu yılın başında kullanıcıların yapay zekadan yararlanarak kendi Bluesky akışlarını oluşturmasını sağlayan bir araç olarak kullanıma <a href="https://webrazzi.com/2026/03/30/bluesky-dan-kendi-algoritmanizi-olusturmanizi-saglayan-yapay-zeka-asistani-attie/" target="_blank">sunulmuştu</a>. Yeni sürüm ise platformu yalnızca akış oluşturmaya odaklanan bir üründen, küçük uygulamalar ve sosyal deneyimler üretilebilen daha kapsamlı bir yapay zeka aracına dönüştürüyor. <strong>Bluesky CEO'su <a href="https://www.linkedin.com/in/tonischneider/" target="_blank">Toni Schneider</a></strong>, bu yaklaşımı "topluluklar için vibe coding" olarak tanımlıyor.</p>
+<p><img class="lazyload " data-src="https://cdn.webrazzi.com/uploads/2026/10/attie-1-908.png" title="attie-1-908" alt=""></p>
+<p>Kullanıcıların bir Attie uygulaması oluşturmak için yapmak istediklerini doğal dilde tarif etmeleri yeterli. Oluşturulan projeler ayrı web siteleri olarak paylaşılabiliyor ve attie.site alan adı altında kendilerine özel bağlantılara sahip oluyor. Platformda şu anda <a href="https://savoring-proud-chime.attie.site/" target="_blank">Flappy Bird benzeri bir oyun</a>, <a href="https://gleaming-perky-latte.attie.site/" target="_blank">drum machine</a>, <a href="https://gleaming-giddy-bonnet.attie.site/" target="_blank">quiz</a> ve <a href="https://humming-loyal-zeppelin.attie.site/" target="_blank">clicker tarzında bir oyun</a> gibi örnekler bulunuyor.</p>
+<p><img class="lazyload " data-src="https://cdn.webrazzi.com/uploads/2026/10/attie-2-521.png" title="attie-2-521" alt=""></p>
+<p> Attie ile oluşturulan deneyimler, Bluesky'ın da temelini oluşturan<strong> AT Protocol (ATProto) </strong>üzerinde çalışıyor. Kullanıcılar Attie'de içerik oluştururken <strong>ATProto kimlikleriyle </strong>bağlantılı kalıyor. Attie ayrıca kullanıcıların herkese açık Bluesky profillerinden yararlanarak oluşturabilecekleri uygulamalara yönelik öneriler de sunabiliyor. Bluesky, yapay zeka modeli konusunda da kullanıcıları tek bir seçeneğe bağlı bırakmıyor. Attie'de kullanıcılar kendi yapay zeka modellerini kullanabildiği gibi <strong>açık ağırlıklı modellerden</strong> de yararlanabiliyor. </p>
+<p><strong>B</strong><strong>luesky COO'su <a href="https://www.linkedin.com/in/rosewang20/" target="_blank">Rose Wang</a></strong>'a göre Attie'nin önemli avantajlarından biri ise oluşturulan uygulamaların Bluesky'ın mevcut kullanıcı ağına erişebilmesi. Böylece vibe coding araçlarında sık karşılaşılan, oluşturulan ürünlerin kullanıcıya nasıl ulaştırılacağı sorununun da sosyal ağ üzerinden çözülmesi hedefleniyor. </p>
+<p>Bluesky'ın planları Attie ile sınırlı değil. Şirket, önümüzdeki dönemde geliştiricilere ve topluluklara daha fazla odaklanmayı planlıyor. AT Protocol için geliştirilen özel veri desteği de şu anda alfa aşamasında test ediliyor ve özelliğin 2026 sonuna kadar kullanıma sunulması hedefleniyor. Schneider'a göre amaç, kullanıcıların her zaman tüm dünyaya hitap etmek yerine arkadaş grupları ve küçük topluluklar için daha fazla sosyal deneyim oluşturabilmesini sağlamak.</p>
+]]></content:encoded>
+			<guid isPermaLink="false">https://webrazzi.com/2026/10/16/bluesky-in-yapay-zeka-araci-attie-ile-web-sitesi-oyun-ve-uygulama-olusturulabilecek/</guid>
+			<dc:creator><![CDATA[Tuğçe İçözü]]></dc:creator>
+			<pubDate>Fri, 16 Oct 2026 14:00:00 +0000</pubDate>
+			<wfw:commentRss>https://webrazzi.com/2026/10/16/bluesky-in-yapay-zeka-araci-attie-ile-web-sitesi-oyun-ve-uygulama-olusturulabilecek/feed</wfw:commentRss>
+			<slash:comments>0</slash:comments>
+			<media:content url="https://cdn.webrazzi.com/uploads/2026/10/attie-493.png" width="240" height="135" medium="image"   />
+			<media:thumbnail url="https://cdn.webrazzi.com/uploads/2026/10/attie-493_240x135.png" width="240" height="135"   />
+			<custom:socialShare>true</custom:socialShare>
+		</item>
+		<item>
+			<title><![CDATA[Bünyamin Aydın'ın yeni Les Benjamins koleksiyonu iPad Pro ile tasarlandı]]></title>
+			<category><![CDATA[Etkinlikler]]></category>
+			<link>https://webrazzi.com/2026/10/16/bunyamin-aydinin-yeni-les-benjamins-koleksiyonu-ipad-pro-ile-tasarlandi/</link>
+			<comments>https://webrazzi.com/2026/10/16/bunyamin-aydinin-yeni-les-benjamins-koleksiyonu-ipad-pro-ile-tasarlandi/#comments</comments>
+			<description><![CDATA[Les Benjamins’in kurucusu ve kreatif direktörü Bünyamin Aydın, markanın 15. yılı için hazırladığı yeni koleksiyonu “From Earth to Sky”ı tanıttı. Anadolu kültürünü, 1970’lerin rock ’n’ roll estetiğini ...]]></description>
+			<content:encoded><![CDATA[<p>  <a href="https://lesbenjamins.com/" target="_blank">Les Benjamins</a>’in kurucusu ve kreatif direktörü <a href="https://www.linkedin.com/in/benjisan/" target="_blank">Bünyamin Aydın</a>, markanın 15. yılı için hazırladığı yeni koleksiyonu “From Earth to Sky”ı tanıttı. Anadolu kültürünü, 1970’lerin rock ’n’ roll estetiğini ve fütüristik tasarım öğelerini bir araya getiren koleksiyonun yaratım sürecinde <strong><a href="https://www.apple.com/tr/ipad-pro/" target="_blank">M5 çipli iPad Pro </a></strong>ve <strong>Apple Pencil Pro</strong> kullanıldı.</p>
+<p> Koleksiyonun temelleri, Aydın’ın 2026 yılının başında Kapadokya’ya gerçekleştirdiği araştırma gezisi sırasında atıldı. Aydın, bölgenin doğasını ve dokusunu <strong>iPhone 17 Pro Max</strong> ile fotoğraf ve <strong>4K video</strong> formatında kaydederken, tasarım fikirlerini <strong>iPad Pro </strong>ve<strong> Apple Pencil Pro</strong> üzerinden geliştirdi. Kapadokya’nın Güllüdere Vadisi’nde karşılaştığı yeşil topuz dikeni, pembe sarmaşık çiçekleri ve yabani sarı laleler, koleksiyondaki 10 farklı görünümün ve üç özel sıcak hava balonunun temel ilham kaynakları arasında yer aldı.</p>
+<p><img class="lazyload " data-src="https://cdn.webrazzi.com/uploads/2026/10/apple-les-benjamins-fashion-show-bunyamin-aydin-sketching-on-ipad-pro-with-apple-pencil-bigjpglarge-2x-466.jpg" title="apple-les-benjamins-fashion-show-bunyamin-aydin-sketching-on-ipad-pro-with-apple-pencil-bigjpglarge-2x-466" alt=""></p>
+<p> Aydın, araştırma gezilerinde topladığı fotoğrafları, kumaş referanslarını ve ilk taslaklarını <strong>Freeform</strong> uygulamasında bir araya getirerek ekibiyle paylaştı. Tasarımlar ise ağırlıklı olarak <strong>Procreate </strong>üzerinden geliştirildi. Paylaşılan bilgilere göre; iPad Pro’nun çoklu görev özellikleri sayesinde Aydın, bir yandan Procreate üzerinde çizim yaparken diğer yandan Safari üzerinden araştırma yapabildi ve seyahatlerinde çektiği görselleri referans olarak kullanabildi.</p>
+<p><img class="lazyload " data-src="https://cdn.webrazzi.com/uploads/2026/10/apple-les-benjamins-fashion-show-bunyamin-aydin-photographing-hot-air-balloons-bigjpglarge-2x-757.jpg" title="apple-les-benjamins-fashion-show-bunyamin-aydin-photographing-hot-air-balloons-bigjpglarge-2x-757" alt=""></p>
+<p>Defile için hazırlanan üç özel sıcak hava balonu da aynı sürecin bir parçasıydı. Aydın ve ekibi, Procreate üzerinde hazırladıkları ilk balon tasarımını farklı varyasyonlara dönüştürdü. Tasarımların gerçekten uçabilir hale getirilmesi için Kapadokya merkezli <strong>Pasha Balloons </strong>ile çalışıldı.</p>
+<p><img class="lazyload " data-src="https://cdn.webrazzi.com/uploads/2026/10/apple-les-benjamins-fashion-show-model-in-pink-photogridjpgxlarge-2x-195.jpg" title="apple-les-benjamins-fashion-show-model-in-pink-photogridjpgxlarge-2x-195" alt=""></p>
+<p> Şirketten gelen teknik geri bildirimler doğrultusunda çizimler yeniden iPad üzerinde düzenlendi. Aydın, yüksek çözünürlüklü görseller, çok sayıda katman ve farklı dokularla çalıştıklarını belirtirken iPad Pro’nun bu süreçte masaüstü bilgisayara benzer bir çalışma deneyimi sunduğunu ifade ediyor. Apple Pencil Pro’nun hover, sıkma ve çift dokunma gibi özellikleri de tasarımlar arasında hızlı şekilde geçiş yapmak için kullanıldı.</p>
+<p><img class="lazyload " data-src="https://cdn.webrazzi.com/uploads/2026/10/apple-les-benjamins-fashion-show-models-walking-down-runway-in-green-photogridjpgxlarge-2x-609.jpg" title="apple-les-benjamins-fashion-show-models-walking-down-runway-in-green-photogridjpgxlarge-2x-609" alt=""></p>
+<p> Koleksiyonun Kapadokya’daki defilesinin çekimleri ise Fransız yönetmen <strong>Neels Castillon </strong>tarafından <strong>iPhone 18 Pro Max</strong> kullanılarak gerçekleştirildi. Prodüksiyonda 48 MP Fusion Ana Kamera'nın yanı sıra drone'lara yerleştirilen iPhone 18 Pro Max modellerinden de yararlanıldı. 4K 120 fps çekimler özellikle kumaşların hareketlerini ağır çekimde göstermek için kullanılırken, ProRes RAW formatı post prodüksiyondaki renk düzenlemelerinde daha fazla esneklik sağladı.</p>
+<p><img class="lazyload " data-src="https://cdn.webrazzi.com/uploads/2026/10/apple-les-benjamins-fashion-show-behind-the-scenes-bigjpglarge-2x-298.jpg" title="apple-les-benjamins-fashion-show-behind-the-scenes-bigjpglarge-2x-298" alt=""></p>
+<p>Defilenin açılışında yer alan Türk kaftanı ve Anadolu’yu temsil eden ağaç dalı ise Barış Manço’ya bir saygı duruşu olarak tasarlandı. Aydın, “From Earth to Sky” ile Türk kültürünü köklerinden koparmadan global bir kitleye taşımayı amaçladığını belirtiyor. Tasarımcı, kendi rolünü de Doğu ile Batı arasında bir “çevirmen ve köprü” olarak tanımlıyor. Kapadokya’da gerçekleştirilen ve tamamı iPhone 18 Pro Max ile çekilen “From Earth to Sky” projesi, 14 Ekim itibarıyla Apple’ın sosyal medya hesapları üzerinden yayınlandı.</p>
+]]></content:encoded>
+			<guid isPermaLink="false">https://webrazzi.com/2026/10/16/bunyamin-aydinin-yeni-les-benjamins-koleksiyonu-ipad-pro-ile-tasarlandi/</guid>
+			<dc:creator><![CDATA[Tuğçe İçözü]]></dc:creator>
+			<pubDate>Fri, 16 Oct 2026 13:50:00 +0000</pubDate>
+			<wfw:commentRss>https://webrazzi.com/2026/10/16/bunyamin-aydinin-yeni-les-benjamins-koleksiyonu-ipad-pro-ile-tasarlandi/feed</wfw:commentRss>
+			<slash:comments>0</slash:comments>
+			<media:content url="https://cdn.webrazzi.com/uploads/2026/10/les-benjamins-apple-344.png" width="240" height="135" medium="image"   />
+			<media:thumbnail url="https://cdn.webrazzi.com/uploads/2026/10/les-benjamins-apple-344_240x135.png" width="240" height="135"   />
+			<custom:socialShare>true</custom:socialShare>
+		</item>
+		<item>
+			<title><![CDATA[Meta, Mac'lerde yerel olarak çalışabilen açık ağırlıklı Muse Spark Open modelini tanıttı]]></title>
+			<category><![CDATA[Yapay Zeka]]></category>
+			<link>https://webrazzi.com/2026/10/16/meta-maclerde-yerel-olarak-calisabilen-acik-agirlikli-muse-spark-open-modelini-tanitti/</link>
+			<comments>https://webrazzi.com/2026/10/16/meta-maclerde-yerel-olarak-calisabilen-acik-agirlikli-muse-spark-open-modelini-tanitti/#comments</comments>
+			<description><![CDATA[Meta, Muse Spark Open adını verdiği yeni açık ağırlıklı yapay zeka modelini kullanıma sundu. Şirket, Muse Spark Open’ı bugüne kadar ABD’de geliştirilen “en yetenekli açık ağırlıklı model” olarak konum...]]></description>
+			<content:encoded><![CDATA[<p> Meta, <a href="https://huggingface.co/collections/meta-models/muse-spark-open" target="_blank">Muse Spark Open </a>adını verdiği yeni açık ağırlıklı yapay zeka modelini <a href="https://research.meta.ai/blog/muse-spark-open" target="_blank">kullanıma sundu</a>. Şirket, Muse Spark Open’ı bugüne kadar ABD’de geliştirilen “en yetenekli açık ağırlıklı model” olarak konumlandırıyor. Modelin en dikkat çekici özelliklerinden biri ise <strong>Apple Silicon </strong>için optimize edilmesi ve <strong>iki Mac Studio</strong> üzerinden tamamen yerel olarak çalıştırılabilmesi.<br><br>Muse Spark Open, toplam <strong>816 milyar parametreye </strong>sahip bir uzmanlar karışımı (mixture-of-experts) modeli. Model her token için <strong>42 milyar parametreyi aktif </strong>hale getiriyor ve <strong>1 milyon tokenlık bağlam penceresi</strong> sunuyor. Doğal olarak multimodal şekilde geliştirilen model; <strong>metinlerin</strong> yanı sıra <strong>görsel, video </strong>ve<strong> ses </strong>girdileriyle çalışabiliyor. Meta, modeli özellikle <strong>uzun süreli görevler, karmaşık yazılım geliştirme süreçleri </strong>ve<strong> çok adımlı akıl yürütme i</strong>çin geliştirdiğini belirtiyor.</p>
+<h2>İki Mac Studio ile yerel olarak çalışıyor </h2>
+<p>Meta ve Apple, Muse Spark Open’ın Mac’lerde çalışabilmesi için iş birliği <a href="https://x.com/finkd/status/2110778025629347999" target="_blank">yaptı</a>. Model, Apple’ın <strong>MLX makine öğrenimi </strong>altyapısı kullanılarak <strong>M5 Ultra işlemcili Mac Studio</strong>’lara optimize edildi. Meta’nın kullandığı sistemde her biri <strong>512 GB birleşik belleğe</strong> sahip iki Mac Studio bulunuyor. Böylece iki cihaz toplam <strong>1 TB birleşik bellek </strong>sağlayarak modelin tamamını bellekte tutabiliyor.</p>
+<figure class="image  wp-caption"><img class="lazyload " data-src="https://cdn.webrazzi.com/uploads/2026/10/mark-zuckerberg-mac-680.jpg" title="mark-zuckerberg-mac-680" alt="">
+<figcaption class="wp-caption-text">Kaynak: Mark Zuckerberg / X</figcaption>
+</figure>
+<p>Apple’ın birleşik bellek mimarisi sayesinde GPU da sistem belleğinin tamamına erişebiliyor. M5 Ultra’nın 1,2 TB/s bellek bant genişliği de modelin her token için ihtiyaç duyduğu parametrelerin işlenmesini mümkün kılıyor. Meta, iki Mac Studio’nun bu kurulumda tek bir masaüstü süper bilgisayar gibi çalıştığını ifade ediyor. <br><br>Bununla birlikte söz konusu yerel kullanımın standart bir Mac kurulumu olmadığını belirtmek gerekiyor.  Meta’nın kullandığı 512 GB belleğe sahip M5 Ultra Mac Studio konfigürasyonu henüz satışa çıkmadı. Bu konfigürasyonun ekim ayının sonlarında sunulması bekleniyor. Öte yandan Muse Spark Open’ın masaüstünde çalışabiliyor olması dikkat çekici olsa da, ihtiyaç duyulan donanım maliyetinin oldukça yüksek olacağını belirtmekte fayda var. <br><br>Meta, Muse Spark Open’ı Muse Code ile birlikte çeşitli agent senaryolarında da test etti. Şirketin paylaştığı örneklerde model, açık kaynaklı Mastodon istemcisi Ice Cubes üzerinde hata düzeltmeleri ve yeni özellikler geliştirdi. Bir başka demoda ise DaVinci Resolve’u kontrol ederek videoları kare kare inceledi ve dikey video formatına uygun bölümleri seçip kırptı.</p>
+<h2>Meta, ABD merkezli açık modeller arasında öne çıktığını belirtiyor</h2>
+<p> Meta’nın paylaştığı değerlendirmelerde Muse Spark Open özellikle agent ve araç kullanımı testlerinde güçlü sonuçlar gösteriyor. Örneğin model <strong>MCP-Atlas’ta 89,2</strong>, <strong>JobBench’te ise 61,8 puan</strong> aldı. Bununla birlikte modelin tüm açık ağırlıklı rakiplerinden daha güçlü olduğunu söylemek mümkün değil. GLM 5.3, Kimi K3 ve bazı Qwen modelleri yazılım geliştirme ve genel yapay zeka performansını ölçen kimi testlerde Muse Spark Open’ın önünde yer alıyor. Meta’nın “en yetenekli” ifadesi bu nedenle özellikle ABD’de geliştirilen açık ağırlıklı modelleri kapsıyor.</p>
+<p><img class="lazyload " data-src="https://cdn.webrazzi.com/uploads/2026/10/benchmark-scorecard-light-v6-952.png" title="benchmark-scorecard-light-v6-952" alt=""></p>
+<p>Muse Spark Open; SGLang, vLLM, TensorRT-LLM, Hugging Face Transformers, llama.cpp, Unsloth ve MLX gibi farklı çıkarım (inference) altyapılarını destekliyor. Model <strong>A</strong><strong>MD, Apple, Intel ve Nvidia </strong>donanımlarında çalıştırılabiliyor. Ağırlıklar <strong>Hugging Face, Amazon SageMaker AI, Google Cloud Model Garden ve Microsoft Foundry Models</strong> üzerinden indirilebilirken; <strong>Baseten, Fireworks AI, Groq, Modal, Nebius, OpenRouter </strong>ve<strong> Together AI </strong>üzerinden API erişimi de sunuluyor.<br><br>Modelin ağırlıkları indirilebilir olsa da Muse Spark Open klasik anlamda tamamen açık kaynaklı bir model değil. Meta modeli kendi Muse Model License lisansı altında yayımlıyor. Bu anlamda özellikle modeli hizmet olarak sunan yüksek gelirli şirketler için bazı ticari kısıtlamalar bulunuyor. Buna karşılık şirket içi kullanım ve modeli başka ürünlerin içine entegre etmek gibi birçok senaryoda ücretsiz ticari kullanım mümkün.<br></p>
+]]></content:encoded>
+			<guid isPermaLink="false">https://webrazzi.com/2026/10/16/meta-maclerde-yerel-olarak-calisabilen-acik-agirlikli-muse-spark-open-modelini-tanitti/</guid>
+			<dc:creator><![CDATA[Tuğçe İçözü]]></dc:creator>
+			<pubDate>Fri, 16 Oct 2026 13:00:00 +0000</pubDate>
+			<wfw:commentRss>https://webrazzi.com/2026/10/16/meta-maclerde-yerel-olarak-calisabilen-acik-agirlikli-muse-spark-open-modelini-tanitti/feed</wfw:commentRss>
+			<slash:comments>0</slash:comments>
+			<media:content url="https://cdn.webrazzi.com/uploads/2026/10/muse-spark-open-847.png" width="240" height="135" medium="image"   />
+			<media:thumbnail url="https://cdn.webrazzi.com/uploads/2026/10/muse-spark-open-847_240x135.png" width="240" height="135"   />
+			<custom:socialShare>true</custom:socialShare>
+		</item>
+		<item>
+			<title><![CDATA[OpenAI, ChatGPT'ye Chrome sekmelerini kontrol etme özelliği ekledi]]></title>
+			<category><![CDATA[Yapay Zeka]]></category>
+			<link>https://webrazzi.com/2026/10/16/openai-chatgptye-chrome-sekmelerini-kontrol-etme-ozelligi-ekledi/</link>
+			<comments>https://webrazzi.com/2026/10/16/openai-chatgptye-chrome-sekmelerini-kontrol-etme-ozelligi-ekledi/#comments</comments>
+			<description><![CDATA[OpenAI, ChatGPT'nin Google Chrome uzantısını yeni özelliklerle güncelledi. Güncellemeyle birlikte ChatGPT, kullanıcıların açık Chrome sekmelerini görebiliyor, sekmelerdeki bilgileri yanıtlarına dahil ...]]></description>
+			<content:encoded><![CDATA[<p> <a href="https://webrazzi.com/etiket/openai" target="_blank">OpenAI</a>, ChatGPT'nin Google Chrome uzantısını yeni özelliklerle <a href="https://x.com/ChatGPT/status/2110823738531037651" target="_blank">güncelledi</a>. Güncellemeyle birlikte ChatGPT, kullanıcıların açık Chrome sekmelerini görebiliyor, sekmelerdeki bilgileri yanıtlarına dahil edebiliyor ve belirli görevlerde tarayıcı üzerinde işlem yapabiliyor.</p>
+<p> Kullanıcılar ChatGPT'nin web veya masaüstü uygulamasında Chrome'u etiketleyerek açık sekmelerini konuşmaya dahil edebiliyor. Örneğin farklı sekmelerde açık olan üç ürün ChatGPT'ye karşılaştırılabiliyor veya birden fazla hizmet sağlayıcının fiyatları ve özellikleri tek bir tabloda toplanabiliyor.</p>
+<p><img class="lazyload " data-src="https://cdn.webrazzi.com/uploads/2026/10/chatgpt-chrome-2-129.png" title="chatgpt-chrome-2-129" alt=""></p>
+<p>Yeni özellik, <strong>Chat</strong> ve<strong> Work</strong> tarafında farklı seviyelerde çalışıyor. ChatGPT, Chat modunda açık sekmelerdeki bilgileri inceleyerek kullanıcının sorularına daha fazla bağlamla yanıt verebiliyor.</p>
+<p><img class="lazyload " data-src="https://cdn.webrazzi.com/uploads/2026/10/chatgpt-chrome-427.png" title="chatgpt-chrome-427" alt=""></p>
+<p>ChatGPT Work ise bilgisayar kullanım yeteneklerinden yararlanarak <strong>Chrome sekmelerini kontrol edebiliyor</strong>. Böylece <strong>mesaj gönderme, formları doldurma</strong> ve<strong> dosya indirme </strong>gibi işlemleri kullanıcı adına gerçekleştirebiliyor. Ayrıca açık sekmeleri düzenleyip gruplandırabiliyor.</p>
+<p><img class="lazyload " data-src="https://cdn.webrazzi.com/uploads/2026/10/chatgpt-chrome-1-875.png" title="chatgpt-chrome-1-875" alt=""></p>
+<p>OpenAI'ın paylaştığı <a href="https://x.com/ChatGPT/status/2110823741991354728" target="_blank">kullanım örnekleri</a> arasında bir etkinlik dokümanındaki bilgilerle <strong>kayıt formunu doldurmak, farklı sekmelerdeki satıcıları fiyat ve özellikleriyle karşılaştırma tablosuna aktarmak</strong> veya açık sekmelerdeki hizmet sağlayıcıları karşılaştırarak uygun olan şirkete gönderilecek bir <strong>e-posta taslağı hazırlamak</strong> bulunuyor. </p>
+<p>ChatGPT'nin Chrome kenar çubuğu da güncellendi. Kullanıcılar ziyaret ettikleri sayfadan ayrılmadan ChatGPT ile konuşabiliyor ve geçmiş ChatGPT konuşmalarına erişebiliyor. Böylece tarayıcıdaki içerik ile ChatGPT aynı ekran üzerinde birlikte kullanılabiliyor.</p>
+<p> Özelliğin izin tarafında ise ChatGPT, varsayılan olarak yeni bir web sitesinde işlem yapmadan önce kullanıcıdan onay istiyor. Dosya yükleme veya indirme ve tarayıcı geçmişine erişim gibi işlemlerde de ek izin mekanizmaları bulunuyor. OpenAI'ın Chrome uzantısı, <a href="https://chromewebstore.google.com/detail/chatgpt/hehggadaopoacecdllhhajmbjkdcmajg?pli=1" target="_blank">Chrome Web Store verilerine</a> göre <strong>7 milyon kullanıcıya</strong> ulaşmış durumda. Güncellenen uzantının tüm ChatGPT planlarına sunulduğu belirtiliyor. </p>
+]]></content:encoded>
+			<guid isPermaLink="false">https://webrazzi.com/2026/10/16/openai-chatgptye-chrome-sekmelerini-kontrol-etme-ozelligi-ekledi/</guid>
+			<dc:creator><![CDATA[Tuğçe İçözü]]></dc:creator>
+			<pubDate>Fri, 16 Oct 2026 12:00:00 +0000</pubDate>
+			<wfw:commentRss>https://webrazzi.com/2026/10/16/openai-chatgptye-chrome-sekmelerini-kontrol-etme-ozelligi-ekledi/feed</wfw:commentRss>
+			<slash:comments>0</slash:comments>
+			<media:content url="https://cdn.webrazzi.com/uploads/2026/10/chatgpt-chrome-602.png" width="240" height="135" medium="image"   />
+			<media:thumbnail url="https://cdn.webrazzi.com/uploads/2026/10/chatgpt-chrome-602_240x135.png" width="240" height="135"   />
+			<custom:socialShare>true</custom:socialShare>
+		</item>
+		<item>
+			<title><![CDATA[Amazon'dan konuşmaları özetleyen iki yeni kişisel yapay zeka cihazı: Bee Frontier ve Bee Eclipse]]></title>
+			<category><![CDATA[Yapay Zeka]]></category>
+			<link>https://webrazzi.com/2026/10/16/amazon-dan-konusmalari-ozetleyen-iki-yeni-kisisel-yapay-zeka-cihazi-bee-frontier-ve-bee-eclipse/</link>
+			<comments>https://webrazzi.com/2026/10/16/amazon-dan-konusmalari-ozetleyen-iki-yeni-kisisel-yapay-zeka-cihazi-bee-frontier-ve-bee-eclipse/#comments</comments>
+			<description><![CDATA[Amazon, kişisel yapay zeka cihazları geliştiren Bee markası altında iki yeni ürününü tanıttı. Şirketin geçtiğimiz yıl satın aldığı girişimin yeni cihazları Bee Frontier ve Bee Eclipse, günlük konuşmal...]]></description>
+			<content:encoded><![CDATA[<p><strong><a href="https://webrazzi.com/etiket/amazon/" target="_blank">Amazon</a></strong>, kişisel yapay zeka cihazları geliştiren <strong><a href="https://bee.computer/" target="_blank">Bee</a></strong> markası altında iki yeni ürününü tanıttı. Şirketin <strong><a href="https://webrazzi.com/2025/07/23/amazon-yapay-zeka-destekli-giyilebilir-teknoloji-girisimi-bee-yi-satin-aldi/" target="_blank">geçtiğimiz yıl satın aldığı</a></strong> girişimin yeni cihazları <strong>Bee Frontier</strong> ve <strong>Bee Eclipse</strong>, günlük konuşmaları notlara dönüştürerek özetler, hatırlatmalar ve yapılacaklar listeleri oluşturmayı amaçlıyor. Ürünler, Amazon’un kişisel yapay zeka alanındaki çalışmalarını genişletiyor.</p>
+<p>Bee Frontier, bileğe takılabilen veya kıyafete tutturulabilen bir cihaz olarak tasarlandı. <strong>74,99 dolar</strong> fiyat etiketiyle satışa sunulan ürün, Onyx, Lavender ve Sage olmak üzere üç renk seçeneğiyle geliyor. Cihazda çift mikrofon, gürültü filtreleme ve IP67 suya dayanıklılık özellikleri bulunuyor. Pil ömrü ise yedi güne kadar ulaşıyor.</p>
+<p>İkinci ürün Bee Eclipse, kredi kartı boyutlarında bir cihaz olarak öne çıkıyor ve manyetik bağlantıyla akıllı telefonun arkasına tutturuluyor. <strong>99,99 dolar</strong> fiyat etiketine sahip olan cihazın Silver, Midnight, Honey ve Blush olmak üzere dört renk seçeneği bulunuyor. Ürünün satışa çıkışının ilerleyen dönemde gerçekleşmesi bekleniyor.</p>
+<p>Bee cihazları, konuşmaları özetleme ve bu özetleri kullanarak yapılacaklar listeleri oluşturma gibi işlevler sunuyor. Gmail, Google Takvim ve Microsoft Outlook gibi üretkenlik araçlarıyla entegre çalışabilen sistem, e-posta taslakları hazırlayabiliyor ve toplantılar oluşturabiliyor. Kullanıcılar ayrıca Bee’yi Alexa’ya bağlayarak özetlerine ve hatırlatmalarına sesli olarak erişebiliyor, Amazon üzerinden alışveriş yapabiliyor.</p>
+<p>Cihazlar, ham ses kayıtlarını saklamak yerine sesi gerçek zamanlı işleyip siliyor. Konuşma dökümleri şifreleniyor. Ücretsiz kullanımda 14 günlük hafıza sunulurken, aylık <strong>11,99 dolarlık</strong> Bee Pro aboneliği sınırsız konuşma özeti, günlük anılar ve kişisel sohbet asistanı gibi ek özellikler sağlıyor.</p>
+]]></content:encoded>
+			<guid isPermaLink="false">https://webrazzi.com/2026/10/16/amazon-dan-konusmalari-ozetleyen-iki-yeni-kisisel-yapay-zeka-cihazi-bee-frontier-ve-bee-eclipse/</guid>
+			<dc:creator><![CDATA[İdil Dilber]]></dc:creator>
+			<pubDate>Fri, 16 Oct 2026 11:00:00 +0000</pubDate>
+			<wfw:commentRss>https://webrazzi.com/2026/10/16/amazon-dan-konusmalari-ozetleyen-iki-yeni-kisisel-yapay-zeka-cihazi-bee-frontier-ve-bee-eclipse/feed</wfw:commentRss>
+			<slash:comments>0</slash:comments>
+			<media:content url="https://cdn.webrazzi.com/uploads/2026/10/bee-frontier-eclipse-926.png" width="240" height="135" medium="image"   />
+			<media:thumbnail url="https://cdn.webrazzi.com/uploads/2026/10/bee-frontier-eclipse-926_240x135.png" width="240" height="135"   />
+			<custom:socialShare>true</custom:socialShare>
+		</item>
+		<item>
+			<title><![CDATA[Bulut ve yapay zeka maliyet yönetimi girişimi North, 60 milyon dolar yatırım aldı]]></title>
+			<category><![CDATA[Yatırım]]></category>
+			<category><![CDATA[Yapay Zeka]]></category>
+			<link>https://webrazzi.com/2026/10/16/bulut-ve-yapay-zeka-maliyet-yonetimi-girisimi-north-60-milyon-dolar-yatirim-aldi/</link>
+			<comments>https://webrazzi.com/2026/10/16/bulut-ve-yapay-zeka-maliyet-yonetimi-girisimi-north-60-milyon-dolar-yatirim-aldi/#comments</comments>
+			<description><![CDATA[Bulut ve yapay zeka maliyet yönetimi girişimi North, 60 milyon dolar yatırım aldı. Şirketin 60 milyon dolarlık B serisi yatırım turuna PeakSpan Capital liderlik etti. ABD merkezli North'un yatırım tur...]]></description>
+			<content:encoded><![CDATA[<p>Bulut ve yapay zeka maliyet yönetimi girişimi <strong><a href="https://north.cloud/" target="_blank">North</a></strong>, <strong>60 milyon dolar</strong> yatırım aldı. Şirketin 60 milyon dolarlık B serisi yatırım turuna <strong><a href="https://www.peakspancapital.com/" target="_blank">PeakSpan Capital</a></strong> liderlik etti. ABD merkezli North'un yatırım turunda Litquidity Ventures, Companyon Ventures, Alpaca, Gaingels, Uncommon Denominator ve Mana Ventures yer aldı.</p>
+<p>Şirket, yeni gelen yatırımı otonom finansal operasyonlar platformunu geliştirmek, üçüncü taraf entegrasyonlarını genişletmek ve pazarlama faaliyetlerini büyütmek için kullanacağını açıkladı.</p>
+<p>North, <strong>Matt Biringer</strong> ve <strong>Yassine Açoine</strong> tarafından 2023 yılında hayata geçirildi. Şirket, işletmelerin bulut ve yapay zeka altyapısı için yaptığı harcamaları takip etmesini ve bu maliyetleri azaltmasını sağlayan bir platform geliştiriyor. Platform, Amazon Web Services (AWS), Microsoft Azure ve Google Cloud gibi hizmetlere yapılan harcamaları tek bir yerde topluyor. Böylece şirketler, paralarının hangi hizmetlere gittiğini görebiliyor ve gelecek aylarda ne kadar harcama yapacaklarını tahmin edebiliyor. </p>
+<p>North, şirketlerin bulut ve yapay zeka kullanırken gereksiz yere para harcadıkları alanları da tespit ediyor. Örneğin platform, kullanılan bilgi işlem kaynaklarını ve yapay zeka modellerinin maliyetlerini inceleyerek tasarruf edilebilecek noktaları belirliyor. Yeni bir özellik veya sistem devreye alındığında ortaya çıkabilecek ek maliyetleri de hesaplayarak şirketlerin bütçelerini daha iyi yönetmesine yardımcı oluyor. </p>
+<p>Şirketin <strong>TokenFlow</strong> adlı çözümü, yapay zeka modellerinin kullanımını ve bunların maliyetlerini takip ediyor. North ayrıca Snowflake, OpenAI ve Anthropic gibi şirketlerin hizmetleriyle entegre çalışıyor. Bu sayede işletmeler, bulut ve yapay zeka harcamalarını ayrı ayrı takip etmek yerine tüm maliyetlerini tek bir platform üzerinden yönetebiliyor. </p>
+]]></content:encoded>
+			<guid isPermaLink="false">https://webrazzi.com/2026/10/16/bulut-ve-yapay-zeka-maliyet-yonetimi-girisimi-north-60-milyon-dolar-yatirim-aldi/</guid>
+			<dc:creator><![CDATA[Candeğer Muradoğlu]]></dc:creator>
+			<pubDate>Fri, 16 Oct 2026 10:00:00 +0000</pubDate>
+			<wfw:commentRss>https://webrazzi.com/2026/10/16/bulut-ve-yapay-zeka-maliyet-yonetimi-girisimi-north-60-milyon-dolar-yatirim-aldi/feed</wfw:commentRss>
+			<slash:comments>0</slash:comments>
+			<media:content url="https://cdn.webrazzi.com/uploads/2026/10/north-kapak-792.png" width="240" height="135" medium="image"   />
+			<media:thumbnail url="https://cdn.webrazzi.com/uploads/2026/10/north-kapak-792_240x135.png" width="240" height="135"   />
+			<custom:socialShare>true</custom:socialShare>
+		</item>
+		<item>
+			<title><![CDATA[Volvo, sürücüsüz araç teknolojileri için Nvidia ile iş birliğini genişletiyor]]></title>
+			<category><![CDATA[Teknoloji]]></category>
+			<link>https://webrazzi.com/2026/10/16/volvo-surucusuz-arac-teknolojileri-icin-nvidia-ile-is-birligini-genisletiyor/</link>
+			<comments>https://webrazzi.com/2026/10/16/volvo-surucusuz-arac-teknolojileri-icin-nvidia-ile-is-birligini-genisletiyor/#comments</comments>
+			<description><![CDATA[Volvo, otomatik sürüş teknolojileri geliştirmek için Nvidia ile yaklaşık 10 yıldır sürdürdüğü iş birliğini genişletiyor. Şirket, Nvidia'nın üç farklı donanım ve yazılım teknolojisini gelecekteki araçl...]]></description>
+			<content:encoded><![CDATA[<p> <strong><a href="https://webrazzi.com/etiket/volvo/" target="_blank">Volvo</a></strong>, otomatik sürüş teknolojileri geliştirmek için <strong><a href="https://webrazzi.com/etiket/nvidia/" target="_blank">Nvidia</a></strong> ile yaklaşık 10 yıldır sürdürdüğü iş birliğini genişletiyor. Şirket, Nvidia'nın üç farklı donanım ve yazılım teknolojisini gelecekteki araçlarında kullanarak şehir içi yollarda ve otoyollarda otomatik sürüş imkanı sunmayı hedefliyor.</p>
+<p> İş birliği kapsamında Volvo, Nvidia'nın <strong>Hyperion</strong> sensör ve bilgi işlem mimarisinden <strong>Alpamayo</strong> sürüş yazılımından ve Halos güvenlik değerlendirme katmanından yararlanacak. Hyperion, araçların çevresini algılamasını sağlayan sensörleri ve bilgi işlem altyapısını kapsıyor. Alpamayo, otonom sürüş yazılımlarının geliştirilmesi için yapay zeka modelleri ve simülasyon araçları sunarken Halos, sürüş sistemlerinin güvenliğinin değerlendirilmesine odaklanıyor. </p>
+<p>Nvidia'dan <strong>Ali Kani</strong>, Alpamayo'nun yapay zeka modellerini kamera ve radar verilerini işleyen yazılımlarla birlikte kullandığını belirtti. Kani, iki sistemin aynı anda çalıştığını ve bu yaklaşımın daha güvenli bir sürüş sistemi geliştirmeyi amaçladığını söyledi. Kani ayrıca açık kaynaklı Alpamayo yazılımının <strong>650 binden fazla geliştirici</strong> tarafından indirildiğini açıkladı. </p>
+<p>Volvo, iş birliğinin finansal büyüklüğünü ve yeni teknolojilerin kullanılacağı ilk aracın modelini henüz açıklamadı. Nvidia'dan <strong>Alwin Bakkenes</strong>, yeni teknoloji paketinin tamamen yeni bir araçta kullanılacağını ve aracın 2030'dan önce tanıtılacağını belirtti. </p>
+<p>Volvo, Nvidia ile geliştirdiği teknolojileri yalnızca elektrikli araçlarında değil, şarj edilebilir hibrit ve benzinli modellerinde de kullanmayı planlıyor. Şirketin mevcut bataryalı elektrikli araçlarında Nvidia'nın Orin bilgi işlem çipi bulunuyor. Volvo, gelecekte Hyperion mimarisini daha fazla aracında standart hale getirerek sensör ve bilgi işlem altyapısını ortak bir sistem üzerinde birleştirmeyi hedefliyor.</p>
+<p><em>Görsel: Volvo Türkiye</em></p>
+]]></content:encoded>
+			<guid isPermaLink="false">https://webrazzi.com/2026/10/16/volvo-surucusuz-arac-teknolojileri-icin-nvidia-ile-is-birligini-genisletiyor/</guid>
+			<dc:creator><![CDATA[Candeğer Muradoğlu]]></dc:creator>
+			<pubDate>Fri, 16 Oct 2026 09:00:00 +0000</pubDate>
+			<wfw:commentRss>https://webrazzi.com/2026/10/16/volvo-surucusuz-arac-teknolojileri-icin-nvidia-ile-is-birligini-genisletiyor/feed</wfw:commentRss>
+			<slash:comments>0</slash:comments>
+			<media:content url="https://cdn.webrazzi.com/uploads/2026/10/volvo-kapak-253.png" width="240" height="135" medium="image"   />
+			<media:thumbnail url="https://cdn.webrazzi.com/uploads/2026/10/volvo-kapak-253_240x135.png" width="240" height="135"   />
+			<custom:socialShare>true</custom:socialShare>
+		</item>
+		<item>
+			<title><![CDATA[Webrazzi Summit 2026'nın indirimli biletleri için son 3 gün!]]></title>
+			<category><![CDATA[Etkinlikler]]></category>
+			<link>https://webrazzi.com/2026/10/16/webrazzi-summit-2026nin-indirimli-biletleri-icin-son-2-gun/</link>
+			<comments>https://webrazzi.com/2026/10/16/webrazzi-summit-2026nin-indirimli-biletleri-icin-son-2-gun/#comments</comments>
+			<description><![CDATA[Türkiye'nin en etkili teknoloji ve girişimcilik konferansı Webrazzi Summit 2026, 21 Ekim'de Wyndham Grand İstanbul Levent'te gerçekleşecek. Webrazzi'nin 20. yılında düzenlenecek konferans, teknoloji v...]]></description>
+			<content:encoded><![CDATA[<p>Türkiye'nin en etkili teknoloji ve girişimcilik konferansı <a href="https://webrazzi.com/etkinlik/2026/summit/" target="_blank">Webrazzi Summit 2026</a>, <strong>21 Ekim</strong>'de <strong>Wyndham Grand İstanbul Levent</strong>'te gerçekleşecek. <strong>Webrazzi'nin 20. yılında</strong> düzenlenecek konferans, teknoloji ve girişimcilik ekosisteminin önemli isimlerini yeniden bir araya getirecek.</p>
+<p>Webrazzi Summit, her yıl olduğu gibi 2026'da da sektörün önemli isimleri ve binlerce katılımcıyla; yapay zeka, şirketlerin iş yapış biçimlerini yeniden şekillendiren teknolojiler, fintech, büyüme stratejileri, girişimcilik, yatırım ekosistemi ve geleceğin iş modelleri gibi başlıklarda teknoloji dünyasının gündemini belirleyen konuları ele alacak. Gün boyunca eş zamanlı paneller, sunumlar ve workshop'larla devam edecek etkinlikte katılımcılar, iş dünyasının dönüşümüne yön veren fikirler ve teknolojilerle buluşma fırsatı yakalayacak.</p>
+<p>Ayrıca Webrazzi Summit'in girişimcilik tarafındaki önemli bölümlerinden <strong>Webrazzi Arena</strong>'nın bu yıl geri döndüğünü daha önce sizlerle <a href="https://webrazzi.com/2026/08/17/webrazzi-arena-2026-basvurulari-acildi/" target="_blank">paylaşmıştık</a>. Webrazzi'nin 20. yılında yeniden düzenlenecek Webrazzi Arena kapsamında seçilen girişimler, 21 Ekim'de Webrazzi Summit 2026 sahnesinde projelerini jüri ve katılımcılarla paylaşacak.</p>
+<p>Webrazzi Summit 2026'ya katılmak ve bu eşsiz deneyimi bizimle birlikte yaşamak için indirimlerden yararlanarak şimdiden <a href="https://webrazzi.com/order/ticket/summit-2026/" target="_blank">yerinizi ayırtabilirsiniz</a>.</p>
+<h3>İndirimlerden faydalanmak için son 3 gün! </h3>
+<p>An itibarıyla konferansımızın fiziksel tek kişilik biletinin fiyatı <strong>48.500 TL + KDV</strong>, en az 3 kişilik grup indirimli bilet kategorisinde tek kişilik bilet fiyatı ise <strong>43.500 TL + KDV.</strong></p>
+<p><strong>19 Ekim'den itibaren</strong> fiziksel tek kişilik biletin fiyatı <strong>50.000 TL + KDV</strong>'ye, en az 3 kişilik grup indirimli bilet kategorisinde tek kişilik bilet fiyatı da <strong>45.000 TL + KDV</strong>'ye çıkacak. </p>
+<p>Webrazzi Summit 2026'ya katılarak geniş networking imkanlarından yararlanabilir, aynı zamanda alanında uzman konuşmacılarımızın anlattıklarını dinleyerek merak ettiğiniz soruların cevaplarını öğrenebilirsiniz. Konferansımıza dair merak ettiklerinize ise <a href="https://webrazzi.com/etkinlik/2026/summit/" target="_blank">buradan</a> göz atabilirsiniz.</p>
+<p>21 Ekim'de görüşmek üzere!</p>
+<h2>SPONSORLAR</h2>
+<p><strong>Elmas Sponsor</strong></p>
+<p><strong><a href="https://www.isbank.com.tr/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/03/adsiz-tasarim-18-kopyasi-1774518601240.png" alt="Türkiye İş Bankası "></a></strong></p>
+<p><strong>Platin Sponsorlar</strong></p>
+<p><strong><a href="https://www.garantibbvayatirim.com.tr/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/06/adsiz-tasarim-18-kopyasi-4-1780904320454.png" alt="garanti bbva yatırım "></a> <a href="https://www.hepsiburada.com/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/06/adsiz-tasarim-4-kopyasi-178091964252.png" alt="hepsiburada "></a></strong></p>
+<p><strong><a href="https://www.turkcell.com.tr/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/06/adsiz-tasarim-6-kopyasi-178237691623.png" alt="Turkcell "></a></strong></p>
+<p><strong>Altın Sponsor</strong></p>
+<p><strong><a href="https://metropolcard.com/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/03/adsiz-tasarim-18-1774518718457.png" alt="Metropolcard "></a> <a href="https://orfeolabs.com/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/10/adsiz-tasarim-10-179129328469.png" alt="orfeo labs "></a></strong></p>
+<p><strong>Gümüş Sponsorlar</strong></p>
+<p><strong><a href="https://www.bacaciyatirimholding.com/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/03/adsiz-tasarim-18-kopyasi-5-1774518800237.png" alt="Bacacı Yatırım Holding "></a> <a href="https://www.greymore.com/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/03/adsiz-tasarim-18-kopyasi-7-1774518881883.png" alt="Greymore "></a></strong></p>
+<p><strong><a href="https://www.tabgida.com.tr/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/04/adsiz-tasarim-19-177503950334.png" alt="TAB Gıda "></a> <a href="https://www.turk.net/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/08/adsiz-tasarim-7-kopyasi-2-1785842005926.png" alt="Turknet "></a></strong></p>
+<p><strong>Startup Lounge İş Ortakları</strong></p>
+<p><a href="https://ariteknokent.com.tr/tr" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/08/adsiz-tasarim-7-1786442761990.png" alt="itü arı teknokent "></a> <a href="https://ostimteknopark.com.tr/tr" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/08/adsiz-tasarim-18-kopyasi-10-178634288243.png" alt="Ostim Teknopark "></a></p>
+<p><a href="https://oriontekmer.com/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/08/adsiz-tasarim-5-kopyasi-1786342915831.png" alt="Thk & Orion Tekmer "></a> <a href="https://terminal.turkishairlines.com/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/10/adsiz-tasarim-10-kopyasi-1790838898382.png" alt="thy terminal "></a></p>
+<p><a href="https://www.workup.ist/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/10/adsiz-tasarim-11-kopyasi-3-1791963062204.png" alt="workup "></a></p>
+<p><strong>Webrazzi Arena Sponsoru</strong></p>
+<p><strong><a href="https://terminal.turkishairlines.com/turkish-ventures/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/10/adsiz-tasarim-10-1790838837655.png" alt="turkish ventures "></a></strong></p>
+<p><strong>Destekleyen</strong></p>
+<p><a href="https://kopuklu.com.tr/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/10/adsiz-tasarim-11-kopyasi-179189910792.png" alt="köpüklü "></a></p>
+<p><strong>Medya Partnerleri</strong></p>
+<p><a href="https://brandfocus.com.tr/anasayfa-turkce/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/03/adsiz-tasarim-18-kopyasi-6-177451901814.png" alt="Brand Focus "></a> <a href="https://www.ekoturk.com/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/08/adsiz-tasarim-7-kopyasi-2-1787652723698.png" alt="ekotürk "></a></p>
+<p><a href="https://karnaval.com/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/03/adsiz-tasarim-20-kopyasi-1774518945559.png" alt="Karnaval "></a> <a href="https://www.platinonline.com/" target="_blank"><img class="lazyload " data-src="https://cdn.webrazzi.com/sponsors/2026/03/adsiz-tasarim-19-kopyasi-1774518979844.png" alt="Platin "></a></p>
+]]></content:encoded>
+			<guid isPermaLink="false">https://webrazzi.com/2026/10/16/webrazzi-summit-2026nin-indirimli-biletleri-icin-son-2-gun/</guid>
+			<dc:creator><![CDATA[Gözde Ulukan]]></dc:creator>
+			<pubDate>Fri, 16 Oct 2026 08:03:07 +0000</pubDate>
+			<wfw:commentRss>https://webrazzi.com/2026/10/16/webrazzi-summit-2026nin-indirimli-biletleri-icin-son-2-gun/feed</wfw:commentRss>
+			<slash:comments>0</slash:comments>
+			<media:content url="https://cdn.webrazzi.com/uploads/2026/10/webrazzi-summit-2026-1920-x-1080-px-5-735.png" width="240" height="135" medium="image"   />
+			<media:thumbnail url="https://cdn.webrazzi.com/uploads/2026/10/webrazzi-summit-2026-1920-x-1080-px-5-735_240x135.png" width="240" height="135"   />
+			<custom:socialShare>true</custom:socialShare>
+		</item>
+		<item>
+			<title><![CDATA[Loops AI, a16z Speedrun ve NTT'nin katıldığı turda 3,5 milyon dolar yatırım aldı]]></title>
+			<category><![CDATA[Yatırım]]></category>
+			<link>https://webrazzi.com/2026/10/16/loops-ai-a16z-speedrun-ve-nttnin-katildigi-turda-35-milyon-dolar-yatirim-aldi/</link>
+			<comments>https://webrazzi.com/2026/10/16/loops-ai-a16z-speedrun-ve-nttnin-katildigi-turda-35-milyon-dolar-yatirim-aldi/#comments</comments>
+			<description><![CDATA[2025 yılında İlker Selim Zorluoğlu, Ari Nazir ve Yusuf Bahadır tarafından kurulan Loops AI, 3,5 milyon dolarlık tohum yatırım turunu tamamladı. Tura Andreessen Horowitz'in erken aşama girişim programı...]]></description>
+			<content:encoded><![CDATA[<p>2025 yılında <a href="https://www.linkedin.com/in/ilkerzorluoglu/" target="_blank">İlker Selim Zorluoğlu</a>, <a href="https://www.linkedin.com/in/anazir9/" target="_blank">Ari Nazir</a> ve <a href="https://www.linkedin.com/in/yusufbahadir/" target="_blank">Yusuf Bahadır</a> tarafından kurulan <strong><a href="https://www.loopsai.com/" target="_blank">Loops AI</a>, 3,5 milyon dolarlık tohum yatırım turunu tamamladı.</strong> Tura Andreessen Horowitz'in erken aşama girişim programı <strong>a16z Speedrun, NTT DOCOMO, Connecticut Innovations, Monday Capital </strong>ve<strong> Alumni Ventures</strong>'ın yanı sıra <strong>Netflix ve Google'dan melek yatırımcılar</strong> katıldı.</p>
+<p>Türkiye'de Mavi, Boyner, A101 Ekstra ve Petrol Ofisi gibi markalarla çalışan girişim, aldığı yatırımı ürün geliştirme ve mühendislik ekibini büyütmek, çözümlerini daha fazla müşteride kullanıma sunmak ve uluslararası pazarlara açılmak için değerlendirecek. Şirketin öncelikli hedef pazarı Japonya olurken, sonraki aşamada Almanya başta olmak üzere Avrupa ve Güneydoğu Asya'ya açılması planlanıyor.</p>
+<p>Loops AI, e-ticaret sitelerinde kullanıcıların anahtar kelimeler ve filtreler yerine ihtiyaçlarını günlük dille anlatarak ürün bulmasını sağlayan bir altyapı geliştiriyor. Sistem, kullanıcının talebini markanın ürün kataloğu, ürün bilgileri ve iş kurallarıyla birlikte değerlendirerek seçenekler sunuyor. Örneğin kullanıcılar, belirli bir ürün adı aramak yerine iş yemeğinde lacivert pantolonla giyebilecekleri bir gömlek istediklerini belirtebiliyor.</p>
+<p>Girişimin çözümleri, yapay zeka destekli arama ve ürün keşfinin yanı sıra alışveriş asistanı, müşteri operasyonları, ürün bilgilerinin zenginleştirilmesi, sanal deneme ve sesli yapay zeka uygulamalarını kapsıyor. Müşteri şirketlerin ürün katalogları, veri kaynakları ve mevcut sistemleriyle yapılan entegrasyonlarda geliştirilen özellikler, sonraki uygulamalarda da kullanılmak üzere ürüne ekleniyor.</p>
+<p><strong>Şirketin paylaştığı verilere göre</strong>, A101 Ekstra'da Loops AI'ın ürün keşfi çözümüyle etkileşime giren müşterilerin satın alma dönüşüm oranı, karşılaştırılan gruba kıyasla yüzde 83, sepete ekleme oranı ise yüzde 77 daha yüksek gerçekleşti. Wee Baby’de ise ortalama sepet tutarının yüzde 11, müşteri başına ortalama harcamanın yüzde 26 daha yüksek olduğu, çözümü kullanan müşterilerin yüzde 32'sinin ilk sorusunun ardından satın alma yaptığı belirtildi. Bu sonuçların ölçüldüğü dönem ve karşılaştırma gruplarının nasıl oluşturulduğuna ilişkin ayrıntılar paylaşılmadı.</p>
+<p>Loops AI, perakende ve e-ticaret için geliştirdiği altyapıyı finansal hizmetler ve enerji gibi sektörlerde kullanmak üzere de çalışmalar yürütüyor. Girişimin uzun vadeli planları arasında şirketlerin verilerini, sistemlerini ve iş akışlarını farklı yapay zeka modelleriyle ortak bir altyapıda buluşturmak ve belirli kurumsal kullanım alanlarına yönelik küçük dil modelleri geliştirmek yer alıyor.</p>
+]]></content:encoded>
+			<guid isPermaLink="false">https://webrazzi.com/2026/10/16/loops-ai-a16z-speedrun-ve-nttnin-katildigi-turda-35-milyon-dolar-yatirim-aldi/</guid>
+			<dc:creator><![CDATA[Gözde Ulukan]]></dc:creator>
+			<pubDate>Fri, 16 Oct 2026 07:05:24 +0000</pubDate>
+			<wfw:commentRss>https://webrazzi.com/2026/10/16/loops-ai-a16z-speedrun-ve-nttnin-katildigi-turda-35-milyon-dolar-yatirim-aldi/feed</wfw:commentRss>
+			<slash:comments>0</slash:comments>
+			<media:content url="https://cdn.webrazzi.com/uploads/2026/10/loops-ai-448.png" width="240" height="135" medium="image"   />
+			<media:thumbnail url="https://cdn.webrazzi.com/uploads/2026/10/loops-ai-448_240x135.png" width="240" height="135"   />
+			<custom:socialShare>true</custom:socialShare>
+		</item>
+		<item>
+			<title><![CDATA[Tesla, uçabilen yeni Roadster'ını tanıttı]]></title>
+			<category><![CDATA[Teknoloji]]></category>
+			<link>https://webrazzi.com/2026/10/16/tesla-ucabilen-yeni-roadsterini-tanitti/</link>
+			<comments>https://webrazzi.com/2026/10/16/tesla-ucabilen-yeni-roadsterini-tanitti/#comments</comments>
+			<description><![CDATA[Bilim kurgu filmlerinde görmeye alıştığımız uçan otomobiller gerçeğe bir adım daha yaklaşıyor. Tesla, dün gerçekleştirdiği tanıtımda, bizleri Back to the Future evreninde gibi hissettiren yeni Roadste...]]></description>
+			<content:encoded><![CDATA[<p>Bilim kurgu filmlerinde görmeye alıştığımız uçan otomobiller gerçeğe bir adım daha yaklaşıyor. <a href="https://webrazzi.com/etiket/Tesla" target="_blank">Tesla</a>, dün gerçekleştirdiği tanıtımda, bizleri Back to the Future evreninde gibi hissettiren yeni <a href="https://www.tesla.com/roadster" target="_blank">Roadster</a>'ını <a href="https://www.youtube.com/live/qt5p-_tE8d0?si=jrD4UW4H2kFgsQXh" target="_blank">sahneye çıkardı</a>. Elektrikli spor otomobil, Teksas'taki SpaceX tesisinde düzenlenen gösteride yerden havalanarak şirketin diğer araçlarının üzerinden geçti.</p>
+<p>Roadster'ın bu manevraları yapabilmesi için SpaceX iticileri ile güçlü fanlar birlikte kullanıldı. Araçtaki dört itici, depolanan basınçlı gazla çalışıyor. Tesla, yeni modelin saatte yaklaşık 97 kilometre hıza bir saniyede ulaşabileceğini ve tek şarjla 483 kilometrenin üzerinde yol alabileceğini belirtiyor.</p>
+<figure class="image  wp-caption"><img class="lazyload " data-src="https://cdn.webrazzi.com/uploads/2026/10/ekran-resmi-2026-10-16-085539-80.png" title="ekran-resmi-2026-10-16-085539-80" alt="">
+<figcaption class="wp-caption-text">Kaynak: Tesla</figcaption>
+</figure>
+<h3>Uçuş özelliği her Roadster'da bulunmayacak </h3>
+<p>Yeni Roadster, "Performance", "Thrust" ve "Rocket" olmak üzere üç versiyonla sunulacak. İki kişilik Performance, iticiler olmadan yola çıkacak. Thrust pist kullanımına odaklanırken, tek kişilik Rocket havalanma özelliğiyle ayrışacak. </p>
+<p>Tesla, <strong>Performance</strong> için toplam <strong>50 bin dolar</strong>, <strong>Thrust</strong> için ise toplam <strong>250 bin dolar</strong> rezervasyon bedeli talep ediyor. Her iki seçenekte de ilk aşamada 5 bin dolar ödenmesi gerekiyor. Kalan tutar 10 gün içinde tamamlanıyor. Tek kişilik Rocket versiyonu ise <strong>yalnızca davetle sunuluyor</strong>. Araçların nihai satış fiyatları henüz açıklanmadı.</p>
+<p>Ancak tanıtımdaki görüntüler, Roadster'ın günlük trafikte de aynı manevraları serbestçe yapabileceği anlamına gelmiyor. Havacılık uzmanlarına göre aracın havalanma özelliğinin kullanılması çeşitli izinlere bağlı olabilir. Gösteri de güvenlik amacıyla araçta kimse bulunmadan gerçekleştirildi.</p>
+<p><a href="https://youtu.be/cvKIR-c1SsU" target="_blank">
+<p><div class="responsive-embed widescreen youtube"><iframe data-type="video" width="200" height="113" src="https://www.youtube.com/embed/cvKIR-c1SsU?feature=oembed" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen title="Roadster | The Last Best Driver&#39;s Car"></iframe></div></p>
+<p></a></p>
+<h3>Yıllardır beklenen model için yeni hedef 2028 </h3>
+<p>İkinci nesil Roadster ilk kez 2017'de duyurulmuş, teslimatlar için 2020 hedefi verilmişti. Yaklaşık dokuz yıllık bekleyişte hem elektrikli otomobil pazarı hem de Tesla'nın öncelikleri değişti. Musk, şirketin geleceğini giderek daha fazla robotik ve otonom sürüş teknolojileri üzerinden anlatmaya başladı.</p>
+<p>Tesla'nın yeni Roadster için açıkladığı üretim tarihi ise 2028. Dolayısıyla tanıtımda havalanan otomobilin müşterilere ulaşması için bir süre daha beklemek gerekecek.</p>
+]]></content:encoded>
+			<guid isPermaLink="false">https://webrazzi.com/2026/10/16/tesla-ucabilen-yeni-roadsterini-tanitti/</guid>
+			<dc:creator><![CDATA[Gözde Ulukan]]></dc:creator>
+			<pubDate>Fri, 16 Oct 2026 07:00:00 +0000</pubDate>
+			<wfw:commentRss>https://webrazzi.com/2026/10/16/tesla-ucabilen-yeni-roadsterini-tanitti/feed</wfw:commentRss>
+			<slash:comments>0</slash:comments>
+			<media:content url="https://cdn.webrazzi.com/uploads/2026/10/roadster-784.png" width="240" height="135" medium="image"   />
+			<media:thumbnail url="https://cdn.webrazzi.com/uploads/2026/10/roadster-784_240x135.png" width="240" height="135"   />
+			<custom:socialShare>true</custom:socialShare>
+		</item>
+	</channel>
+</rss>

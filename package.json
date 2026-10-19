@@ -1,0 +1,61 @@
+{
+  "name": "trend-pool",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Personal trend pool: collects, de-duplicates and ranks trending topics (Phase 1).",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "docker compose -f compose.yaml -f compose.dev.yaml up --build",
+    "dev:down": "docker compose -f compose.yaml -f compose.dev.yaml down",
+    "dev:web": "next dev",
+    "dev:worker": "tsx watch worker/index.ts",
+    "build": "next build && npm run build:worker",
+    "build:worker": "tsup",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx worker/migrate.ts",
+    "db:seed": "tsx worker/seed.ts",
+    "db:reseed": "tsx worker/seed.ts --update",
+    "db:studio": "drizzle-kit studio",
+    "migrate": "docker compose -f compose.yaml -f compose.dev.yaml run --rm migrate",
+    "logs": "docker compose -f compose.yaml -f compose.dev.yaml logs -f --tail=100"
+  },
+  "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "drizzle-orm": "^0.45.4",
+    "lucide-react": "^1.59.0",
+    "next": "^16.4.2",
+    "node-cron": "^4.6.0",
+    "pg": "^8.23.1",
+    "pino": "^10.4.0",
+    "radix-ui": "^1.8.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "rss-parser": "^3.13.0",
+    "tailwind-merge": "^3.7.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^24.19.2",
+    "@types/pg": "^8.23.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "drizzle-kit": "^0.31.11",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.4.2",
+    "prettier": "^3.9.10",
+    "tailwindcss": "^4.3.3",
+    "tsup": "^8.5.1",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.5"
+  }
+}

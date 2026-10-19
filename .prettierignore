@@ -1,0 +1,6 @@
+.next
+dist
+node_modules
+lib/db/migrations
+tests/fixtures
+package-lock.json

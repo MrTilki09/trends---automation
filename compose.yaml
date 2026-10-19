@@ -1,0 +1,61 @@
+# Production stack:  docker compose up -d --build
+# Dev stack:         docker compose -f compose.yaml -f compose.dev.yaml up   (or: npm run dev)
+name: trend-pool
+
+x-app: &app
+  build:
+    context: .
+    target: runtime
+  image: trend-pool:latest
+  env_file: .env
+  restart: unless-stopped
+  depends_on:
+    db:
+      condition: service_healthy
+    migrate:
+      condition: service_completed_successfully
+
+services:
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    # No public port in production. (Dev exposes 127.0.0.1:5432, see compose.dev.yaml.)
+
+  # One-off: applies DB migrations + adds missing seed sources, then exits.
+  migrate:
+    <<: *app
+    command: ["node", "dist/migrate.js"]
+    restart: "no" # it must exit, not loop
+    environment:
+      SERVICE_NAME: migrate
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    <<: *app
+    command: ["node", "server.js"]
+    environment:
+      SERVICE_NAME: web
+    # Bound to localhost only: there is no login yet. Reach it via SSH tunnel or Tailscale (README).
+    ports:
+      - "127.0.0.1:3000:3000"
+
+  worker:
+    <<: *app
+    command: ["node", "dist/worker.js"]
+    environment:
+      SERVICE_NAME: worker
+    # Give the worker time to mark its current run as interrupted on `docker compose down`.
+    stop_grace_period: 30s
+
+volumes:
+  pgdata:

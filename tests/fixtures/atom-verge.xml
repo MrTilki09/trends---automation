@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?><feed
+	xmlns="http://www.w3.org/2005/Atom"
+	xmlns:thr="http://purl.org/syndication/thread/1.0"
+	xml:lang="en-US"
+	>
+	<title type="text">The Verge</title>
+	<subtitle type="text">The Verge is about technology and how it makes us feel. Founded in 2011, we offer our audience everything from breaking news to reviews to award-winning features and investigations, on our site, in video, and in podcasts.</subtitle>
+
+	<updated>2026-10-19T12:37:05+00:00</updated>
+
+	<link rel="alternate" type="text/html" href="https://www.theverge.com" />
+	<id>https://www.theverge.com/rss/index.xml</id>
+	<link rel="self" type="application/atom+xml" href="https://www.theverge.com/rss/index.xml" />
+
+	<icon>https://platform.theverge.com/wp-content/uploads/sites/2/2025/01/verge-rss-large_80b47e.png?w=150&amp;h=150&amp;crop=1</icon>
+		<entry>
+			
+			<author>
+				<name>Andrew Liszewski</name>
+			</author>
+			
+			<title type="html"><![CDATA[Wyze moved the screen on its new smart scale to the handle so it’s easier to read at eye level]]></title>
+			<link rel="alternate" type="text/html" href="https://www.theverge.com/tech/1013081/wyze-smart-scale-ultra-bodyscan-plus-handle-display" />
+			<id>https://www.theverge.com/?p=1013081</id>
+			<updated>2026-10-19T08:29:09-04:00</updated>
+			<published>2026-10-19T09:00:00-04:00</published>
+			<category scheme="https://www.theverge.com" term="Gadgets" /><category scheme="https://www.theverge.com" term="Health" /><category scheme="https://www.theverge.com" term="News" /><category scheme="https://www.theverge.com" term="Science" /><category scheme="https://www.theverge.com" term="Tech" />
+							<summary type="html"><![CDATA[Wyze announced a new version of its Ultra BodyScan smart scale that debuted nearly a year ago with additional electrodes on a retractable handle, allowing it to provide a breakdown of various health metrics across your arms, legs, and torso. With the new Ultra BodyScan Plus, Wyze is introducing a redesign that moves the scale's [&#8230;]]]></summary>
+			
+							<content type="html">
+											<![CDATA[
+
+						
+<figure>
+
+<img alt="A person holds the screen-equipped handle on the Wyze Scale Ultra BodyScan Plus." data-caption="The scale features a conductive indium tin oxide (ITO) coated glass surface so it can take BIA measurements no matter where your feet are positioned. | Image: Wyze" data-portal-copyright="Image: Wyze" data-has-syndication-rights="1" src="https://platform.theverge.com/wp-content/uploads/sites/2/2026/10/wyzescale1.jpg?quality=90&#038;strip=all&#038;crop=0,0,100,100" />
+	<figcaption>
+	The scale features a conductive indium tin oxide (ITO) coated glass surface so it can take BIA measurements no matter where your feet are positioned. | Image: Wyze	</figcaption>
+</figure>
+<p class="wp-block-paragraph">Wyze announced a new version of its <a href="https://www.theverge.com/news/817826/wyze-smart-scale-ultra-bodyscan-segmented-body-composition-handle-electrodes">Ultra BodyScan smart scale that debuted nearly a year ago</a> with additional electrodes on a retractable handle, allowing it to provide a breakdown of various health metrics across your arms, legs, and torso. With the new Ultra BodyScan Plus, Wyze is introducing a redesign that moves the scale's 4.3-inch customizable color screen to the retractable handle so all the measurements are now displayed closer to eye level.</p>
+<p class="wp-block-paragraph">The Wyze Scale Ultra BodyScan Plus is available starting today for $149 through <a href="https://www.wyze.com/">Wyze's online store</a> in black or white color options. That makes it about $30 more expensive than the <a href="https://www.wyze.com/products/wyze-scale-ultra-bodyscan?" data-type="link" data-id="https://www.wyze.com/products/wyze-scale-ultra-bodyscan?">$119.98 Ultra …</a></p>
+<p><a href="https://www.theverge.com/tech/1013081/wyze-smart-scale-ultra-bodyscan-plus-handle-display">Read the full story at The Verge.</a></p>
+						]]>
+									</content>
+			
+					</entry>
+			<entry>
+			
+			<author>
+				<name>Terrence O’Brien</name>
+			</author>
+			
+			<title type="html"><![CDATA[Vibe coding is turning the music gear world upside down]]></title>
+			<link rel="alternate" type="text/html" href="https://www.theverge.com/gadgets/1013493/vibe-coding-ai-music-gear-hacking-custom-firmware" />
+			<id>https://www.theverge.com/?p=1013493</id>
+			<updated>2026-10-19T07:03:53-04:00</updated>
+			<published>2026-10-19T08:30:00-04:00</published>
+			<category scheme="https://www.theverge.com" term="Entertainment" /><category scheme="https://www.theverge.com" term="Gadgets" /><category scheme="https://www.theverge.com" term="Music" /><category scheme="https://www.theverge.com" term="Report" /><category scheme="https://www.theverge.com" term="Tech" />
+							<summary type="html"><![CDATA[If you spend any time on r/synthesizers or watch a lot of synth videos on YouTube, you've probably noticed the explosion of custom firmware for hardware synthesizers, samplers, and grooveboxes. What unites almost all of them is that they were made possible by increasingly sophisticated vibe coding tools. These sorts of custom firmware were exceedingly [&#8230;]]]></summary>
+			
+							<content type="html">
+											<![CDATA[
+
+						
+<figure>
+
+<img alt="The Elektron Model:Cycles and Model:Samples grooveboxes on a shelf in front of books, a cassette player, and other random nonseense." data-caption="They’re far more powerful and fun than their bargain price suggests. | Photo: Terrence O’Brien / The Verge" data-portal-copyright="Photo: Terrence O’Brien / The Verge" data-has-syndication-rights="1" src="https://platform.theverge.com/wp-content/uploads/sites/2/2026/08/elektron-model-cycles-model-samples-8.jpg?quality=90&#038;strip=all&#038;crop=0,0,100,100" />
+	<figcaption>
+	They’re far more powerful and fun than their bargain price suggests. | Photo: Terrence O’Brien / The Verge	</figcaption>
+</figure>
+<p class="wp-block-paragraph">If you spend any time on <a href="https://www.reddit.com/r/synthesizers/s/qfWhHlVu8R">r/synthesizers</a> or watch a lot of synth videos on YouTube, you've probably noticed the explosion of custom firmware for <a href="https://github.com/Lapin/awesome-music-gear-firmware">hardware synthesizers, samplers, and grooveboxes</a>. What unites almost all of them is that they were made possible by increasingly sophisticated vibe coding tools.</p>
+<p class="wp-block-paragraph">These sorts of custom firmware were exceedingly rare in the pre-LLM days, and required both deep expertise and an incredible investment of time. It could take weeks or months to add a simple feature like velocity sensitivity to a <a href="https://www.reddit.com/r/volcas/comments/dj7f7v/volca_fm_firmware_108_unofficial_velocity_on_note/">Korg Volca</a>. Now, hobbyist hackers are able to turn Temu synths into full-fledged grooveboxes in a matter of days …</p>
+<p><a href="https://www.theverge.com/gadgets/1013493/vibe-coding-ai-music-gear-hacking-custom-firmware">Read the full story at The Verge.</a></p>
+						]]>
+									</content>
+			
+					</entry>
+			<entry>
+			
+			<author>
+				<name>Lauren Feiner</name>
+			</author>
+			
+			<title type="html"><![CDATA[Democrats think cracking down on AI could give them an edge]]></title>
+			<link rel="alternate" type="text/html" href="https://www.theverge.com/policy/1013113/democrats-ai-midterms" />
+			<id>https://www.theverge.com/?p=1013113</id>
+			<updated>2026-10-19T08:37:05-04:00</updated>
+			<published>2026-10-19T08:00:00-04:00</published>
+			<category scheme="https://www.theverge.com" term="AI" /><category scheme="https://www.theverge.com" term="Policy" /><category scheme="https://www.theverge.com" term="Politics" /><category scheme="https://www.theverge.com" term="Report" />
+							<summary type="html"><![CDATA[Democrats could win back control of Congress this November, and if they do, they'll need to decide how to approach one of the country's newest and thorniest political issues: AI. Polls predict Democrats will flip at least one chamber of Congress in the midterm elections, which would put committee leadership back in their hands. That [&#8230;]]]></summary>
+			
+							<content type="html">
+											<![CDATA[
+
+						
+<figure>
+
+<img alt="Graphic photo illustration of a voting sign that reads “Vote here”." data-caption="" data-portal-copyright="Cath Virginia / The Verge | Photo by Stephen Morton, Getty Images" data-has-syndication-rights="1" src="https://platform.theverge.com/wp-content/uploads/sites/2/chorus/uploads/chorus_asset/file/25334821/STK466_ELECTION_2024_CVirginia_C.jpg?quality=90&#038;strip=all&#038;crop=0,0,100,100" />
+	<figcaption>
+		</figcaption>
+</figure>
+<p class="wp-block-paragraph">Democrats could win back control of Congress this November, and if they do, they'll need to decide how to approach one of the country's newest and thorniest political issues: AI.</p>
+<p class="wp-block-paragraph">Polls predict Democrats will flip at least one chamber of Congress in the midterm elections, which would put committee leadership back in their hands. That could usher in a wave of newfound scrutiny for AI companies. Top Democrats on key committees have already signaled their willingness to press the industry on <a href="https://www.politico.com/live-updates/2026/10/14/congress/democratic-tax-writers-demand-meta-explain-use-of-research-credits-tied-to-data-centers-01118217">tax credits tied to data centers</a> and <a href="https://www.cnbc.com/2026/08/10/openai-anthropic-ai-hack-congress.html">recent hacking incidents</a>, and would be able to set committee agendas if they take over, allowing them to call CEOs to  …</p>
+<p><a href="https://www.theverge.com/policy/1013113/democrats-ai-midterms">Read the full story at The Verge.</a></p>
+						]]>
+									</content>
+			
+					</entry>
+			<entry>
+			
+			<author>
+				<name>Tim Stevens</name>
+			</author>
+			
+			<title type="html"><![CDATA[The Maeving RM2 is high-style electric riding with a few compromises]]></title>
+			<link rel="alternate" type="text/html" href="https://www.theverge.com/transportation/1013049/maeving-rm2-electric-motorcycle-review-specs" />
+			<id>https://www.theverge.com/?p=1013049</id>
+			<updated>2026-10-16T14:44:35-04:00</updated>
+			<published>2026-10-19T07:00:00-04:00</published>
+			<category scheme="https://www.theverge.com" term="Electric Bikes" /><category scheme="https://www.theverge.com" term="Reviews" /><category scheme="https://www.theverge.com" term="Rideables" /><category scheme="https://www.theverge.com" term="Tech" /><category scheme="https://www.theverge.com" term="Transportation" />
+							<summary type="html"><![CDATA[There's a fast-growing category of two-wheeled electric vehicles splitting the difference between high-end scooters and entry-level motorcycles, fresh bikes with avant-garde style but approachable performance. I'm talking about offerings like the Infinite Machine P1 and BMW CE 02, similar concepts but with wildly different attitudes. Among this class, the Maeving RM2 stands out. It has [&#8230;]]]></summary>
+			
+							<content type="html">
+											<![CDATA[
+
+						
+<figure>
+
+<img alt="" data-caption="" data-portal-copyright="" data-has-syndication-rights="1" src="https://platform.theverge.com/wp-content/uploads/sites/2/2026/10/2026-Maeving-RM2-013.jpg?quality=90&#038;strip=all&#038;crop=0,0,100,100" />
+	<figcaption>
+		</figcaption>
+</figure>
+<p class="wp-block-paragraph">There's a fast-growing category of two-wheeled electric vehicles splitting the difference between high-end scooters and entry-level motorcycles, fresh bikes with avant-garde style but approachable performance.</p>
+<p class="wp-block-paragraph">I'm talking about offerings like the Infinite Machine P1 and <a href="https://www.theverge.com/2021/9/3/22655751/bmw-ce-02-mini-bike-concept-electric-iaa-mobility-2021">BMW CE 02</a>, similar concepts but with wildly different attitudes. Among this class, the Maeving RM2 stands out. It has a distinctly retrofuturistic flair, bringing together the vibe of classic British motorcycles like the Triumph Bonneville or Royal Enfield Continental GT, just without the literal vibes caused by internal combustion.</p>
+<p class="wp-block-paragraph">Quite the contrary, in fact. The RM2 is o …</p>
+<p><a href="https://www.theverge.com/transportation/1013049/maeving-rm2-electric-motorcycle-review-specs">Read the full story at The Verge.</a></p>
+						]]>
+									</content>
+			
+					</entry>
+			<entry>
+			
+			<author>
+				<name>Terrence O’Brien</name>
+			</author>
+			
+			<title type="html"><![CDATA[A Savannah police officer gave her Flock login to her ICE agent husband]]></title>
+			<link rel="alternate" type="text/html" href="https://www.theverge.com/policy/1013573/spd-officer-fired-flock-ice-husband" />
+			<id>https://www.theverge.com/?p=1013573</id>
+			<updated>2026-10-18T18:20:53-04:00</updated>
+			<published>2026-10-18T18:20:53-04:00</published>
+			<category scheme="https://www.theverge.com" term="Law" /><category scheme="https://www.theverge.com" term="News" /><category scheme="https://www.theverge.com" term="Policy" />
+							<summary type="html"><![CDATA[Now, former Savannah police officer Amber Harpe was fired in August following a department investigation that found she had shared her Flock login information with her husband, Tyler Harpe, an ICE agent. SPD does not share its Flock data with ICE and said sharing access to the system violated the department's security protocols. While he [&#8230;]]]></summary>
+			
+							<content type="html">
+											<![CDATA[
+
+						
+<figure>
+
+<img alt="BOULDER, CO - MARCH 5:A Flock Safety license plate recognition camera is seen near the intersection of Marine Street and Arapahoe Avenue in Boulder on Thursday, March 5, 2026. (Photo by Matthew Jonas/MediaNews Group/Boulder Daily Camera via Getty Images)" data-caption="" data-portal-copyright="MediaNews Group via Getty Images" data-has-syndication-rights="1" src="https://platform.theverge.com/wp-content/uploads/sites/2/2026/09/gettyimages-2265184860.jpg?quality=90&#038;strip=all&#038;crop=0,0,100,100" />
+	<figcaption>
+		</figcaption>
+</figure>
+<p class="wp-block-paragraph">Now, former Savannah police officer Amber Harpe was <a href="https://gizmodo.com/cop-fired-for-letting-her-ice-agent-husband-use-her-flock-login-2000827428">fired</a> in August following a department investigation that found she had shared her Flock login information with her husband, Tyler Harpe, an ICE agent. SPD does not share its Flock data with ICE and said sharing access to the system violated the department's security protocols.</p>
+<p class="wp-block-paragraph">While he had unauthorized access to the system, Tyler Harpe conducted 983 searches related to 97 license plates, which were overwhelmingly registered to Hispanic drivers, according to Savannah's local ABC affiliate, <a href="https://www.wjcl.com/article/gas-money-calculator/74146634">WJCL</a>. The Harpes defended their actions, saying they didn't use access for personal reasons and that  …</p>
+<p><a href="https://www.theverge.com/policy/1013573/spd-officer-fired-flock-ice-husband">Read the full story at The Verge.</a></p>
+						]]>
+									</content>
+			
+					</entry>
+			<entry>
+			
+			<author>
+				<name>Terrence O’Brien</name>
+			</author>
+			
+			<title type="html"><![CDATA[Mister Organ is one of the most unsettling documentaries I’ve ever seen]]></title>
+			<link rel="alternate" type="text/html" href="https://www.theverge.com/entertainment/1013545/mister-organ-horror-documentary-review" />
+			<id>https://www.theverge.com/?p=1013545</id>
+			<updated>2026-10-18T15:21:56-04:00</updated>
+			<published>2026-10-18T15:30:00-04:00</published>
+			<category scheme="https://www.theverge.com" term="Column" /><category scheme="https://www.theverge.com" term="Entertainment" /><category scheme="https://www.theverge.com" term="Film" /><category scheme="https://www.theverge.com" term="Movie Review" />
+							<summary type="html"><![CDATA[Mister Organ doesn't reach the level of societal horror of The Act of Killing or the creepypasta-meets-true-crime gruesomeness of Beware the Slenderman, but there's something deeply unsettling about Michael Organ and his intimate campaign of terror against everyone who enters his life. Mister Organ is a documentary by David Farrier, an Auckland, New Zealand journalist. [&#8230;]]]></summary>
+			
+							<content type="html">
+											<![CDATA[
+
+						
+<figure>
+
+<img alt="The poster for the documentary Mister Organ super imposed over a pixelated and distorted version of itself." data-caption="" data-portal-copyright="Image: Firefly Films" data-has-syndication-rights="1" src="https://platform.theverge.com/wp-content/uploads/sites/2/2026/10/Mister-Organ-poster.jpg?quality=90&#038;strip=all&#038;crop=0,0,100,100" />
+	<figcaption>
+		</figcaption>
+</figure>
+<p class="wp-block-paragraph"><em>Mister Organ</em> doesn't reach the level of societal horror of <em>The Act of Killing</em> or the creepypasta-meets-true-crime gruesomeness of <em>Beware the Slenderman</em>, but there's something deeply unsettling about Michael Organ and his intimate campaign of terror against everyone who enters his life. </p>
+<p class="wp-block-paragraph"><em>Mister Organ</em> is a documentary by David Farrier, an Auckland, New Zealand journalist. The movie starts with Farrier reporting on Bashford Antiques, a shop in Ponsonby that has begun aggressively clamping cars in its lot and demanding exorbitant fees to release them - up to $760. Farrier's article for <em>The Spinoff</em> eventually led the government to introduce legi …</p>
+<p><a href="https://www.theverge.com/entertainment/1013545/mister-organ-horror-documentary-review">Read the full story at The Verge.</a></p>
+						]]>
+									</content>
+			
+					</entry>
+			<entry>
+			
+			<author>
+				<name>Terrence O’Brien</name>
+			</author>
+			
+			<title type="html"><![CDATA[A woman was arrested in Philly for blocking a delivery robot]]></title>
+			<link rel="alternate" type="text/html" href="https://www.theverge.com/ai-artificial-intelligence/1013541/a-woman-was-arrested-in-philly-for-blocking-a-delivery-robot" />
+			<id>https://www.theverge.com/?p=1013541</id>
+			<updated>2026-10-18T14:28:10-04:00</updated>
+			<published>2026-10-18T14:28:10-04:00</published>
+			<category scheme="https://www.theverge.com" term="AI" /><category scheme="https://www.theverge.com" term="Law" /><category scheme="https://www.theverge.com" term="News" /><category scheme="https://www.theverge.com" term="Policy" /><category scheme="https://www.theverge.com" term="Robot" /><category scheme="https://www.theverge.com" term="Tech" />
+							<summary type="html"><![CDATA[Carolyn Marvin was arrested and charged with disorderly conduct after blocking the path of an Uber delivery robot and refusing to get out of the way. Marvin told Philadelphia's ABC13 "I know they're taking the jobs of human delivery workers and so, I have been protesting them whenever I saw them by standing in front [&#8230;]]]></summary>
+			
+							<content type="html">
+											<![CDATA[
+
+						
+<figure>
+
+<img alt="" data-caption="" data-portal-copyright="" data-has-syndication-rights="1" src="https://platform.theverge.com/wp-content/uploads/sites/2/2025/02/avride-uber-delivery.webp?quality=90&#038;strip=all&#038;crop=0,0,100,100" />
+	<figcaption>
+		</figcaption>
+</figure>
+<p class="wp-block-paragraph">Carolyn Marvin was arrested and charged with disorderly conduct after blocking the path of an Uber delivery robot and refusing to get out of the way. Marvin told Philadelphia's <em><a href="https://abc13.com/story/woman-arrested-blocking-delivery-robot-philadelphia-confrontation/19943936/">ABC13</a></em> "I know they're taking the jobs of human delivery workers and so, I have been protesting them whenever I saw them by standing in front of them and preventing them from going forward."</p>
+<p class="wp-block-paragraph">Police responded to the scene and asked Marvin to move out of the robot's way. When she refused, they placed her in cuffs and arrested her. The incident was captured on video and has now garnered considerable media attention. </p>
+<p class="wp-block-paragraph">The delivery robots have become a common sight on the …</p>
+<p><a href="https://www.theverge.com/ai-artificial-intelligence/1013541/a-woman-was-arrested-in-philly-for-blocking-a-delivery-robot">Read the full story at The Verge.</a></p>
+						]]>
+									</content>
+			
+					</entry>
+			<entry>
+			
+			<author>
+				<name>Terrence O’Brien</name>
+			</author>
+			
+			<title type="html"><![CDATA[Video game ownership bill introduced in Congress]]></title>
+			<link rel="alternate" type="text/html" href="https://www.theverge.com/policy/1013521/video-game-ownership-bill-congress-power-to-the-players-act" />
+			<id>https://www.theverge.com/?p=1013521</id>
+			<updated>2026-10-18T12:27:51-04:00</updated>
+			<published>2026-10-18T12:27:51-04:00</published>
+			<category scheme="https://www.theverge.com" term="Gaming" /><category scheme="https://www.theverge.com" term="News" /><category scheme="https://www.theverge.com" term="Policy" /><category scheme="https://www.theverge.com" term="Politics" />
+							<summary type="html"><![CDATA[Rep. Ritchie Torres of New York's 15th congressional district in the Bronx introduced the Power To The Players Act this week. If passed, the bill would direct the Federal Trade Commission to establish regulations that guarantee consumers ownership of a game when they pay for it, rather than a licensing agreement. It's increasingly common for [&#8230;]]]></summary>
+			
+							<content type="html">
+											<![CDATA[
+
+						
+<figure>
+
+<img alt="Capitol Hill" data-caption="" data-portal-copyright="Photo by Samuel Corum / Getty Images" data-has-syndication-rights="1" src="https://platform.theverge.com/wp-content/uploads/sites/2/chorus/uploads/chorus_asset/file/25544255/2162439650.jpg?quality=90&#038;strip=all&#038;crop=0,0,100,100" />
+	<figcaption>
+		</figcaption>
+</figure>
+<p class="wp-block-paragraph">Rep. Ritchie Torres of New York's 15th congressional district in the Bronx introduced the <a href="https://ritchietorres.house.gov/posts/rep-torres-announces-power-to-the-players-act-legislation-to-ensure-gamers-own-their-games">Power To The Players Act</a> this week. If passed, the bill would direct the Federal Trade Commission to establish regulations that <a href="https://www.tomshardware.com/video-games/new-york-rep-announces-game-ownership-bill-that-would-require-consumer-ownership-rather-than-sale-of-licenses-would-also-require-publishers-to-keep-the-game-functional-after-support-ends">guarantee consumers ownership</a> of a game when they pay for it, rather than a licensing agreement.</p>
+<p class="wp-block-paragraph">It's increasingly common for games sold to require a connection to a server. Meaning that when a company decides to shut down those servers, the games often become unplayable. Rep. Torres singles out <em>NBA 2K25</em> as a recent example. 2K will be delisting the game from storefronts at the end of the month and shutting down its servers on …</p>
+<p><a href="https://www.theverge.com/policy/1013521/video-game-ownership-bill-congress-power-to-the-players-act">Read the full story at The Verge.</a></p>
+						]]>
+									</content>
+			
+					</entry>
+			<entry>
+			
+			<author>
+				<name>Cameron Faulkner</name>
+			</author>
+			
+			<title type="html"><![CDATA[Lenovo’s fast, comfy SteamOS handheld is hundreds off]]></title>
+			<link rel="alternate" type="text/html" href="https://www.theverge.com/gadgets/1013436/lenovo-legion-go-s-steamos-handheld-deal-sale" />
+			<id>https://www.theverge.com/?p=1013436</id>
+			<updated>2026-10-18T10:53:52-04:00</updated>
+			<published>2026-10-18T11:00:00-04:00</published>
+			<category scheme="https://www.theverge.com" term="Deals" /><category scheme="https://www.theverge.com" term="Gadgets" /><category scheme="https://www.theverge.com" term="Gaming" /><category scheme="https://www.theverge.com" term="PC Gaming" /><category scheme="https://www.theverge.com" term="Verge Shopping" />
+							<summary type="html"><![CDATA[The Legion Go S with SteamOS is a pretty solid alternative to the $789 Steam Deck OLED. It runs identical software, but ships in a design with two-stage triggers, a bigger eight-inch IPS screen (1080p and up to 120Hz versus 800p and 90Hz in the Deck OLED), and it’s got double the RAM and storage [&#8230;]]]></summary>
+			
+							<content type="html">
+											<![CDATA[
+
+						
+<figure>
+
+<img alt="" data-caption="" data-portal-copyright="Photo by Sean Hollister / The Verge" data-has-syndication-rights="1" src="https://platform.theverge.com/wp-content/uploads/sites/2/2025/07/lenovo-legion-go-s-steamos-sean-hollister-331A1224.jpg?quality=90&#038;strip=all&#038;crop=0,0,100,100" />
+	<figcaption>
+		</figcaption>
+</figure>
+<p class="wp-block-paragraph">The <strong>Legion Go S with SteamOS</strong> is a pretty solid alternative to the $789 Steam Deck OLED. It runs identical software, but ships in a design with two-stage triggers, a bigger eight-inch IPS screen (1080p and up to 120Hz versus 800p and 90Hz in the Deck OLED), and it’s got double the RAM and storage (32GB and 1TB, respectively), not to mention a slightly faster processor in the Ryzen Z1 Extreme.</p>
+
+<p class="wp-block-paragraph">At $999.99, its current discounted price at <a href="https://www.bestbuy.com/site/legion-go-s-8-120hz-gaming-handheld-amd-ryzen-z1-extreme-steamos-32gb-with-1tb-ssd-steam/6619188.p">Best Buy</a>, it’s worth considering if you’re deciding on a handheld. The Legion Go S is not as powerful as the $1,299.99 <a href="https://www.bestbuy.com/product/rog-xbox-ally-x20-7-4-fhd-1080p-120hz-oled-gaming-handheld-amd-ryzen-ai-z2-extreme-processor-24gb-ram-1tb-ssd/JJGHGST42W/sku/6686854?irclickid=XtwWWD0o2xyZTUT3KwX21VG5Ukr1q01NzSiZ2g0&amp;irgwc=1&amp;afsrc=1&amp;ref=198&amp;loc=PubCo&amp;acampID=&amp;mpid=482924&amp;affgroup=%22Content%22">Asus ROG Xbox Ally X20</a> that just launched, which has the Z2 Extreme and a OLED screen, but it’s no slouch, either.</p>
+<div class="product-block"><h3>Lenovo Legion Go S with SteamOS (Z1 Extreme)</h3>
+<figure class="product-image"><img width="300" height="200" src="https://platform.theverge.com/wp-content/uploads/sites/2/2025/07/lenovo-legion-go-s-steamos-sean-hollister-331A1222.jpg?w=300" class="attachment-medium size-medium" alt="" /></figure>
+<h3>Where to Buy:</h3><ul><li><a href="https://www.bestbuy.com/site/legion-go-s-8-120hz-gaming-handheld-amd-ryzen-z1-extreme-steamos-32gb-with-1tb-ssd-steam/6619188.p"> <strike>$1579.99</strike> $999.99 at <strong>Best Buy</strong></a></li></ul></div>
+<p class="wp-block-paragraph">This model launched with Windows 11 and the Ryzen Z2 Go. Despite being a newer chip, it’s less powerful than the Z1 Extreme in the discounted model. SteamOS and the faster internals within this configuration will provide a better experience. Check out my colleague <a href="https://www.theverge.com/reviews/704903/lenovo-legion-go-s-steam-os-review-z2-go-z1-extreme">Sean Hollister’s review of multiple configs</a> of the Go S, and see how it stacks up in his benchmarks.</p>
+						]]>
+									</content>
+			
+					</entry>
+			<entry>
+			
+			<author>
+				<name>Terrence O’Brien</name>
+			</author>
+			
+			<title type="html"><![CDATA[J Mascis has nothing better to do]]></title>
+			<link rel="alternate" type="text/html" href="https://www.theverge.com/entertainment/1012442/j-mascis-dinosaur-jr-fender-interview" />
+			<id>https://www.theverge.com/?p=1012442</id>
+			<updated>2026-10-18T10:13:04-04:00</updated>
+			<published>2026-10-18T10:00:00-04:00</published>
+			<category scheme="https://www.theverge.com" term="Entertainment" /><category scheme="https://www.theverge.com" term="Interview" /><category scheme="https://www.theverge.com" term="Music" /><category scheme="https://www.theverge.com" term="Report" />
+							<summary type="html"><![CDATA[Dinosaur Jr. frontman J Mascis is known as something of a slacker guitar god. He stands stoically onstage, barely moving, as he seemingly effortlessly works through deft guitar solos and lopsided riffs. Unfortunately, Mascis has developed a similar reputation as an interview subject, quietly sitting and offering deft nonanswers. That's not to say that Mascis [&#8230;]]]></summary>
+			
+							<content type="html">
+											<![CDATA[
+
+						
+<figure>
+
+<img alt="J Mascis of Dinosaur Jr on stage at Baby’s All Right playing the loudest show." data-caption="J Mascis on stage during Dinosaur Jr.’s Baby’s Alright show in NYC. | Photo: Terrence O’Brien" data-portal-copyright="Photo: Terrence O’Brien" data-has-syndication-rights="1" src="https://platform.theverge.com/wp-content/uploads/sites/2/2026/10/J-Mascis-Dinosaur-Jr-interview-Babys-All-Right.jpg?quality=90&#038;strip=all&#038;crop=0,0,100,100" />
+	<figcaption>
+	J Mascis on stage during Dinosaur Jr.’s Baby’s Alright show in NYC. | Photo: Terrence O’Brien	</figcaption>
+</figure>
+<p class="wp-block-paragraph">Dinosaur Jr. frontman J Mascis is known as something of a slacker guitar god. He stands stoically onstage, barely moving, as he seemingly effortlessly works through deft guitar solos and lopsided riffs. Unfortunately, Mascis has developed a similar reputation as an interview subject, quietly sitting and offering deft nonanswers.</p>
+<p class="wp-block-paragraph">That's not to say that Mascis can't be funny or charming. As our interview was winding down and I was thanking him for his time, he started to loosen up a bit. He told me about his youth as a mini golf "enthusiast." "I had a 3-foot putt for the win" at a mini-golf tournament, he said, but "that's when I realized tha …</p>
+<p><a href="https://www.theverge.com/entertainment/1012442/j-mascis-dinosaur-jr-fender-interview">Read the full story at The Verge.</a></p>
+						]]>
+									</content>
+			
+					</entry>
+	</feed>
