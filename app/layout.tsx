@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { logoutAction } from "@/app/actions";
 import { RunNowButton } from "@/components/run-now-button";
 import { StatusBadge } from "@/components/status-badge";
+import { getViewer, type Viewer } from "@/lib/auth/server";
 import { hasActiveCollect } from "@/lib/data/jobs";
 import { latestRun } from "@/lib/data/runs";
 import { readHeartbeat } from "@/lib/data/settings";
@@ -21,9 +23,15 @@ const NAV = [
   { href: "/pool", label: "Pool" },
   { href: "/runs", label: "Runs" },
   { href: "/sources", label: "Sources" },
+  { href: "/keys", label: "API keys" },
+];
+// Personal pages: only with a real login (not via the localhost bypass).
+const USER_NAV = [
+  { href: "/saved", label: "Saved" },
+  { href: "/settings", label: "Settings" },
 ];
 
-async function Header() {
+async function Header({ viewer }: { viewer: Viewer }) {
   const db = getDb();
   const [{ online, heartbeat }, run, active] = await Promise.all([
     readHeartbeat(db),
@@ -37,15 +45,11 @@ async function Header() {
           Trend Pool
         </Link>
         <nav className="flex gap-4 text-sm">
-          {NAV.map((n) => (
+          {[...NAV, ...(viewer.via === "session" ? USER_NAV : [])].map((n) => (
             <Link key={n.href} href={n.href} className="text-muted-foreground hover:text-foreground">
               {n.label}
             </Link>
           ))}
-          {/* Phase 2+: Drafts */}
-          <span className="text-muted-foreground/50" title="Coming in a later phase">
-            Drafts
-          </span>
         </nav>
         <div className="ml-auto flex flex-wrap items-center gap-3 text-sm">
           <span
@@ -68,17 +72,38 @@ async function Header() {
             )}
           </span>
           <RunNowButton active={active} />
+          {viewer.via === "session" ? (
+            <form action={logoutAction}>
+              <button
+                type="submit"
+                className="text-muted-foreground hover:text-foreground"
+                title={`Signed in as ${viewer.user}`}
+              >
+                Log out
+              </button>
+            </form>
+          ) : (
+            <Link
+              href="/login"
+              className="text-muted-foreground hover:text-foreground"
+              title="On localhost the dashboard works without a login; sign in for Saved and Settings"
+            >
+              Sign in
+            </Link>
+          )}
         </div>
       </div>
     </header>
   );
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Signed-out visitors only ever see /login (proxy.ts), without the header's live data.
+  const viewer = await getViewer();
   return (
     <html lang="en">
       <body className="min-h-screen">
-        <Header />
+        {viewer && <Header viewer={viewer} />}
         <main className="mx-auto max-w-7xl px-4 py-6">{children}</main>
       </body>
     </html>

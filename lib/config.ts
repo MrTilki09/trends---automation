@@ -20,6 +20,12 @@ const csv = z
       .filter(Boolean),
   );
 
+// Unset or empty → undefined.
+const optionalString = z
+  .string()
+  .optional()
+  .transform((v) => (v ? v : undefined));
+
 const envSchema = z.object({
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
   TZ: z.string().default("Europe/Istanbul"),
@@ -37,6 +43,26 @@ const envSchema = z.object({
   // Public API (/api/topics)
   API_CACHE_SECONDS: z.coerce.number().int().min(0).max(3600).default(60),
   API_RATE_LIMIT_PER_MIN: z.coerce.number().int().positive().default(60),
+
+  // Dashboard login (web only). All three must be set, otherwise every login is refused (fail closed).
+  DASHBOARD_USER: optionalString,
+  DASHBOARD_PASSWORD_HASH: optionalString.pipe(
+    z
+      .string()
+      .regex(/^scrypt\.[\w-]+\.[\w-]+$/, "generate it with: node scripts/hash-password.mjs")
+      .optional(),
+  ),
+  SESSION_SECRET: optionalString.pipe(z.string().min(32, "use at least 32 random characters").optional()),
+  SESSION_MAX_AGE_DAYS: z.coerce.number().positive().default(30),
+  // Encrypts users' stored API keys (NVIDIA). Required to save one.
+  SECRETS_KEY: optionalString.pipe(z.string().min(32, "use at least 32 random characters").optional()),
+  NVIDIA_API_BASE_URL: z.url().default("https://integrate.api.nvidia.com/v1"),
+  NVIDIA_TIMEOUT_MS: z.coerce.number().int().positive().default(60_000),
+  // Requests to http://localhost:3000 on the server itself skip login and API keys (lib/auth/local.ts).
+  AUTH_LOCALHOST_BYPASS: z
+    .enum(["true", "false", "1", "0", ""])
+    .default("true")
+    .transform((v) => v !== "false" && v !== "0"),
 
   NICHE_DESCRIPTION: z.string().default(""),
   NICHE_KEYWORDS: csv,

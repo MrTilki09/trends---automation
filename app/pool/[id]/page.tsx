@@ -5,15 +5,20 @@ import { TopicActions } from "@/components/topic-actions";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { getSignedInUser, requireViewer } from "@/lib/auth/server";
+import { savedTopicIds } from "@/lib/data/saved";
 import { getTopic } from "@/lib/data/topics";
 import { getDb } from "@/lib/db/client";
 import { formatDateTime, hostOf, relativeTime } from "@/lib/utils";
 
 export default async function TopicPage({ params }: { params: Promise<{ id: string }> }) {
+  await requireViewer();
   const { id } = await params;
   const data = Number.isInteger(Number(id)) ? await getTopic(getDb(), Number(id)) : null;
   if (!data) notFound();
   const { topic, items } = data;
+  const user = await getSignedInUser();
+  const savedIds = user ? await savedTopicIds(getDb(), user.id) : null;
   const b = topic.scoreBreakdown;
 
   const rows: [string, string, string][] = b
@@ -94,7 +99,7 @@ export default async function TopicPage({ params }: { params: Promise<{ id: stri
               </div>
             )}
           </div>
-          <TopicActions id={topic.id} status={topic.status} />
+          <TopicActions id={topic.id} status={topic.status} saved={savedIds?.has(topic.id)} />
         </div>
       </div>
 

@@ -7,7 +7,7 @@ import { pruneOldJobs } from "../data/jobs";
  *  - raw items older than RAW_ITEM_RETENTION_DAYS whose topic is `ignored`, still `new`, or missing,
  *  - topics left with no items (except shortlisted ones),
  *  - finished job requests older than the same retention.
- * Shortlisted topics (and later-phase statuses) and their items are never deleted.
+ * Shortlisted topics (and later-phase statuses), topics in someone's Saved list, and their items are never deleted.
  */
 export async function runRetention(db: DB, retentionDays: number) {
   const cutoff = new Date(Date.now() - retentionDays * 86_400_000);
@@ -16,11 +16,13 @@ export async function runRetention(db: DB, retentionDays: number) {
     WHERE r.last_seen_at < ${cutoff}
       AND (r.topic_id IS NULL OR EXISTS (
         SELECT 1 FROM topics t WHERE t.id = r.topic_id AND t.status IN ('new', 'ignored')
+          AND NOT EXISTS (SELECT 1 FROM saved_topics s WHERE s.topic_id = t.id)
       ))`);
   const orphans = await db.execute(sql`
     DELETE FROM topics t
     WHERE t.status IN ('new', 'ignored')
-      AND NOT EXISTS (SELECT 1 FROM raw_items r WHERE r.topic_id = t.id)`);
+      AND NOT EXISTS (SELECT 1 FROM raw_items r WHERE r.topic_id = t.id)
+      AND NOT EXISTS (SELECT 1 FROM saved_topics s WHERE s.topic_id = t.id)`);
   const jobs = await pruneOldJobs(db, retentionDays);
   // Keep the counters on remaining topics honest after items were removed.
   await db.execute(sql`

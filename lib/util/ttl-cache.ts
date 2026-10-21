@@ -51,6 +51,10 @@ export class TtlCache<V> {
     return { value: await p, hit: false };
   }
 
+  clear(): void {
+    this.map.clear();
+  }
+
   get size(): number {
     return this.map.size;
   }

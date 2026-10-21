@@ -35,7 +35,7 @@ cp .env.example .env
 docker compose up -d --build
 ```
 
-Open <http://localhost:3000>. The pool is empty until the first run: press **Run now** (top right).
+Open <http://localhost:3000> (on the machine running Docker no login is needed; see §6 for the login). The pool is empty until the first run: press **Run now** (top right).
 After ~10–20 s the page refreshes and shows ranked topics.
 
 Useful commands:
@@ -213,7 +213,7 @@ If this ever becomes a product used by other people, switch `LLM_PROVIDER` to an
 (`anthropic-api` — stubbed in `lib/llm/index.ts`, to be implemented). The Agent SDK does **not** accept
 subscription tokens.
 
-## 5b. Public API
+## 5b. API
 
 Every Pool view has an **API URL** (box above the table, with a copy button). It is built from the domain
 you are browsing on and the current filters:
@@ -221,6 +221,17 @@ you are browsing on and the current filters:
 ```
 GET https://your-domain/api/topics?focus=tech&status=new&window=24h&sort=published&dir=desc&tag=launch
 ```
+
+**API keys.** Every call needs a key, created on the dashboard's **API keys** page (`/keys`). The key is shown
+once (only its SHA-256 is stored); revoking it there takes effect immediately. Send it as a header:
+
+```bash
+curl -H "Authorization: Bearer tp_..." "https://your-domain/api/topics?window=24h"
+curl -H "X-API-Key: tp_..." "https://your-domain/api/topics?window=24h"
+```
+
+Without a valid key the API answers `401` JSON. Exception: requests made **on the server itself** to
+`http://localhost:3000/api/topics` need no key (`AUTH_LOCALHOST_BYPASS`, see §6).
 
 - Returns a **JSON array** of topics: `id, title, url, score, category, tags, lang, status, sources,
 sourceCount, itemCount, publishedAt, firstSeenAt, lastSeenAt, summary`.
@@ -230,16 +241,17 @@ sourceCount, itemCount, publishedAt, firstSeenAt, lastSeenAt, summary`.
   `window` (6h|24h|72h|7d|30d|all), `sort` (score|published|sources|title|category|status), `dir` (asc|desc),
   `category`, `tag`, `lang`, `source`, `q` (text search), plus `limit` (1–500, default 200) and `offset`.
   Invalid values fall back to defaults instead of erroring.
-- CORS is open (`Access-Control-Allow-Origin: *`), so any website can call it from the browser.
+- CORS is open (`Access-Control-Allow-Origin: *`), so a website can call it from the browser, but it must
+  send a key, which its visitors can then see: prefer calling the API from your own backend.
 
 **Load protection** (built in, per web process):
 
-| Layer                                                                                                   | Default                              | Setting                  |
-| ------------------------------------------------------------------------------------------------------- | ------------------------------------ | ------------------------ |
-| Response cache: identical requests served from memory, concurrent identical requests share one DB query | 60 s                                 | `API_CACHE_SECONDS`      |
-| `Cache-Control` headers so browsers/CDNs cache too                                                      | 60 s (+5 min stale-while-revalidate) | same                     |
-| Per-IP rate limit (token bucket) → `429` + `Retry-After`                                                | 60 requests/min                      | `API_RATE_LIMIT_PER_MIN` |
-| Result cap                                                                                              | 500 per request                      | —                        |
+| Layer                                                                                                   | Default         | Setting                  |
+| ------------------------------------------------------------------------------------------------------- | --------------- | ------------------------ |
+| Response cache: identical requests served from memory, concurrent identical requests share one DB query | 60 s            | `API_CACHE_SECONDS`      |
+| `Cache-Control: private`: the calling client may cache, a shared CDN may not (responses need a key)     | 60 s            | same                     |
+| Per-IP rate limit (token bucket) → `429` + `Retry-After`                                                | 60 requests/min | `API_RATE_LIMIT_PER_MIN` |
+| Result cap                                                                                              | 500 per request | —                        |
 
 Measured on a dev laptop (production build, Oct 2026): ~1,200 req/s from many clients on cached queries,
 ~1,300 req/s on uncached searches, a flooding client gets 429s while others are unaffected.
@@ -248,12 +260,43 @@ Measured on a dev laptop (production build, Oct 2026): ~1,200 req/s from many cl
 reaches the Node process. The limits above stop one noisy client and absorb normal popularity, but a
 large distributed attack (thousands of IPs, network-level floods) can still saturate the server's CPU or
 bandwidth. Before making the API public, put a CDN/proxy with DDoS protection in front (e.g. Cloudflare,
-free plan): it absorbs floods at the edge and, thanks to the `Cache-Control` headers, serves most API calls
-without touching your server. If an old project "didn't slow down under a DDoS", it was most likely hosted
+free plan): it absorbs floods at the edge. If an old project "didn't slow down under a DDoS", it was most likely hosted
 behind such an edge network (Vercel, Cloudflare), not protected by Next.js itself.
 
-**Before going public:** the dashboard has no login yet (§6). Expose only `/api/topics` publicly (e.g. a
-Caddy/Cloudflare rule) or add authentication to the dashboard first.
+**Before going public:**
+
+- Set `DASHBOARD_USER`, `DASHBOARD_PASSWORD_HASH` and `SESSION_SECRET` (§6). Without them nobody can sign in
+  from outside (the login refuses everyone; only localhost works).
+- Keep the web port bound to `127.0.0.1` and serve the domain through a reverse proxy (Caddy, §6, or a
+  Cloudflare Tunnel). Never publish port 3000 directly: the localhost bypass relies on public traffic arriving
+  through a proxy (which adds `X-Forwarded-For`). Or set `AUTH_LOCALHOST_BYPASS=false`.
+- Use HTTPS (Caddy does it automatically): the session cookie is `Secure` in production.
+
+## 5c. Saved topics and post generation (NVIDIA)
+
+Signed-in users (a real login, not the localhost bypass) get two personal pages:
+
+- **Saved** (`/saved`): your own pool. Press **Save** next to any topic in the Pool (or on its page) to add it.
+  Saved topics belong to your account only and are never removed by the retention cleanup.
+- **Settings** (`/settings`): your NVIDIA API key and model.
+
+Then on Saved, tick topics, pick a format (X, LinkedIn, blog intro) and language (English/Turkish) and press
+**Generate**: one post per topic, written with your key, stored under your account (copy or delete it there).
+Up to 10 per click, one at a time (the free endpoints are rate-limited per key).
+
+**Your NVIDIA key.** Create one for free at [build.nvidia.com](https://build.nvidia.com) (profile menu → API
+Keys, starts with `nvapi-`) and paste it in Settings. It is stored **encrypted** (AES-256-GCM) in the `users`
+table with the server's `SECRETS_KEY`, never shown again (only `nvapi-…last4`) and only used for your own
+requests. Set `SECRETS_KEY` once (32+ random characters, e.g. `openssl rand -base64 32`) and keep it: if it
+changes, saved keys can't be decrypted and users simply enter them again.
+
+**Model.** Default `nvidia/nemotron-3.5-lightning-30b-a3b`, with its reasoning switched off
+(`chat_template_kwargs.enable_thinking=false`, otherwise it spends the token budget thinking and returns no
+text). Measured with a real free key (October 2026) it answers in about 2 s, while the free endpoints of
+`deepseek-ai/deepseek-v4.1-flash`, `google/gemma-4-31b-it`, `openai/gpt-oss-20b` and `z-ai/glm-5.3-flash` gave
+no first token within 75 s (queued). DeepSeek and Gemma stay selectable in Settings for when they are less
+busy. A post that takes longer than `NVIDIA_TIMEOUT_MS` (60 s) fails with a message, and the batch stops there.
+The list lives in `lib/llm/nvidia.ts`.
 
 ## 6. Deploy to a Linux server
 
@@ -267,7 +310,7 @@ sudo usermod -aG docker $USER && newgrp docker
 # 2. Get the code and configure
 git clone <your-repo-url> /opt/trend-pool && cd /opt/trend-pool
 cp .env.example .env
-nano .env        # set POSTGRES_PASSWORD (+ same in DATABASE_URL), NICHE_*, optional token
+nano .env        # set POSTGRES_PASSWORD (+ same in DATABASE_URL), NICHE_*, login (below), optional token
 
 # 3. Start
 docker compose up -d --build
@@ -278,17 +321,49 @@ Everything restarts automatically after a crash or reboot (`restart: unless-stop
 
 Update to a new version: `git pull && docker compose up -d --build`.
 
-### Accessing the dashboard
+### Login
 
-There is **no login yet**, so the web port is bound to the server's localhost only (`127.0.0.1:3000`).
-Reach it with an SSH tunnel from your computer:
+The dashboard (`/pool`, `/runs`, `/sources`, `/keys` and all its buttons) needs a username and password.
+Set these in `.env`, then `docker compose up -d` to apply:
 
 ```bash
-ssh -L 3000:localhost:3000 user@your-server
+# DASHBOARD_PASSWORD_HASH: prompts for the password (needs only Node, no npm install)
+node scripts/hash-password.mjs
+# …or without Node on the server:
+docker run --rm -it -v "$PWD/scripts:/s:ro" node:24-slim node /s/hash-password.mjs
+
+# SESSION_SECRET: 32+ random characters
+openssl rand -base64 32
 ```
 
-…then open <http://localhost:3000> locally. Alternatively, install [Tailscale](https://tailscale.com) on both
-machines. Do **not** open port 3000 to the internet. (When auth is added later, put Caddy in front for HTTPS.)
+```
+DASHBOARD_USER=admin
+DASHBOARD_PASSWORD_HASH=scrypt.…
+SESSION_SECRET=…
+```
+
+- Signing in sets an httpOnly, signed session cookie valid for `SESSION_MAX_AGE_DAYS` (30). **Log out** is in
+  the header. Changing `SESSION_SECRET` signs every browser out.
+- Login attempts are rate-limited per IP (5, then 1 per minute). Failed attempts are logged by the web service.
+- **Localhost needs no login** (`AUTH_LOCALHOST_BYPASS=true`, the default): on the server itself,
+  <http://localhost:3000> opens the dashboard and the API without a password or key. A request counts as local
+  when its Host is `localhost`/`127.0.0.1`/`[::1]` and it did not come through a reverse proxy or CDN
+  (`lib/auth/local.ts`). An SSH tunnel (`ssh -L 3000:localhost:3000 user@your-server`) therefore also skips the
+  login. Set `AUTH_LOCALHOST_BYPASS=false` to always require it.
+
+### Public domain (HTTPS with Caddy)
+
+Keep `127.0.0.1:3000:3000` in `compose.yaml` and put [Caddy](https://caddyserver.com) on the server in front of
+it (automatic HTTPS). `/etc/caddy/Caddyfile`:
+
+```
+trends.example.com {
+	reverse_proxy 127.0.0.1:3000
+}
+```
+
+Point the domain's DNS at the server, open ports 80/443, `sudo systemctl reload caddy`. Visitors get the login
+page; API clients use a key (§5b). Do **not** open port 3000 to the internet.
 
 ### Backups
 
@@ -315,7 +390,12 @@ The restore command is at the bottom of the script.
 | `CLUSTER_WINDOW_HOURS`                        | 72                | how far back to match / score topics                 |
 | `SCORE_HALF_LIFE_HOURS`                       | 24                | recency decay                                        |
 | `RAW_ITEM_RETENTION_DAYS`                     | 30                | cleanup age (shortlisted topics are never deleted)   |
-| `API_CACHE_SECONDS`, `API_RATE_LIMIT_PER_MIN` | 60, 60            | public API cache time and per-IP limit (§5b)         |
+| `API_CACHE_SECONDS`, `API_RATE_LIMIT_PER_MIN` | 60, 60            | API cache time and per-IP limit (§5b)                |
+| `DASHBOARD_USER`, `DASHBOARD_PASSWORD_HASH`   | —                 | dashboard login (§6)                                 |
+| `SESSION_SECRET`, `SESSION_MAX_AGE_DAYS`      | —, 30             | signs the session cookie (32+ chars); its lifetime   |
+| `AUTH_LOCALHOST_BYPASS`                       | `true`            | localhost skips login and API keys (§6)              |
+| `SECRETS_KEY`                                 | —                 | encrypts users' NVIDIA keys (§5c)                    |
+| `NVIDIA_API_BASE_URL`, `NVIDIA_TIMEOUT_MS`    | NVIDIA, 60000     | post generation endpoint and timeout (§5c)           |
 | `NICHE_DESCRIPTION`, `NICHE_KEYWORDS`         | AI/tech           | used for keyword boost and LLM relevance             |
 | `LLM_*`, `CLAUDE_CODE_OAUTH_TOKEN`            | off               | optional enrichment (§5)                             |
 | `REDDIT_*`                                    | empty             | optional Reddit (§4)                                 |
@@ -361,11 +441,13 @@ Choices made where the plan left room (simplest reasonable option):
 ## 10. Project layout
 
 ```
-app/          Next.js dashboard (pool, pool/[id], runs, sources) + server actions
+app/          Next.js dashboard (pool, pool/[id], runs, sources, keys, saved, settings, login), api/topics,
+              server actions (actions.ts; user-actions.ts for a user's own data)
+proxy.ts      redirects signed-out visitors to /login (pages and actions check again)
 components/   UI (shadcn/ui in components/ui)
 worker/       index.ts (scheduler, poller, shutdown), jobs/collect.ts, migrate.ts, seed.ts
-lib/          ALL business logic: db/, sources/, pipeline/, llm/, data/ (queries), config.ts, logger.ts
+lib/          ALL business logic: db/, sources/, pipeline/, llm/, data/ (queries), auth/, posts/, config.ts, logger.ts
 config/       sources.seed.ts — what to watch
 tests/        vitest + fixtures (saved real responses)
-scripts/      backup.sh
+scripts/      backup.sh, hash-password.mjs
 ```

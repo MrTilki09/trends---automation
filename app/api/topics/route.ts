@@ -1,5 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { isLocalRequest } from "@/lib/auth/local";
 import { getConfig } from "@/lib/config";
+import { apiKeyFromHeaders, authenticateApiKey } from "@/lib/data/api-keys";
 import { parsePaging, parseTopicFilters } from "@/lib/data/topic-filters";
 import { listTopics, type TopicListRow } from "@/lib/data/topics";
 import { getDb } from "@/lib/db/client";
@@ -8,7 +10,9 @@ import { clientIp, RateLimiter } from "@/lib/util/rate-limit";
 import { TtlCache } from "@/lib/util/ttl-cache";
 
 /*
- * Public search API for the pool:  GET /api/topics?<same filters as the Pool page>&limit=&offset=
+ * Search API for the pool:  GET /api/topics?<same filters as the Pool page>&limit=&offset=
+ * Needs an API key (created on the dashboard's Keys page) in `Authorization: Bearer <key>` or
+ * `X-API-Key: <key>`, except for requests on the server itself (localhost, see lib/auth/local.ts).
  *
  * The URL stores the *filters*, not the results: calling the same URL later returns whatever
  * matches now (time windows like `window=24h` are relative to the moment of the call).
@@ -64,6 +68,7 @@ const cfg = (() => {
 })();
 const cacheSeconds = cfg?.API_CACHE_SECONDS ?? 60;
 const perMinute = cfg?.API_RATE_LIMIT_PER_MIN ?? 60;
+const localBypass = cfg?.AUTH_LOCALHOST_BYPASS ?? false;
 const cache = new TtlCache<string>(cacheSeconds * 1000, 1000);
 // Burst of `perMinute` requests, refilling at perMinute/60 per second.
 const limiter = new RateLimiter(perMinute, perMinute / 60);
@@ -71,7 +76,7 @@ const limiter = new RateLimiter(perMinute, perMinute / 60);
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
+  "Access-Control-Allow-Headers": "Authorization, X-API-Key, Content-Type",
   "Access-Control-Max-Age": "86400",
 };
 
@@ -87,6 +92,20 @@ export async function GET(req: NextRequest) {
       { error: "Too many requests. Slow down and retry later.", retryAfterSeconds: rl.retryAfterSec },
       { status: 429, headers: { ...CORS, ...rlHeaders, "Retry-After": String(rl.retryAfterSec) } },
     );
+  }
+
+  if (!(localBypass && isLocalRequest(req.headers))) {
+    const key = apiKeyFromHeaders(req.headers);
+    if (!key || !(await authenticateApiKey(getDb(), key))) {
+      return NextResponse.json(
+        {
+          error: key
+            ? "Invalid or revoked API key."
+            : "API key required: send it as 'Authorization: Bearer <key>' or 'X-API-Key: <key>'.",
+        },
+        { status: 401, headers: { ...CORS, ...rlHeaders, "WWW-Authenticate": "Bearer" } },
+      );
+    }
   }
 
   const params = req.nextUrl.searchParams;
@@ -105,8 +124,9 @@ export async function GET(req: NextRequest) {
         ...CORS,
         ...rlHeaders,
         "Content-Type": "application/json; charset=utf-8",
-        // Lets browsers and any CDN in front (e.g. Cloudflare) cache too.
-        "Cache-Control": `public, max-age=${cacheSeconds}, s-maxage=${cacheSeconds}, stale-while-revalidate=${cacheSeconds * 5}`,
+        // `private`: the client may cache, but a shared cache/CDN must not serve it to callers without a key.
+        "Cache-Control": `private, max-age=${cacheSeconds}`,
+        Vary: "Authorization, X-API-Key",
         "X-Cache": hit ? "HIT" : "MISS",
       },
     });

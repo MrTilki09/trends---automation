@@ -45,7 +45,8 @@ services:
     command: ["node", "server.js"]
     environment:
       SERVICE_NAME: web
-    # Bound to localhost only: there is no login yet. Reach it via SSH tunnel or Tailscale (README).
+    # Bound to localhost only: public traffic must come through a reverse proxy (Caddy, README §6),
+    # which the localhost login bypass relies on. Never publish this port directly.
     ports:
       - "127.0.0.1:3000:3000"
 

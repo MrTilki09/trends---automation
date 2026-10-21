@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { getSignedInUser, requireViewer } from "@/lib/auth/server";
+import { savedTopicIds } from "@/lib/data/saved";
 import { listSources } from "@/lib/data/sources";
 import { filtersToQuery, parseTopicFilters } from "@/lib/data/topic-filters";
 import {
@@ -98,15 +100,18 @@ async function requestOrigin(): Promise<string> {
 }
 
 export default async function PoolPage({ searchParams }: { searchParams: SearchParams }) {
+  await requireViewer();
   const filters = parseTopicFilters(await searchParams);
   const sort = filters.sort ?? "score";
   const dir = filters.dir ?? DEFAULT_DIR[sort];
 
   const db = getDb();
-  const [topics, sources, facets] = await Promise.all([
+  const user = await getSignedInUser();
+  const [topics, sources, facets, savedIds] = await Promise.all([
     listTopics(db, filters),
     listSources(db),
     listFacets(db, filters),
+    user ? savedTopicIds(db, user.id) : null,
   ]);
   const hasExtraFilters = Boolean(
     filters.source || filters.category || filters.tag || filters.lang || filters.q,
@@ -338,7 +343,7 @@ export default async function PoolPage({ searchParams }: { searchParams: SearchP
                   <StatusBadge status={t.status} />
                 </TableCell>
                 <TableCell className="text-right">
-                  <TopicActions id={t.id} status={t.status} />
+                  <TopicActions id={t.id} status={t.status} saved={savedIds?.has(t.id)} />
                 </TableCell>
               </TableRow>
             ))}

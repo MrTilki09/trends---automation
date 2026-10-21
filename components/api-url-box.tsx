@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, Copy, ExternalLink } from "lucide-react";
+import Link from "next/link";
 import { useState, useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -8,7 +9,7 @@ import { Button } from "@/components/ui/button";
 const noopSubscribe = () => () => {};
 
 /**
- * Shows the public API URL for the current Pool filters, on the domain the page is being viewed on
+ * Shows the API URL for the current Pool filters, on the domain the page is being viewed on
  * (whatever is in the browser's address bar), with a copy button.
  */
 export function ApiUrlBox({ query, serverOrigin }: { query: string; serverOrigin: string }) {
@@ -39,7 +40,13 @@ export function ApiUrlBox({ query, serverOrigin }: { query: string; serverOrigin
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-muted/40 px-3 py-2 text-sm">
       <span className="font-medium">API</span>
-      <span className="text-xs text-muted-foreground">JSON of these results, always up to date:</span>
+      <span className="text-xs text-muted-foreground">
+        JSON of these results, always up to date (send an{" "}
+        <Link href="/keys" className="underline hover:text-foreground">
+          API key
+        </Link>
+        ; not needed on localhost):
+      </span>
       <input
         id="api-url"
         readOnly

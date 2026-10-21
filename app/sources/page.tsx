@@ -2,11 +2,13 @@ import { toggleSourceAction } from "@/app/actions";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { requireViewer } from "@/lib/auth/server";
 import { listSources } from "@/lib/data/sources";
 import { getDb } from "@/lib/db/client";
 import { relativeTime } from "@/lib/utils";
 
 export default async function SourcesPage() {
+  await requireViewer();
   const sources = await listSources(getDb());
   return (
     <div className="space-y-4">
