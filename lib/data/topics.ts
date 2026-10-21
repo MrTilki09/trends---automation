@@ -48,6 +48,7 @@ export type TopicFilters = {
   dir?: SortDir;
   q?: string;
   limit?: number;
+  offset?: number;
 };
 
 export type TopicListRow = {
@@ -141,7 +142,7 @@ export async function listTopics(db: DB, f: TopicFilters = {}): Promise<TopicLis
     FROM topics t
     ${where.length ? sql`WHERE ${sql.join(where, sql` AND `)}` : sql``}
     ORDER BY ${order}
-    LIMIT ${f.limit ?? 200}`);
+    LIMIT ${f.limit ?? 200} OFFSET ${f.offset ?? 0}`);
 
   return (res.rows as Record<string, unknown>[]).map((r) => ({
     id: Number(r.id),

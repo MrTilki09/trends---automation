@@ -213,6 +213,48 @@ If this ever becomes a product used by other people, switch `LLM_PROVIDER` to an
 (`anthropic-api` — stubbed in `lib/llm/index.ts`, to be implemented). The Agent SDK does **not** accept
 subscription tokens.
 
+## 5b. Public API
+
+Every Pool view has an **API URL** (box above the table, with a copy button). It is built from the domain
+you are browsing on and the current filters:
+
+```
+GET https://your-domain/api/topics?focus=tech&status=new&window=24h&sort=published&dir=desc&tag=launch
+```
+
+- Returns a **JSON array** of topics: `id, title, url, score, category, tags, lang, status, sources,
+sourceCount, itemCount, publishedAt, firstSeenAt, lastSeenAt, summary`.
+- The URL stores the **filters, not the results**: call it again tomorrow and you get what matches then
+  (`window=24h` is always "the last 24 h from now").
+- Parameters (same as the Pool): `focus` (tech|all), `status` (new|shortlisted|ignored|all),
+  `window` (6h|24h|72h|7d|30d|all), `sort` (score|published|sources|title|category|status), `dir` (asc|desc),
+  `category`, `tag`, `lang`, `source`, `q` (text search), plus `limit` (1–500, default 200) and `offset`.
+  Invalid values fall back to defaults instead of erroring.
+- CORS is open (`Access-Control-Allow-Origin: *`), so any website can call it from the browser.
+
+**Load protection** (built in, per web process):
+
+| Layer                                                                                                   | Default                              | Setting                  |
+| ------------------------------------------------------------------------------------------------------- | ------------------------------------ | ------------------------ |
+| Response cache: identical requests served from memory, concurrent identical requests share one DB query | 60 s                                 | `API_CACHE_SECONDS`      |
+| `Cache-Control` headers so browsers/CDNs cache too                                                      | 60 s (+5 min stale-while-revalidate) | same                     |
+| Per-IP rate limit (token bucket) → `429` + `Retry-After`                                                | 60 requests/min                      | `API_RATE_LIMIT_PER_MIN` |
+| Result cap                                                                                              | 500 per request                      | —                        |
+
+Measured on a dev laptop (production build, Oct 2026): ~1,200 req/s from many clients on cached queries,
+~1,300 req/s on uncached searches, a flooding client gets 429s while others are unaffected.
+
+**What this does not protect against: real DDoS.** Next.js itself has no DDoS protection: every request
+reaches the Node process. The limits above stop one noisy client and absorb normal popularity, but a
+large distributed attack (thousands of IPs, network-level floods) can still saturate the server's CPU or
+bandwidth. Before making the API public, put a CDN/proxy with DDoS protection in front (e.g. Cloudflare,
+free plan): it absorbs floods at the edge and, thanks to the `Cache-Control` headers, serves most API calls
+without touching your server. If an old project "didn't slow down under a DDoS", it was most likely hosted
+behind such an edge network (Vercel, Cloudflare), not protected by Next.js itself.
+
+**Before going public:** the dashboard has no login yet (§6). Expose only `/api/topics` publicly (e.g. a
+Caddy/Cloudflare rule) or add authentication to the dashboard first.
+
 ## 6. Deploy to a Linux server
 
 On a fresh Ubuntu/Debian server:
@@ -262,20 +304,21 @@ The restore command is at the bottom of the script.
 
 ## 7. Configuration (`.env`)
 
-| Variable                              | Default           | Meaning                                              |
-| ------------------------------------- | ----------------- | ---------------------------------------------------- |
-| `POSTGRES_*`, `DATABASE_URL`          | —                 | DB credentials (keep the password identical in both) |
-| `TZ`                                  | `Europe/Istanbul` | timezone for cron and display                        |
-| `COLLECT_CRON`                        | `0 7,13,19 * * *` | when runs are queued (3× a day)                      |
-| `CLEANUP_CRON`                        | `30 3 * * *`      | daily retention cleanup                              |
-| `SOURCE_TIMEOUT_MS`                   | 30000             | per-source timeout                                   |
-| `CLUSTER_SIMILARITY_THRESHOLD`        | 0.55              | title similarity needed to merge items               |
-| `CLUSTER_WINDOW_HOURS`                | 72                | how far back to match / score topics                 |
-| `SCORE_HALF_LIFE_HOURS`               | 24                | recency decay                                        |
-| `RAW_ITEM_RETENTION_DAYS`             | 30                | cleanup age (shortlisted topics are never deleted)   |
-| `NICHE_DESCRIPTION`, `NICHE_KEYWORDS` | AI/tech           | used for keyword boost and LLM relevance             |
-| `LLM_*`, `CLAUDE_CODE_OAUTH_TOKEN`    | off               | optional enrichment (§5)                             |
-| `REDDIT_*`                            | empty             | optional Reddit (§4)                                 |
+| Variable                                      | Default           | Meaning                                              |
+| --------------------------------------------- | ----------------- | ---------------------------------------------------- |
+| `POSTGRES_*`, `DATABASE_URL`                  | —                 | DB credentials (keep the password identical in both) |
+| `TZ`                                          | `Europe/Istanbul` | timezone for cron and display                        |
+| `COLLECT_CRON`                                | `0 7,13,19 * * *` | when runs are queued (3× a day)                      |
+| `CLEANUP_CRON`                                | `30 3 * * *`      | daily retention cleanup                              |
+| `SOURCE_TIMEOUT_MS`                           | 30000             | per-source timeout                                   |
+| `CLUSTER_SIMILARITY_THRESHOLD`                | 0.55              | title similarity needed to merge items               |
+| `CLUSTER_WINDOW_HOURS`                        | 72                | how far back to match / score topics                 |
+| `SCORE_HALF_LIFE_HOURS`                       | 24                | recency decay                                        |
+| `RAW_ITEM_RETENTION_DAYS`                     | 30                | cleanup age (shortlisted topics are never deleted)   |
+| `API_CACHE_SECONDS`, `API_RATE_LIMIT_PER_MIN` | 60, 60            | public API cache time and per-IP limit (§5b)         |
+| `NICHE_DESCRIPTION`, `NICHE_KEYWORDS`         | AI/tech           | used for keyword boost and LLM relevance             |
+| `LLM_*`, `CLAUDE_CODE_OAUTH_TOKEN`            | off               | optional enrichment (§5)                             |
+| `REDDIT_*`                                    | empty             | optional Reddit (§4)                                 |
 
 ## 8. Verifying each milestone
 

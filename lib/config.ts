@@ -34,6 +34,10 @@ const envSchema = z.object({
   SCORE_HALF_LIFE_HOURS: z.coerce.number().positive().default(24),
   RAW_ITEM_RETENTION_DAYS: z.coerce.number().int().positive().default(30),
 
+  // Public API (/api/topics)
+  API_CACHE_SECONDS: z.coerce.number().int().min(0).max(3600).default(60),
+  API_RATE_LIMIT_PER_MIN: z.coerce.number().int().positive().default(60),
+
   NICHE_DESCRIPTION: z.string().default(""),
   NICHE_KEYWORDS: csv,
 

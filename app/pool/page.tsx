@@ -1,5 +1,7 @@
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { headers } from "next/headers";
 import Link from "next/link";
+import { ApiUrlBox } from "@/components/api-url-box";
 import { StatusBadge } from "@/components/status-badge";
 import { TopicActions } from "@/components/topic-actions";
 import { Badge } from "@/components/ui/badge";
@@ -7,26 +9,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { listSources } from "@/lib/data/sources";
+import { filtersToQuery, parseTopicFilters } from "@/lib/data/topic-filters";
 import {
+  DEFAULT_DIR,
+  FOCUSES,
   listFacets,
   listTopics,
-  FOCUSES,
-  DEFAULT_DIR,
   SORTS,
   TIME_WINDOWS,
   TOPIC_STATUSES,
-  type Focus,
-  type SortDir,
   type SortKey,
-  type TimeWindow,
   type TopicFilters,
 } from "@/lib/data/topics";
 import { getDb } from "@/lib/db/client";
-import type { TopicStatus } from "@/lib/db/schema";
 import { formatDateTime, hostOf, relativeTime } from "@/lib/utils";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
-const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) || undefined;
 
 const selectClass =
   "h-9 rounded-md border border-input bg-background px-2 text-sm text-foreground shadow-xs focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
@@ -35,24 +33,7 @@ const LANG_NAMES: Record<string, string> = { tr: "Turkish", en: "English" };
 
 /** Builds a /pool URL with the current filters plus `change` (undefined removes a key). */
 function poolHref(current: TopicFilters, change: Partial<Record<keyof TopicFilters, string | undefined>>) {
-  const params = new URLSearchParams();
-  const merged = { ...current, ...change };
-  for (const key of [
-    "focus",
-    "status",
-    "window",
-    "sort",
-    "dir",
-    "category",
-    "tag",
-    "lang",
-    "source",
-    "q",
-  ] as const) {
-    const v = merged[key];
-    if (v != null && v !== "") params.set(key, String(v));
-  }
-  return `/pool?${params.toString()}`;
+  return `/pool?${filtersToQuery(current, change)}`;
 }
 
 /** One-click views at the top of the Pool (each sets these filters, keeping focus/status/window/sort). */
@@ -107,28 +88,19 @@ function SortHead({
   );
 }
 
+/** Origin (scheme + host) of the current request, as the browser addressed it. */
+async function requestOrigin(): Promise<string> {
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
+  const proto =
+    h.get("x-forwarded-proto") ?? (/^(localhost|127\.0\.0\.1|\[::1\])(:|$)/.test(host) ? "http" : "https");
+  return `${proto}://${host}`;
+}
+
 export default async function PoolPage({ searchParams }: { searchParams: SearchParams }) {
-  const sp = await searchParams;
-  const status = (one(sp.status) ?? "new") as TopicStatus | "all";
-  const window = (one(sp.window) ?? "72h") as TimeWindow;
-  // "newest" (old links) = published, newest first.
-  const rawSort = one(sp.sort) === "newest" ? "published" : (one(sp.sort) ?? "score");
-  const sort = (rawSort in SORTS ? rawSort : "score") as SortKey;
-  const rawDir = one(sp.dir);
-  const dir: SortDir = rawDir === "asc" || rawDir === "desc" ? rawDir : DEFAULT_DIR[sort];
-  const focus = (one(sp.focus) ?? "tech") as Focus;
-  const filters: TopicFilters = {
-    focus: focus in FOCUSES ? focus : "tech",
-    status: status === "all" || TOPIC_STATUSES.includes(status) ? status : "new",
-    window: window in TIME_WINDOWS ? window : "72h",
-    sort,
-    dir,
-    source: one(sp.source),
-    category: one(sp.category),
-    tag: one(sp.tag),
-    lang: one(sp.lang),
-    q: one(sp.q),
-  };
+  const filters = parseTopicFilters(await searchParams);
+  const sort = filters.sort ?? "score";
+  const dir = filters.dir ?? DEFAULT_DIR[sort];
 
   const db = getDb();
   const [topics, sources, facets] = await Promise.all([
@@ -283,6 +255,8 @@ export default async function PoolPage({ searchParams }: { searchParams: SearchP
           </Button>
         </form>
       </div>
+
+      <ApiUrlBox query={filtersToQuery(filters)} serverOrigin={await requestOrigin()} />
 
       <div className="rounded-lg border">
         <Table>
