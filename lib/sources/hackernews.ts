@@ -7,7 +7,7 @@ import type { RawItemInput, SourceAdapter } from "./types";
 const BASE = "https://hacker-news.firebaseio.com/v0";
 
 export const hackerNewsConfig = z.object({
-  list: z.enum(["top", "best", "new"]).default("top"),
+  list: z.enum(["top", "best", "new", "show", "ask"]).default("top"),
   maxItems: z.number().int().positive().max(500).default(50),
 });
 

@@ -5,35 +5,40 @@ import { getConfig } from "../lib/config";
 import { closeDb, getDb } from "../lib/db/client";
 import { rawItems } from "../lib/db/schema";
 import { logger } from "../lib/logger";
-import { normalizeTags } from "../lib/pipeline/classify";
+import { detectSignals, normalizeTags } from "../lib/pipeline/classify";
 import { refreshTopicAggregates } from "../lib/pipeline/cluster";
 import { scoreRecentTopics } from "../lib/pipeline/score";
 
 async function main() {
   const db = getDb();
-  // 1. Fill in item tags/lang for items stored before those columns existed:
-  //    feed categories (kept in raw) + the source's configured tags + the source's language.
+  // 1. Recompute every item's tags (feed categories + source tags + detected signals) and fill
+  //    in language for items stored before those columns existed.
   const items = await db.execute(sql`
-    SELECT r.id, r.raw->'categories' AS cats, s.config->'tags' AS stags,
+    SELECT r.id, r.raw->'categories' AS cats, s.config->'tags' AS stags, r.normalized_title AS norm,
            coalesce(r.lang, s.config->'feeds'->0->>'lang', s.config->>'lang') AS lang, s.type,
            r.raw->>'geo' AS geo, r.title
-    FROM raw_items r JOIN sources s ON s.id = r.source_id
-    WHERE cardinality(r.tags) = 0 OR r.lang IS NULL`);
+    FROM raw_items r JOIN sources s ON s.id = r.source_id`);
   for (const row of items.rows as {
     id: number;
     cats: unknown;
     stags: unknown;
+    norm: string;
     lang: string | null;
     type: string;
     geo: string | null;
     title: string;
   }[]) {
     const raw: string[] = [];
-    if (Array.isArray(row.cats)) for (const c of row.cats) if (typeof c === "string") raw.push(c);
+    if (Array.isArray(row.stags)) for (const t of row.stags) if (typeof t === "string") raw.push(t);
+    raw.push(...detectSignals(row.norm));
     if (row.type === "google_trends") raw.push("search trend", row.geo === "TR" ? "turkey" : "usa");
     const m = row.type === "hackernews" ? row.title.match(/^(Show|Ask|Launch|Tell) HN\b/i) : null;
     if (m) raw.push(`${m[1]!.toLowerCase()} hn`);
-    if (Array.isArray(row.stags)) for (const t of row.stags) if (typeof t === "string") raw.push(t);
+    if (Array.isArray(row.cats))
+      for (const c of row.cats) {
+        if (typeof c === "string") raw.push(c);
+        else if (c && typeof c === "object" && "_" in c) raw.push(String((c as { _: unknown })._));
+      }
     const lang =
       row.lang ??
       (row.type === "google_trends"
@@ -45,10 +50,10 @@ async function main() {
           : null);
     await db
       .update(rawItems)
-      .set({ tags: normalizeTags(raw), lang })
+      .set({ tags: normalizeTags(raw, 20), lang })
       .where(eq(rawItems.id, row.id));
   }
-  logger.info({ items: items.rows.length }, "item tags/lang backfilled");
+  logger.info({ items: items.rows.length }, "item tags/lang recomputed");
 
   // 2. Recompute every topic, then rescore.
   const ids = (await db.execute(sql`SELECT id FROM topics`)).rows.map((r) =>

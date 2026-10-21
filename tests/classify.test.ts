@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { classify, normalizeTags, topByFrequency } from "../lib/pipeline/classify";
+import { classify, detectSignals, normalizeTags, topByFrequency } from "../lib/pipeline/classify";
 import { normalizeTitle } from "../lib/pipeline/normalize";
 
 const cat = (title: string, tags: string[] = [], lang?: string) =>
@@ -82,5 +82,32 @@ describe("classify (real uncategorized headlines from a run)", () => {
     ["Making Solar Panels with a Microwave [video]", "en", "Science & Space"],
   ])("%s", (title, lang, expected) => {
     expect(cat(title, [], lang)).toBe(expected);
+  });
+});
+
+describe("detectSignals (launches and companies)", () => {
+  const sig = (title: string, lang?: string) => detectSignals(normalizeTitle(title, lang));
+
+  it("tags launches and announcements in English and Turkish", () => {
+    expect(sig("OpenAI launches GPT-6 for enterprise")).toEqual(expect.arrayContaining(["launch", "openai"]));
+    expect(sig("Google unveils Gemini 4 with longer context")).toEqual(
+      expect.arrayContaining(["launch", "google"]),
+    );
+    expect(sig("Apple yeni iPhone 18 modelini tanıttı", "tr")).toEqual(
+      expect.arrayContaining(["launch", "apple"]),
+    );
+    expect(sig("Samsung Galaxy S27 Türkiye'de satışa sunuldu", "tr")).toContain("samsung");
+    expect(sig("Microsoft Copilot artık herkesin kullanımına sunuldu", "tr")).toContain("microsoft");
+  });
+
+  it("does not tag ordinary news as a launch", () => {
+    expect(sig("Why the chip shortage is not over")).not.toContain("launch");
+    expect(sig("Merkez Bankası faiz kararını açıkladı", "tr")).not.toContain("launch");
+  });
+
+  it("maps products to their company", () => {
+    expect(sig("Claude gets a new memory feature")).toContain("anthropic");
+    expect(sig("PlayStation 6 rumors")).toContain("sony");
+    expect(sig("Snapdragon X3 benchmarks")).toContain("qualcomm");
   });
 });

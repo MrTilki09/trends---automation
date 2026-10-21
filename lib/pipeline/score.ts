@@ -6,7 +6,7 @@ import { getAdapter } from "../sources/registry";
 import { normalizeTitle } from "./normalize";
 
 /*
- * score = (engagement + cross_source_bonus + keyword_boost + llm_boost) × recency_decay
+ * score = (engagement + cross_source_bonus + keyword_boost + launch_boost + llm_boost) × recency_decay
  *
  * All tunable numbers live in ScoreWeights so they are easy to find and change.
  */
@@ -15,6 +15,8 @@ export type ScoreWeights = {
   crossSourcePerSource: number;
   crossSourceCap: number;
   keywordBoost: number;
+  /** Topic is a launch / announcement (tag "launch"). */
+  launchBoost: number;
   llmBoostFactor: number;
   halfLifeHours: number;
   /** Engagement given to items from sources without an engagement metric (e.g. RSS). */
@@ -25,6 +27,7 @@ export const DEFAULT_WEIGHTS: ScoreWeights = {
   crossSourcePerSource: 0.3,
   crossSourceCap: 0.9,
   keywordBoost: 0.2,
+  launchBoost: 0.2,
   llmBoostFactor: 0.5,
   halfLifeHours: 24,
   noMetricEngagement: 0.3,
@@ -81,6 +84,8 @@ export type ScoreInput = {
   sourceCount: number;
   normalizedTitle: string;
   keywords: string[];
+  /** Topic tags; "launch" earns the launch boost. */
+  tags?: string[];
   llmRelevance: number | null;
   /** When the story was published (earliest article); drives the recency decay. */
   publishedAt: Date;
@@ -95,16 +100,18 @@ export function scoreTopic(
   const cross = crossSourceBonus(input.sourceCount, w);
   const matched = matchKeywords(input.normalizedTitle, input.keywords, opts.nicheKeywords);
   const keywordBoost = matched.length > 0 ? w.keywordBoost : 0;
+  const launchBoost = input.tags?.includes("launch") ? w.launchBoost : 0;
   const llmBoost = input.llmRelevance != null ? w.llmBoostFactor * input.llmRelevance : 0;
   const hours = (opts.now.getTime() - input.publishedAt.getTime()) / 3600_000;
   const decay = recencyDecay(hours, w.halfLifeHours);
   const round = (x: number) => Math.round(x * 10_000) / 10_000;
   return {
-    score: round((engagement + cross + keywordBoost + llmBoost) * decay),
+    score: round((engagement + cross + keywordBoost + launchBoost + llmBoost) * decay),
     breakdown: {
       engagement: round(engagement),
       crossSourceBonus: round(cross),
       keywordBoost,
+      launchBoost,
       llmBoost: round(llmBoost),
       recencyDecay: round(decay),
       ageHours: Math.round(Math.max(0, hours) * 10) / 10,
@@ -125,6 +132,7 @@ export async function scoreRecentTopics(db: DB, opts: { windowHours: number; now
       id: topics.id,
       title: topics.title,
       keywords: topics.keywords,
+      tags: topics.tags,
       sourceCount: topics.sourceCount,
       llmRelevance: topics.llmRelevance,
       firstSeenAt: topics.firstSeenAt,
@@ -187,6 +195,7 @@ export async function scoreRecentTopics(db: DB, opts: { windowHours: number; now
           sourceCount: t.sourceCount,
           normalizedTitle: entry?.titles.join(" ") ?? normalizeTitle(t.title),
           keywords: t.keywords,
+          tags: t.tags,
           llmRelevance: t.llmRelevance,
           // An old article we only just found is not fresh news: decay from the publish date.
           publishedAt: t.publishedAt ?? t.firstSeenAt,

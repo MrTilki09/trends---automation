@@ -637,3 +637,116 @@ export function topByFrequency(values: string[], max: number): string[] {
     .slice(0, max)
     .map(([v]) => v);
 }
+
+/*
+ * Signals detected from the title, added as tags:
+ *  - "launch": the story is about something new being released/announced
+ *  - company names: which big company the story is about ("google", "openai", ...)
+ * Keywords are in normalized form (see normalizeTitle); "*" = prefix, as above.
+ */
+const LAUNCH_KEYWORDS = [
+  "launch*",
+  "announc*",
+  "unveil*",
+  "introduc*",
+  "release",
+  "releases",
+  "released",
+  "rolls out",
+  "rolling out",
+  "debut*",
+  "now available",
+  "available now",
+  "generally available",
+  "ships",
+  "open sources",
+  "open sourced",
+  "new model",
+  "preview",
+  "beta",
+  "show hn",
+  "tanitti",
+  "tanitildi",
+  "tanitiyor",
+  "duyurdu",
+  "duyuruldu",
+  "piyasaya",
+  "kullanima sundu",
+  "kullanima sunuldu",
+  "yayinladi",
+  "satisa sundu",
+  "satisa cikti",
+  "yeni model",
+  "erisime acti",
+  "resmen",
+];
+const COMPANIES: Record<string, string[]> = {
+  openai: ["openai", "chatgpt", "sora", "gpt"],
+  anthropic: ["anthropic", "claude"],
+  google: ["google", "alphabet", "deepmind", "gemini", "android", "pixel", "youtube", "waymo"],
+  microsoft: ["microsoft", "windows", "copilot", "azure", "xbox", "linkedin"],
+  apple: ["apple", "iphone", "ipad", "macos", "ios", "vision pro", "macbook", "airpods"],
+  meta: ["meta", "facebook", "instagram", "whatsapp", "threads", "llama"],
+  amazon: ["amazon", "aws", "alexa"],
+  nvidia: ["nvidia", "geforce", "cuda"],
+  samsung: ["samsung", "galaxy"],
+  tesla: ["tesla", "elon musk", "spacex", "starlink"],
+  xai: ["xai", "grok"],
+  mistral: ["mistral"],
+  deepseek: ["deepseek"],
+  intel: ["intel"],
+  amd: ["amd", "radeon", "ryzen"],
+  qualcomm: ["qualcomm", "snapdragon"],
+  huawei: ["huawei"],
+  xiaomi: ["xiaomi"],
+  github: ["github"],
+  "hugging face": ["hugging face", "huggingface"],
+  perplexity: ["perplexity"],
+  alibaba: ["alibaba", "qwen"],
+  bytedance: ["bytedance", "tiktok"],
+  sony: ["sony", "playstation", "ps5"],
+  ibm: ["ibm"],
+  oracle: ["oracle"],
+  cloudflare: ["cloudflare"],
+};
+
+function matcher(keywords: string[]): (padded: string, words: Set<string>) => boolean {
+  const exact = keywords.filter((k) => !k.endsWith("*") && !k.includes(" "));
+  const phrases = keywords.filter((k) => !k.endsWith("*") && k.includes(" ")).map((k) => ` ${k} `);
+  const prefixes = keywords.filter((k) => k.endsWith("*")).map((k) => ` ${k.slice(0, -1)}`);
+  return (padded, words) =>
+    exact.some((k) => words.has(k)) ||
+    phrases.some((p) => padded.includes(p)) ||
+    prefixes.some((p) => padded.includes(p));
+}
+const isLaunch = matcher(LAUNCH_KEYWORDS);
+const companyMatchers = Object.entries(COMPANIES).map(([name, kws]) => [name, matcher(kws)] as const);
+
+/** Tags derived from a normalized title: "launch" and company names. */
+export function detectSignals(normalizedTitle: string): string[] {
+  const padded = ` ${normalizedTitle} `;
+  const words = new Set(normalizedTitle.split(" "));
+  const tags: string[] = [];
+  if (isLaunch(padded, words)) tags.push("launch");
+  for (const [name, match] of companyMatchers) if (match(padded, words)) tags.push(name);
+  return tags;
+}
+
+/** Categories that count as tech for the Pool's "Tech only" view. */
+export const TECH_CATEGORIES = [
+  "AI",
+  "Startups",
+  "Mobile",
+  "Hardware",
+  "Gaming",
+  "Security",
+  "Software",
+  "Science & Space",
+  "Auto & EV",
+  "Aviation & Defense",
+  "Social & Media",
+];
+/** Never tech, even when published by a tech site (e.g. a Verge politics story). */
+export const NON_TECH_CATEGORIES = ["Politics", "Sports", "Entertainment"];
+/** Tags that mark an item as tech when it has no clear category. */
+export const TECH_TAGS = ["tech", "ai", "official", "launch", "dev"];

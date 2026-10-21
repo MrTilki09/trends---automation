@@ -91,6 +91,7 @@ export type ScoreBreakdown = {
   engagement: number;
   crossSourceBonus: number;
   keywordBoost: number;
+  launchBoost?: number;
   llmBoost: number;
   recencyDecay: number;
   /** Hours since the topic was published (earliest article), used for recency decay. */

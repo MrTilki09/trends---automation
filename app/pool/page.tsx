@@ -9,9 +9,11 @@ import { listSources } from "@/lib/data/sources";
 import {
   listFacets,
   listTopics,
+  FOCUSES,
   SORTS,
   TIME_WINDOWS,
   TOPIC_STATUSES,
+  type Focus,
   type SortKey,
   type TimeWindow,
   type TopicFilters,
@@ -32,19 +34,45 @@ const LANG_NAMES: Record<string, string> = { tr: "Turkish", en: "English" };
 function poolHref(current: TopicFilters, change: Partial<Record<keyof TopicFilters, string | undefined>>) {
   const params = new URLSearchParams();
   const merged = { ...current, ...change };
-  for (const key of ["status", "window", "sort", "category", "tag", "lang", "source", "q"] as const) {
+  for (const key of [
+    "focus",
+    "status",
+    "window",
+    "sort",
+    "category",
+    "tag",
+    "lang",
+    "source",
+    "q",
+  ] as const) {
     const v = merged[key];
     if (v != null && v !== "") params.set(key, String(v));
   }
   return `/pool?${params.toString()}`;
 }
 
+/** One-click views at the top of the Pool (each sets these filters, keeping focus/status/window/sort). */
+const QUICK_VIEWS: { label: string; hint: string; change: Partial<Record<keyof TopicFilters, string>> }[] = [
+  { label: "All", hint: "No category or tag filter", change: {} },
+  { label: "AI", hint: "Category: AI", change: { category: "AI" } },
+  { label: "Launches", hint: "New products, models and releases", change: { tag: "launch" } },
+  { label: "Official", hint: "Straight from company newsrooms & blogs", change: { tag: "official" } },
+  { label: "Show HN", hint: "Things people just built", change: { tag: "show hn" } },
+  { label: "Hardware", hint: "Category: Hardware", change: { category: "Hardware" } },
+  { label: "Mobile", hint: "Category: Mobile", change: { category: "Mobile" } },
+  { label: "Security", hint: "Category: Security", change: { category: "Security" } },
+  { label: "Startups", hint: "Category: Startups", change: { category: "Startups" } },
+  { label: "Türkiye", hint: "Turkish sources", change: { tag: "turkey" } },
+];
+
 export default async function PoolPage({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
   const status = (one(sp.status) ?? "new") as TopicStatus | "all";
   const window = (one(sp.window) ?? "72h") as TimeWindow;
   const sort = (one(sp.sort) ?? "score") as SortKey;
+  const focus = (one(sp.focus) ?? "tech") as Focus;
   const filters: TopicFilters = {
+    focus: focus in FOCUSES ? focus : "tech",
     status: status === "all" || TOPIC_STATUSES.includes(status) ? status : "new",
     window: window in TIME_WINDOWS ? window : "72h",
     sort: sort in SORTS ? sort : "score",
@@ -92,7 +120,37 @@ export default async function PoolPage({ searchParams }: { searchParams: SearchP
             </Link>
           )}
         </div>
+        <nav className="flex flex-wrap items-center gap-1.5 text-sm" aria-label="Quick views">
+          {QUICK_VIEWS.map((v) => {
+            const href = poolHref(
+              { focus: filters.focus, status: filters.status, window: filters.window, sort: filters.sort },
+              v.change,
+            );
+            const active = filters.category === v.change.category && filters.tag === v.change.tag;
+            return (
+              <Link
+                key={v.label}
+                href={href}
+                className={
+                  active
+                    ? "rounded-full bg-primary px-3 py-1 text-primary-foreground"
+                    : "rounded-full border px-3 py-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+                }
+                title={v.hint}
+              >
+                {v.label}
+              </Link>
+            );
+          })}
+        </nav>
         <form className="flex flex-wrap items-center gap-2" method="get">
+          <select name="focus" defaultValue={filters.focus} className={selectClass} aria-label="Focus">
+            {Object.entries(FOCUSES).map(([k, label]) => (
+              <option key={k} value={k}>
+                {label}
+              </option>
+            ))}
+          </select>
           <select name="sort" defaultValue={filters.sort} className={selectClass} aria-label="Sort">
             {Object.entries(SORTS).map(([k, label]) => (
               <option key={k} value={k}>

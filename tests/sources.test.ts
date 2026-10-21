@@ -96,6 +96,16 @@ describe("rss adapter", () => {
     expect(items[0]!.metrics).toEqual({ weight: 1.5 });
   });
 
+  it("turns structured <author> elements into plain text (Google blog format)", async () => {
+    const xml = `<?xml version="1.0"?><rss version="2.0" xmlns:author="http://www.w3.org/2005/Atom"><channel><title>t</title>
+      <item><title>Hello</title><link>https://blog.google/x/</link><pubDate>Wed, 21 Oct 2026 04:00:00 +0000</pubDate>
+      <author xmlns:author="http://www.w3.org/2005/Atom"><name>Jane Doe</name><title>Director</title></author>
+      <category>AI</category></item></channel></rss>`;
+    const [item] = await parseFeed(xml);
+    expect(item!.author).toBe("Jane Doe");
+    expect(item!.tags).toEqual(["AI"]);
+  });
+
   it("respects maxItems", async () => {
     expect(await parseFeed(fixture("rss-webrazzi.xml"), { maxItems: 5 })).toHaveLength(5);
   });

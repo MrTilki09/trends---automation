@@ -1,6 +1,7 @@
 import { asc, desc, eq, sql, type SQL } from "drizzle-orm";
 import type { DB } from "../db/client";
 import { rawItems, sources, topics, type TopicStatus } from "../db/schema";
+import { NON_TECH_CATEGORIES, TECH_CATEGORIES, TECH_TAGS } from "../pipeline/classify";
 import { normalizeTitle } from "../pipeline/normalize";
 
 export const TOPIC_STATUSES: TopicStatus[] = ["new", "shortlisted", "ignored"];
@@ -10,7 +11,12 @@ export type TimeWindow = keyof typeof TIME_WINDOWS;
 export const SORTS = { score: "Top score", newest: "Newest first" } as const;
 export type SortKey = keyof typeof SORTS;
 
+export const FOCUSES = { tech: "Tech only", all: "Everything" } as const;
+export type Focus = keyof typeof FOCUSES;
+
 export type TopicFilters = {
+  /** "tech" (default) hides non-tech topics: politics, sports, celebrities, generic news. */
+  focus?: Focus;
   status?: TopicStatus | "all";
   source?: string; // source key
   category?: string;
@@ -43,8 +49,25 @@ export type TopicListRow = {
 // A topic's publish date, falling back to when we first saw it (older rows before the column existed).
 const PUBLISHED = sql.raw("coalesce(t.published_at, t.first_seen_at)");
 
-function baseWhere(f: Pick<TopicFilters, "status" | "window">): SQL[] {
+const list = (values: string[]) =>
+  sql.join(
+    values.map((v) => sql`${v}`),
+    sql`, `,
+  );
+
+/**
+ * Tech topic = tech category, or no clear non-tech category but tagged as tech
+ * (by its source, e.g. a Hacker News item, or as a launch / official announcement).
+ */
+const TECH_ONLY = sql`(
+  coalesce(t.category, t.llm_category) IN (${list(TECH_CATEGORIES)})
+  OR (coalesce(t.category, t.llm_category, '') NOT IN (${list(NON_TECH_CATEGORIES)})
+      AND t.tags && ARRAY[${list(TECH_TAGS)}]::text[])
+)`;
+
+function baseWhere(f: Pick<TopicFilters, "status" | "window" | "focus">): SQL[] {
   const where: SQL[] = [];
+  if ((f.focus ?? "tech") === "tech") where.push(TECH_ONLY);
   const hours = TIME_WINDOWS[f.window ?? "72h"];
   if (hours != null) where.push(sql`${PUBLISHED} > now() - make_interval(hours => ${hours})`);
   const status = f.status ?? "new";
@@ -110,7 +133,7 @@ export type Facet = { value: string; count: number };
  */
 export async function listFacets(
   db: DB,
-  f: Pick<TopicFilters, "status" | "window">,
+  f: Pick<TopicFilters, "status" | "window" | "focus">,
 ): Promise<{ categories: Facet[]; tags: Facet[]; langs: Facet[] }> {
   const where = baseWhere(f);
   const w = where.length ? sql`WHERE ${sql.join(where, sql` AND `)}` : sql``;

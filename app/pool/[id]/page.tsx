@@ -30,6 +30,11 @@ export default async function TopicPage({ params }: { params: Promise<{ id: stri
           b.matchedKeywords.length ? `Matched: ${b.matchedKeywords.join(", ")}` : "No niche keyword matched",
         ],
         [
+          "Launch boost",
+          `+${(b.launchBoost ?? 0).toFixed(2)}`,
+          b.launchBoost ? "New release / announcement" : "Not a launch",
+        ],
+        [
           "LLM boost",
           `+${b.llmBoost.toFixed(2)}`,
           topic.llmRelevance != null ? `0.5 × relevance ${topic.llmRelevance}` : "Not enriched",
@@ -102,7 +107,7 @@ export default async function TopicPage({ params }: { params: Promise<{ id: stri
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
             <p className="text-muted-foreground">
-              (engagement + cross-source + keyword + LLM) × recency decay
+              (engagement + cross-source + keyword + launch + LLM) × recency decay
             </p>
             {rows.length === 0 && <p className="text-muted-foreground">Not scored yet.</p>}
             {rows.map(([label, value, why]) => (

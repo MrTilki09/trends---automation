@@ -35,6 +35,20 @@ function stripHtml(s: string | undefined): string | undefined {
   return text ? text.slice(0, 1000) : undefined;
 }
 
+/**
+ * Feeds sometimes send structured values where a string is expected, e.g. Google's blog sends
+ * <author><name>…</name><title>…</title></author>. Pull out the readable text.
+ */
+function textOf(v: unknown): string | undefined {
+  if (typeof v === "string") return v.trim() || undefined;
+  if (Array.isArray(v)) return textOf(v[0]);
+  if (v && typeof v === "object") {
+    const o = v as Record<string, unknown>;
+    return textOf(o.name) ?? textOf(o._);
+  }
+  return undefined;
+}
+
 /** <category> values; rss-parser gives strings, or objects like { _: "AI" } for attributes. */
 function feedCategories(cats: unknown): string[] {
   if (!Array.isArray(cats)) return [];
@@ -63,7 +77,7 @@ export async function parseFeed(
       url,
       title,
       summary: stripHtml(item.contentSnippet ?? item.summary ?? item.content),
-      author: item.creator ?? (item as { author?: string }).author,
+      author: textOf(item.creator) ?? textOf((item as { author?: unknown }).author),
       publishedAt: date && !Number.isNaN(date.getTime()) ? date : undefined,
       lang: opts.lang,
       tags: feedCategories(item.categories),

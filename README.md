@@ -91,7 +91,7 @@ Running it twice in a row never creates duplicates.
 ### Scoring
 
 ```
-score = (engagement + cross_source_bonus + keyword_boost + llm_boost) × recency_decay
+score = (engagement + cross_source_bonus + keyword_boost + launch_boost + llm_boost) × recency_decay
 ```
 
 | Part               | Meaning                                                                                                                                                          |
@@ -99,6 +99,7 @@ score = (engagement + cross_source_bonus + keyword_boost + llm_boost) × recency
 | engagement         | the topic's best item: its percentile within its source (HN points, Google traffic…) × source weight. RSS has no engagement numbers, so RSS items get a flat 0.3 |
 | cross_source_bonus | +0.3 per extra source, max +0.9                                                                                                                                  |
 | keyword_boost      | +0.2 if the title/keywords contain one of `NICHE_KEYWORDS` (whole words)                                                                                         |
+| launch_boost       | +0.2 if the topic is a launch / announcement (tag `launch`)                                                                                                      |
 | llm_boost          | +0.5 × LLM relevance (only when enriched)                                                                                                                        |
 | recency_decay      | halves every `SCORE_HALF_LIFE_HOURS` (24 h) since the story was **published** (so an old article we only just found doesn't count as fresh)                      |
 
@@ -120,15 +121,36 @@ The topic page in the dashboard shows each part. The weights live in `lib/pipeli
 In the **Pool**: sort by _Top score_ or _Newest first_; filter by _Published last 6h / 24h / 72h / 7d / 30d_,
 status, category, tag, language, source and text. Clicking a category or `#tag` badge filters by it.
 
+- **Tech only** (default) hides politics, sports, celebrity and generic news. A topic counts as tech if its
+  category is a tech one, or it has no non-tech category and comes from a tech source / is a launch.
+  Switch to _Everything_ to see all. (Lists live in `lib/pipeline/classify.ts`: `TECH_CATEGORIES`, `TECH_TAGS`.)
+- **Quick views** above the filters: AI, Launches, Official (company newsrooms), Show HN, Hardware, Mobile,
+  Security, Startups, Türkiye.
+- **Launches**: titles saying something was launched / announced / released / unveiled (EN) or
+  tanıttı / duyurdu / kullanıma sundu / satışa sundu (TR) get the `launch` tag and a score boost.
+- **Companies**: stories mentioning a big company or its products get a company tag (`openai`, `google`,
+  `apple`, `nvidia`, `anthropic`, `microsoft`, `meta`, `samsung`, …) — filter with the tag dropdown.
+
 To tune categories, edit `CATEGORY_RULES` in `lib/pipeline/classify.ts` (a `*` suffix matches Turkish
 word endings: `oyun*` → `oyunlari`), add a test case in `tests/classify.test.ts`, then recompute existing
 topics with `npm run db:reindex` (dev) or `docker compose run --rm migrate node dist/reindex.js` (prod).
 
 ## 4. Sources
 
-Defaults (edit `config/sources.seed.ts`): Hacker News top, Google Trends "Trending now" (TR + US), TechCrunch,
-The Verge, Ars Technica, OpenAI News, Webrazzi, Egirişim, ShiftDelete, DonanımHaber, NTV Teknoloji, BBC Türkçe,
-and Reddit (disabled).
+Defaults (edit `config/sources.seed.ts`), about 45 sources, all free with no keys:
+
+| Group                               | Sources                                                                                                                                                                              |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Official newsrooms (tag `official`) | OpenAI, Google Blog, Google DeepMind, Microsoft, Meta, Apple, NVIDIA (news + blog), AWS, GitHub, Hugging Face, Mistral AI, Samsung                                                   |
+| Tech news                           | Techmeme, TechCrunch, The Verge, Ars Technica, Wired, Engadget, MIT Technology Review, The Register, ZDNet, 9to5Mac, 9to5Google, Android Authority, Tom's Hardware, BleepingComputer |
+| AI news                             | The Decoder, MarkTechPost, Simon Willison                                                                                                                                            |
+| New products / dev                  | Hacker News (top + Show HN), Product Hunt, Lobsters                                                                                                                                  |
+| Turkish                             | Webrazzi, Egirişim, ShiftDelete, DonanımHaber, NTV Teknoloji, Webtekno, Teknoblog, LOG, CHIP Online, BBC Türkçe                                                                      |
+| Trends                              | Google Trends "Trending now" (TR, US)                                                                                                                                                |
+| Optional                            | Reddit (disabled, see below)                                                                                                                                                         |
+
+Checked Oct 2026 but not usable: Anthropic and Meta AI have no RSS feed (404); VentureBeat blocks automated
+requests (429).
 
 - Turn sources on/off on the **Sources** page.
 - To change configs/feeds: edit the seed file, then `npm run db:reseed` (dev) or
@@ -149,9 +171,20 @@ A new RSS feed needs no code: just add an `rss(...)` line to the seed file.
 
 - **Google Trends**: `https://trends.google.com/trending/rss?geo=TR` works (RSS with `ht:approx_traffic` and
   related `ht:news_item`s). A trend's URL is its first related news article, so it can cluster with RSS items.
-- **Reddit**: public `.json` endpoints return **403**, and since Reddit's Responsible Builder Policy (Nov 2025)
-  new Data API access requires approval. The adapter (OAuth "script" app, password grant) is ready but disabled.
-  Only enable it once you have approved credentials in `REDDIT_*`. Check Reddit's current developer docs first.
+- **Reddit**: public `.json` endpoints return **403** and public `.rss` feeds are rate-limited (429) after one
+  or two requests, so Reddit needs API credentials. Since Reddit's Responsible Builder Policy (Nov 2025), new
+  Data API access requires **approval**. The adapter (OAuth "script" app, password grant) is ready but
+  disabled; subreddits are set in the seed (technology, artificial, LocalLLaMA, OpenAI, singularity, gadgets,
+  programming). To connect it:
+  1. Use (or create) a Reddit account.
+  2. Request Data API access through Reddit's developer / Data API request form (non-commercial, personal use;
+     describe: read-only, a few requests 3× a day, no redistribution). Wait for approval.
+  3. Once approved, create a **script** app at <https://www.reddit.com/prefs/apps> (redirect URI can be
+     `http://localhost`). Note the client id (under the app name) and secret.
+  4. Put `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`, `REDDIT_USERNAME`, `REDDIT_PASSWORD` in `.env`
+     (an account with 2FA won't work with the password grant), restart: `docker compose up -d`.
+  5. Turn on "Reddit (tech subs)" on the **Sources** page and press Run now. Errors show on the Runs page.
+     Check Reddit's current developer docs first: the process has changed several times.
 - **X/Twitter** and other sites whose terms forbid scraping are intentionally not used.
 
 ## 5. Optional: Claude enrichment

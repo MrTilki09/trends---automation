@@ -2,7 +2,7 @@ import { sql } from "drizzle-orm";
 import type { DB } from "../db/client";
 import { rawItems } from "../db/schema";
 import type { RawItemInput } from "../sources/types";
-import { normalizeTags } from "./classify";
+import { detectSignals, normalizeTags } from "./classify";
 import { canonicalizeUrl, guessLang, normalizeTitle } from "./normalize";
 
 /** Removes repeated externalIds inside one batch (a feed can list the same item twice). */
@@ -34,6 +34,7 @@ export async function upsertRawItems(
   for (let i = 0; i < items.length; i += 200) {
     const chunk = items.slice(i, i + 200).map((it) => {
       const lang = it.lang ?? params.defaultLang ?? guessLang(it.title);
+      const normalizedTitle = normalizeTitle(it.title, lang);
       return {
         sourceId: params.sourceId,
         runId: params.runId,
@@ -41,13 +42,17 @@ export async function upsertRawItems(
         url: it.url ?? null,
         canonicalUrl: canonicalizeUrl(it.url),
         title: it.title.slice(0, 1000),
-        normalizedTitle: normalizeTitle(it.title, lang),
+        normalizedTitle,
         summary: it.summary ?? null,
         author: it.author ?? null,
         // Some feeds put dates slightly in the future (time zones); never trust a future date.
         publishedAt: it.publishedAt ? new Date(Math.min(it.publishedAt.getTime(), now.getTime())) : null,
         lang: lang ?? null,
-        tags: normalizeTags([...(it.tags ?? []), ...(params.sourceTags ?? [])]),
+        // Source tags and detected signals first, so a feed with many categories can't crowd them out.
+        tags: normalizeTags(
+          [...(params.sourceTags ?? []), ...detectSignals(normalizedTitle), ...(it.tags ?? [])],
+          20,
+        ),
         metrics: it.metrics,
         raw: it.raw ?? null,
         fetchedAt: now,

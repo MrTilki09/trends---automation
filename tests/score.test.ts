@@ -55,6 +55,12 @@ describe("components", () => {
     );
   });
 
+  it("launch boost applies to topics tagged as launches", () => {
+    expect(score({ tags: ["launch", "openai"] }).breakdown.launchBoost).toBe(DEFAULT_WEIGHTS.launchBoost);
+    expect(score({ tags: ["tech"] }).breakdown.launchBoost).toBe(0);
+    expect(score({ tags: ["launch"] }).score).toBeGreaterThan(score({ tags: [] }).score);
+  });
+
   it("llm boost is 0.5 × relevance, 0 when not enriched", () => {
     expect(score({ llmRelevance: 0.8 }).breakdown.llmBoost).toBeCloseTo(0.4);
     expect(score({ llmRelevance: null }).breakdown.llmBoost).toBe(0);
