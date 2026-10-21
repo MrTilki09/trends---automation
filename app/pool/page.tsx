@@ -100,7 +100,7 @@ async function requestOrigin(): Promise<string> {
 }
 
 export default async function PoolPage({ searchParams }: { searchParams: SearchParams }) {
-  await requireViewer();
+  const viewer = await requireViewer();
   const filters = parseTopicFilters(await searchParams);
   const sort = filters.sort ?? "score";
   const dir = filters.dir ?? DEFAULT_DIR[sort];
@@ -343,7 +343,12 @@ export default async function PoolPage({ searchParams }: { searchParams: SearchP
                   <StatusBadge status={t.status} />
                 </TableCell>
                 <TableCell className="text-right">
-                  <TopicActions id={t.id} status={t.status} saved={savedIds?.has(t.id)} />
+                  <TopicActions
+                    id={t.id}
+                    status={t.status}
+                    saved={savedIds?.has(t.id)}
+                    canEdit={viewer.role === "owner"}
+                  />
                 </TableCell>
               </TableRow>
             ))}

@@ -2,13 +2,13 @@ import { revokeApiKeyAction } from "@/app/actions";
 import { CreateApiKeyForm } from "@/components/create-api-key-form";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { requireViewer } from "@/lib/auth/server";
+import { requireOwner } from "@/lib/auth/server";
 import { listApiKeys } from "@/lib/data/api-keys";
 import { getDb } from "@/lib/db/client";
 import { formatDateTime, relativeTime } from "@/lib/utils";
 
 export default async function KeysPage() {
-  await requireViewer();
+  await requireOwner();
   const keys = await listApiKeys(getDb());
   return (
     <div className="space-y-4">

@@ -9,9 +9,12 @@ import { getConfig } from "@/lib/config";
  * sent to /login. This is the first gate only; pages and server actions check again (lib/auth/server.ts).
  * /api/* is skipped here: /api/topics checks its own API key (and answers JSON, not a redirect).
  */
+const PUBLIC_PATHS = new Set(["/login", "/signup", "/verify"]);
+
 export function proxy(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
-  if (pathname === "/login" || pathname.startsWith("/api/")) return NextResponse.next();
+  // Public: sign-in, sign-up, the emailed confirmation link, and the API (which checks its own key).
+  if (PUBLIC_PATHS.has(pathname) || pathname.startsWith("/api/")) return NextResponse.next();
 
   const cfg = getConfig();
   if (cfg.AUTH_LOCALHOST_BYPASS && isLocalRequest(req.headers)) return NextResponse.next();

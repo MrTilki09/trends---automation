@@ -8,12 +8,17 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 
 export const SESSION_COOKIE = "tp_session";
 
-export type Session = { user: string; exp: number }; // exp = unix seconds
+/** owner = DASHBOARD_USER from .env (everything); member = an account created on /signup. */
+export type Role = "owner" | "member";
+
+export type Session = { user: string; exp: number; role: Role }; // exp = unix seconds
 
 const sign = (data: string, secret: string) => createHmac("sha256", secret).update(data).digest("base64url");
 
 export function signSession(session: Session, secret: string): string {
-  const data = Buffer.from(JSON.stringify({ u: session.user, exp: session.exp })).toString("base64url");
+  const data = Buffer.from(JSON.stringify({ u: session.user, exp: session.exp, r: session.role })).toString(
+    "base64url",
+  );
   return `${data}.${sign(data, secret)}`;
 }
 
@@ -30,12 +35,14 @@ export function verifySession(
   const given = Buffer.from(mac);
   if (given.length !== expected.length || !timingSafeEqual(given, expected)) return null;
   try {
-    const { u, exp } = JSON.parse(Buffer.from(data, "base64url").toString("utf8")) as {
+    const { u, exp, r } = JSON.parse(Buffer.from(data, "base64url").toString("utf8")) as {
       u?: unknown;
       exp?: unknown;
+      r?: unknown;
     };
     if (typeof u !== "string" || typeof exp !== "number" || exp <= nowSec) return null;
-    return { user: u, exp };
+    // Cookies from before roles existed could only belong to the owner.
+    return { user: u, exp, role: r === "member" ? "member" : "owner" };
   } catch {
     return null;
   }

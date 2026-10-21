@@ -19,8 +19,9 @@ export const metadata: Metadata = {
   description: "Collected and ranked trending topics",
 };
 
-const NAV = [
-  { href: "/pool", label: "Pool" },
+const NAV = [{ href: "/pool", label: "Pool" }];
+// Owner only (members get redirected to the Pool).
+const OWNER_NAV = [
   { href: "/runs", label: "Runs" },
   { href: "/sources", label: "Sources" },
   { href: "/keys", label: "API keys" },
@@ -45,7 +46,11 @@ async function Header({ viewer }: { viewer: Viewer }) {
           Trend Pool
         </Link>
         <nav className="flex gap-4 text-sm">
-          {[...NAV, ...(viewer.via === "session" ? USER_NAV : [])].map((n) => (
+          {[
+            ...NAV,
+            ...(viewer.role === "owner" ? OWNER_NAV : []),
+            ...(viewer.via === "session" ? USER_NAV : []),
+          ].map((n) => (
             <Link key={n.href} href={n.href} className="text-muted-foreground hover:text-foreground">
               {n.label}
             </Link>
@@ -71,7 +76,7 @@ async function Header({ viewer }: { viewer: Viewer }) {
               " never"
             )}
           </span>
-          <RunNowButton active={active} />
+          {viewer.role === "owner" && <RunNowButton active={active} />}
           {viewer.via === "session" ? (
             <form action={logoutAction}>
               <button

@@ -56,6 +56,19 @@ const envSchema = z.object({
   SESSION_MAX_AGE_DAYS: z.coerce.number().positive().default(30),
   // Encrypts users' stored API keys (NVIDIA). Required to save one.
   SECRETS_KEY: optionalString.pipe(z.string().min(32, "use at least 32 random characters").optional()),
+  // Public base URL used in emailed links; falls back to the request's host (README §5d).
+  APP_URL: z
+    .url()
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
+  // Outgoing email (signup verification). Same names as Laravel's MAIL_* settings.
+  MAIL_HOST: optionalString,
+  MAIL_PORT: z.coerce.number().int().positive().default(587),
+  MAIL_USERNAME: optionalString,
+  MAIL_PASSWORD: optionalString,
+  MAIL_ENCRYPTION: z.enum(["tls", "ssl", "none", ""]).default("tls"),
+  MAIL_FROM_ADDRESS: optionalString,
+  MAIL_FROM_NAME: z.string().default("Trend Pool"),
   NVIDIA_API_BASE_URL: z.url().default("https://integrate.api.nvidia.com/v1"),
   NVIDIA_TIMEOUT_MS: z.coerce.number().int().positive().default(60_000),
   // Requests to http://localhost:3000 on the server itself skip login and API keys (lib/auth/local.ts).

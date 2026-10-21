@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 import { assertSignedInUser } from "@/lib/auth/server";
 import { getConfig } from "@/lib/config";
 import { deletePost, saveTopic, unsaveTopic } from "@/lib/data/saved";
-import { clearNvidiaKey, setNvidiaKey, setNvidiaModel } from "@/lib/data/users";
+import { clearNvidiaKey, setBrandName, setNvidiaKey, setNvidiaModel } from "@/lib/data/users";
 import { getDb } from "@/lib/db/client";
 import type { PostPlatform } from "@/lib/db/schema";
 import { isNvidiaModel, looksLikeNvidiaKey } from "@/lib/llm/nvidia";
@@ -63,6 +63,7 @@ export async function saveNvidiaSettingsAction(
   const db = getDb();
   const model = formData.get("model");
   if (isNvidiaModel(model)) await setNvidiaModel(db, user.id, model);
+  if (formData.has("brand")) await setBrandName(db, user.id, String(formData.get("brand")));
 
   const apiKey = String(formData.get("apiKey") ?? "").trim();
   if (apiKey) {
@@ -74,7 +75,7 @@ export async function saveNvidiaSettingsAction(
     await setNvidiaKey(db, user.id, apiKey, secretsKey);
   }
   revalidatePath("/settings");
-  return { message: apiKey ? "Key and model saved." : "Model saved." };
+  return { message: apiKey ? "Key and settings saved." : "Settings saved." };
 }
 
 export async function clearNvidiaKeyAction(): Promise<void> {

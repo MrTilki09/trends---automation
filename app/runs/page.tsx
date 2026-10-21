@@ -1,12 +1,12 @@
 import { StatusBadge } from "@/components/status-badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { requireViewer } from "@/lib/auth/server";
+import { requireOwner } from "@/lib/auth/server";
 import { listRuns } from "@/lib/data/runs";
 import { getDb } from "@/lib/db/client";
 import { formatDateTime, formatDuration } from "@/lib/utils";
 
 export default async function RunsPage() {
-  await requireViewer();
+  await requireOwner();
   const runs = await listRuns(getDb(), 50);
   return (
     <div className="space-y-4">

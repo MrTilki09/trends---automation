@@ -12,7 +12,7 @@ import { getDb } from "@/lib/db/client";
 import { formatDateTime, hostOf, relativeTime } from "@/lib/utils";
 
 export default async function TopicPage({ params }: { params: Promise<{ id: string }> }) {
-  await requireViewer();
+  const viewer = await requireViewer();
   const { id } = await params;
   const data = Number.isInteger(Number(id)) ? await getTopic(getDb(), Number(id)) : null;
   if (!data) notFound();
@@ -99,7 +99,12 @@ export default async function TopicPage({ params }: { params: Promise<{ id: stri
               </div>
             )}
           </div>
-          <TopicActions id={topic.id} status={topic.status} saved={savedIds?.has(topic.id)} />
+          <TopicActions
+            id={topic.id}
+            status={topic.status}
+            saved={savedIds?.has(topic.id)}
+            canEdit={viewer.role === "owner"}
+          />
         </div>
       </div>
 

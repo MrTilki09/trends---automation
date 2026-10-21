@@ -1,6 +1,6 @@
 import { and, desc, eq, inArray } from "drizzle-orm";
 import type { DB } from "../db/client";
-import { posts, rawItems, savedTopics, topics, type Post, type PostPlatform } from "../db/schema";
+import { posts, rawItems, savedTopics, sources, topics, type Post, type PostPlatform } from "../db/schema";
 
 /*
  * A user's own pool ("Saved") and the posts generated for it. Every query is scoped by userId:
@@ -63,8 +63,18 @@ export async function savedTopicsForGeneration(db: DB, userId: number, ids: numb
     .innerJoin(topics, eq(topics.id, savedTopics.topicId))
     .where(and(eq(savedTopics.userId, userId), inArray(savedTopics.topicId, ids)));
   const items = await db
-    .select({ topicId: rawItems.topicId, title: rawItems.title, summary: rawItems.summary })
+    .select({
+      topicId: rawItems.topicId,
+      title: rawItems.title,
+      summary: rawItems.summary,
+      url: rawItems.url,
+      author: rawItems.author,
+      publishedAt: rawItems.publishedAt,
+      metrics: rawItems.metrics,
+      sourceName: sources.name,
+    })
     .from(rawItems)
+    .innerJoin(sources, eq(sources.id, rawItems.sourceId))
     .where(
       inArray(
         rawItems.topicId,
@@ -82,6 +92,16 @@ export async function savedTopicsForGeneration(db: DB, userId: number, ids: numb
         category: topic.category,
         tags: topic.tags,
         itemTitles: own.map((i) => i.title),
+        items: own.map((i) => ({
+          source: i.sourceName,
+          title: i.title,
+          summary: i.summary,
+          url: i.url,
+          author: i.author,
+          publishedAt: i.publishedAt,
+          metrics: i.metrics,
+        })),
+        publishedAt: topic.publishedAt,
       },
     };
   });
@@ -96,6 +116,7 @@ export async function addPost(
     lang: string;
     model: string;
     content: string;
+    imagePrompts: string | null;
   },
 ): Promise<void> {
   await db.insert(posts).values(p);

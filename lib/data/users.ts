@@ -33,6 +33,18 @@ export async function setNvidiaModel(db: DB, userId: number, model: NvidiaModelI
   await db.update(users).set({ nvidiaModel: model }).where(eq(users.id, userId));
 }
 
+export const DEFAULT_BRAND = "Trend Pool";
+
+/** Watermark on generated carousel slides: the user's own brand/handle, else the app name. */
+export const userBrand = (u: User): string => u.brandName?.trim() || DEFAULT_BRAND;
+
+export async function setBrandName(db: DB, userId: number, brand: string): Promise<void> {
+  await db
+    .update(users)
+    .set({ brandName: brand.trim().slice(0, 40) || null })
+    .where(eq(users.id, userId));
+}
+
 export const userModel = (u: User): NvidiaModelId =>
   isNvidiaModel(u.nvidiaModel) ? u.nvidiaModel : DEFAULT_NVIDIA_MODEL;
 

@@ -29,6 +29,27 @@
       "when": 1792587260669,
       "tag": "0003_users_saved_posts",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792590175177,
+      "tag": "0004_user_accounts",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792591243135,
+      "tag": "0005_post_image_prompts",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792592351872,
+      "tag": "0006_user_brand_name",
+      "breakpoints": true
     }
   ]
 }

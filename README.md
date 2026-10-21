@@ -1,25 +1,132 @@
 # Trend Pool
 
-A personal tool that, on a schedule, gathers what's trending (Hacker News, Google Trends, tech/news RSS
-feeds), removes duplicates, groups the same story from different sources into one **topic**, ranks the topics,
-and shows them in a dashboard where you can **shortlist** or **ignore** them.
+**A personal tech-news radar that finds what's trending in AI and tech, ranks it, and helps turn it into
+social media posts, with you approving every step.**
 
-This is **Phase 1** of a bigger "content machine" (later phases will turn topics into post drafts, add approval,
-and publish). Nothing is ever posted anywhere by this code.
+Trend Pool watches ~45 news sources, company newsrooms and trend feeds three times a day, merges the same story
+from different sites into one topic, and ranks the topics so the important launches and announcements float to
+the top. You pick the stories worth talking about, and it drafts posts for X, LinkedIn or a blog, plus image
+prompts for an Instagram carousel, in English or Turkish.
+
+---
+
+## The goal
+
+Posting about tech and AI consistently means opening dozens of sites every day, spotting which stories actually
+matter, checking whether a story is big or just noise, and then writing about it. That's hours of repetitive
+work before the creative part even starts.
+
+**Trend Pool automates the legwork and keeps the judgment with you:**
+
+| Step          | What happens                                                                                                                                                                                             | Status                                                 |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| **1. Watch**  | Collect what's new from ~45 sources on a schedule: official newsrooms (OpenAI, Google, Apple, NVIDIA, Microsoft…), tech and AI news sites, Hacker News, Product Hunt, Google Trends, Turkish tech media. | ✅ Live                                                |
+| **2. Sort**   | Remove duplicates, group the same story from different sites into one topic, give it a category (AI, Hardware, Mobile…), tags and a publish date, and rank it.                                           | ✅ Live                                                |
+| **3. Write**  | Turn chosen topics into post drafts (X, LinkedIn, blog intro) and Instagram carousel image prompts, in English or Turkish, grounded in the actual articles.                                              | 🟡 Working (with your free NVIDIA API key)             |
+| **4. Decide** | Review the pool, shortlist or ignore topics, keep your own Saved list, edit and approve drafts.                                                                                                          | 🟡 Shortlist + Saved work; draft approval flow is next |
+| **5. Share**  | Publish approved posts to social platforms.                                                                                                                                                              | ⏳ Planned (copy-paste for now)                        |
+
+Nothing is ever posted automatically. Trend Pool prepares; you decide.
+
+## What makes it useful
+
+- **Signal over noise.** A story covered by TechCrunch, The Verge and Hacker News at the same time is one topic
+  marked "×3", and it ranks higher. Launches and official announcements get a boost; old articles fade out.
+- **Built for tech.** The default _Tech only_ view hides politics, sports and celebrity news. Quick views jump
+  to AI, Launches, Official newsrooms, Show HN, Hardware, Mobile, Security, Startups or Türkiye.
+- **Fresh first.** Every topic has its real publish date: sort by newest, or filter to the last 6 hours, 24
+  hours, 3 days, a week or a month.
+- **Explainable ranking.** Open any topic to see exactly why it scored what it did: engagement, number of
+  sources, keyword and launch boosts, and how much it has aged.
+- **Bilingual.** Turkish and English sources, Turkish-aware text matching (İ/ı, ş, ğ…), posts in either
+  language.
+- **Yours.** Runs on your own server in Docker, uses free public feeds and your own keys, and exposes a
+  JSON API so other tools can use the pool.
+
+## A quick tour
+
+| Page         | What you do there                                                                                                                                              |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Pool**     | The ranked list of topics. Sort, filter by date, category, tag, language or source; shortlist or ignore; save to your list. Every view has a copyable API URL. |
+| **Topic**    | One story with all its articles from every source, its score breakdown, tags and summary.                                                                      |
+| **Saved**    | Your personal shortlist. Tick topics, choose a format and language, and generate posts and carousel prompts.                                                   |
+| **Runs**     | Every collection run: when it ran, what each source returned, and any errors.                                                                                  |
+| **Sources**  | Turn sources on and off and see when each last worked.                                                                                                         |
+| **API keys** | Create keys for the `/api/topics` JSON API.                                                                                                                    |
+
+## How it works
 
 ```
-            ┌──────────── Docker ───────────────────────────────────────────────┐
- browser ──▶│ web (Next.js dashboard) ──┐                                       │
- (localhost)│                           ├──▶ db (Postgres 17)                   │
-            │ worker (scheduler+jobs) ──┘     ▲  job_requests table = queue    │
-            │   └─ fetches sources, clusters, scores, optional `claude -p`     │
-            │ migrate (runs once at start: DB migrations + seed sources)       │
-            └───────────────────────────────────────────────────────────────────┘
+   ~45 sources                     your server (Docker)                          you
+ ─────────────────     ┌───────────────────────────────────────────┐     ─────────────────
+ Company newsrooms     │  worker                                   │
+ Tech & AI news   ───▶ │   collect → de-dupe → group into topics   │
+ Hacker News, PH       │   → categorize & tag → rank   (3× a day)  │
+ Google Trends         │                  │                        │
+ Turkish tech media    │                  ▼                        │
+                       │            Postgres database              │
+                       │                  │                        │
+                       │                  ▼                        │     browse, filter,
+                       │  web dashboard + JSON API  ◀──────────────┼──── shortlist, save,
+                       │   └ post drafts via your NVIDIA key       │     generate posts
+                       └───────────────────────────────────────────┘
 ```
 
-- The **web** app never collects anything. "Run now" just inserts a row in `job_requests`.
-- The **worker** picks up that row within ~10 s (and also queues runs itself on a schedule).
-- All logic is in `lib/` (sources, pipeline, scoring, LLM, DB access); `app/` and `worker/` stay thin.
+- The **worker** does all collection in the background, on a schedule or when you press **Run now**.
+- The **web** dashboard only reads data and queues jobs, so it stays fast.
+- One failing source never breaks a run. You see the error on the Runs page, and everything else still comes in.
+
+Built with TypeScript, Next.js, PostgreSQL and Docker. All business logic lives in `lib/`.
+
+## Quick start
+
+You need [Docker](https://docs.docker.com/get-docker/) and git.
+
+```bash
+git clone <your-repo-url> trend-pool && cd trend-pool
+cp .env.example .env        # set a real POSTGRES_PASSWORD (same one in DATABASE_URL)
+docker compose up -d --build
+```
+
+Open <http://localhost:3000> and press **Run now**. About 15 seconds later, the pool fills with today's topics.
+Full setup, server deployment and login are in [section 1](#1-setup-from-zero-any-machine-with-docker) and
+[section 6](#6-deploy-to-a-linux-server).
+
+## Roadmap
+
+| Next                    | What it adds                                                                                             |
+| ----------------------- | -------------------------------------------------------------------------------------------------------- |
+| Draft review & approval | Edit, approve or reject generated drafts in the dashboard.                                               |
+| Publishing              | Post approved drafts to LinkedIn, X or Instagram (platform APIs or a self-hosted scheduler like Postiz). |
+| Mobile approval         | A Telegram bot that sends drafts with Approve / Reject buttons.                                          |
+| More sources            | Reddit (two adapters ready, waiting on access), YouTube trending.                                        |
+| Multi-user              | Accounts already exist; per-user sources and billing would make it a product.                            |
+
+## Principles
+
+- **Human in the loop.** Nothing is published without your approval.
+- **Only official channels.** Public APIs and RSS feeds, no scraping of sites whose terms forbid it.
+- **Explainable, tunable rules.** Scoring weights and category keywords are plain code you can read and change.
+- **Every failure is visible.** Errors show up on the Runs page and in the logs, never silently swallowed.
+- **Cheap to run.** Free sources, one small server, your own API keys.
+
+---
+
+## Documentation
+
+1. [Setup from zero](#1-setup-from-zero-any-machine-with-docker)
+2. [Dev workflow](#2-dev-workflow)
+3. [How a run works](#3-how-a-run-works), including scoring, dates, categories, tags and filters
+4. [Sources](#4-sources): the full list, adding a source, Reddit
+5. [Optional: Claude enrichment](#5-optional-claude-enrichment) ·
+   [API](#5b-api) ·
+   [Saved topics and post generation](#5c-saved-topics-and-post-generation-nvidia) ·
+   [Accounts](#5d-accounts-sign-up-with-email-confirmation)
+6. [Deploy to a Linux server](#6-deploy-to-a-linux-server): login, HTTPS, backups
+7. [Configuration (`.env`)](#7-configuration-env)
+8. [Verifying each milestone](#8-verifying-each-milestone)
+9. [Decisions](#9-decisions)
+10. [Project layout](#10-project-layout)
 
 ---
 
@@ -284,6 +391,32 @@ Then on Saved, tick topics, pick a format (X, LinkedIn, blog intro) and language
 **Generate**: one post per topic, written with your key, stored under your account (copy or delete it there).
 Up to 10 per click, one at a time (the free endpoints are rate-limited per key).
 
+Each generation also writes an **image prompt pack** for a 3 to 7 slide Instagram carousel (hook first, call to
+action last, 4:5 portrait): per slide a goal, a visual concept and one detailed prompt to paste into any image
+model (Midjourney, DALL-E, Flux…). Prompts are in English; the text shown on the images is in the post's
+language. Both are stored with the post, each with a Copy button.
+
+**Platforms.** Pick Instagram (default), X / Twitter, LinkedIn or Blog intro next to Generate. Each has its
+own built-in style (`PLATFORMS` in `lib/posts/prompt.ts`) for both the text and the images:
+
+| Platform  | Post                                                                                  | Images                                                                                          |
+| --------- | ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Instagram | hook line, airy lines, "swipe →", save/share CTA, 5-10 hashtags, "link in bio"        | 3-7 slide carousel, 4:5, bold news-card look, swipe cue on slide 1, "save & follow" last        |
+| X         | punchy, ≤ 280 chars (or a 2-4 post thread), surprising fact first, 1-2 hashtags, link | 1-4 images, 16:9, one short bold headline readable as a thumbnail                               |
+| LinkedIn  | professional, industry impact, closing question, link, ≤ 3 hashtags                   | 5-10 slide document carousel, 4:5, navy/slate + one accent, title + data callout, "1/7" numbers |
+| Blog      | title + 3-4 paragraphs                                                                | 1-3 header images, 16:9                                                                         |
+
+On Instagram every slide is a news-cover card: the visual scene fills the frame and the prompt ends with a fixed text
+layout (bottom 40% dark gradient, huge bold all-caps headline with the key words in neon lime `#C6F432`, one
+short factual subheadline, a small brand watermark at the bottom). The texts are also listed separately on an
+`On-image text` line per slide ("Copy slide texts only"), so you can add them by hand in Canva when an image
+model misspells them. The watermark is your **Brand** setting in Settings (default "Trend Pool").
+
+To give the model real facts, generation sends a fact sheet: every collected item of the story (source,
+summary, points/comments, author, date) plus the description and opening paragraphs of the story's own page,
+fetched at that moment (`lib/posts/article.ts`; public addresses only, 8 s timeout, 1.5 MB cap). On the Saved
+page every item is collapsed to its title and a summary line; expand it to see its posts.
+
 **Your NVIDIA key.** Create one for free at [build.nvidia.com](https://build.nvidia.com) (profile menu → API
 Keys, starts with `nvapi-`) and paste it in Settings. It is stored **encrypted** (AES-256-GCM) in the `users`
 table with the server's `SECRETS_KEY`, never shown again (only `nvapi-…last4`) and only used for your own
@@ -297,6 +430,33 @@ text). Measured with a real free key (October 2026) it answers in about 2 s, whi
 no first token within 75 s (queued). DeepSeek and Gemma stay selectable in Settings for when they are less
 busy. A post that takes longer than `NVIDIA_TIMEOUT_MS` (60 s) fails with a message, and the batch stops there.
 The list lives in `lib/llm/nvidia.ts`.
+
+## 5d. Accounts (sign-up with email confirmation)
+
+Anyone can create an account on `/signup` with an email and a password (10+ characters). The account can't be
+used until the email is confirmed: we send a one-time link (`/verify?token=…`, valid 24 h, only its SHA-256 is
+stored). Signing in before that says so and offers to send the link again.
+
+- **Roles.** The owner (`DASHBOARD_USER` from `.env`, or anyone on localhost) can do everything. Members
+  (sign-up accounts) can browse the Pool and use their own **Saved** list and **Settings** (NVIDIA key, post
+  generation). Runs, Sources, API keys, Run now and Shortlist/Ignore stay owner-only.
+- **Abuse limits.** Sign-ups and "send again" share a per-IP limit (5, then 1 every 10 minutes); logins have
+  their own (§6). The answer to a sign-up is the same whether or not the email already has an account.
+- **Email settings** (same names as Laravel's):
+
+```
+APP_URL=https://trends.example.com   # base for the link in the email (else the request's host)
+MAIL_HOST=smtp.example.com
+MAIL_PORT=587
+MAIL_USERNAME=…
+MAIL_PASSWORD=…
+MAIL_ENCRYPTION=tls                  # tls = STARTTLS on 587, ssl = port 465
+MAIL_FROM_ADDRESS=…
+MAIL_FROM_NAME=Trend Pool
+```
+
+Without `MAIL_HOST` nothing is sent: the email (with its link) is only written to the web log, which is handy in
+development but means nobody can confirm an account in production.
 
 ## 6. Deploy to a Linux server
 
@@ -395,6 +555,7 @@ The restore command is at the bottom of the script.
 | `SESSION_SECRET`, `SESSION_MAX_AGE_DAYS`      | —, 30             | signs the session cookie (32+ chars); its lifetime   |
 | `AUTH_LOCALHOST_BYPASS`                       | `true`            | localhost skips login and API keys (§6)              |
 | `SECRETS_KEY`                                 | —                 | encrypts users' NVIDIA keys (§5c)                    |
+| `APP_URL`, `MAIL_*`                           | —                 | sign-up confirmation emails (§5d)                    |
 | `NVIDIA_API_BASE_URL`, `NVIDIA_TIMEOUT_MS`    | NVIDIA, 60000     | post generation endpoint and timeout (§5c)           |
 | `NICHE_DESCRIPTION`, `NICHE_KEYWORDS`         | AI/tech           | used for keyword boost and LLM relevance             |
 | `LLM_*`, `CLAUDE_CODE_OAUTH_TOKEN`            | off               | optional enrichment (§5)                             |
@@ -441,7 +602,8 @@ Choices made where the plan left room (simplest reasonable option):
 ## 10. Project layout
 
 ```
-app/          Next.js dashboard (pool, pool/[id], runs, sources, keys, saved, settings, login), api/topics,
+app/          Next.js dashboard (pool, pool/[id], runs, sources, keys, saved, settings, login, signup,
+              verify), api/topics,
               server actions (actions.ts; user-actions.ts for a user's own data)
 proxy.ts      redirects signed-out visitors to /login (pages and actions check again)
 components/   UI (shadcn/ui in components/ui)

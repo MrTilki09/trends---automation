@@ -3,7 +3,7 @@ import { NvidiaSettingsForm } from "@/components/nvidia-settings-form";
 import { Button } from "@/components/ui/button";
 import { requireSignedInUser } from "@/lib/auth/server";
 import { getConfig } from "@/lib/config";
-import { nvidiaKeyStatus, userModel } from "@/lib/data/users";
+import { DEFAULT_BRAND, nvidiaKeyStatus, userModel } from "@/lib/data/users";
 import { NVIDIA_MODELS } from "@/lib/llm/nvidia";
 
 export const metadata = { title: "Settings · Trend Pool" };
@@ -56,6 +56,8 @@ export default async function SettingsPage() {
           models={NVIDIA_MODELS.map((m) => ({ value: m.id, label: m.label }))}
           model={userModel(user)}
           hasKey={status.state === "saved"}
+          brand={user.brandName}
+          defaultBrand={DEFAULT_BRAND}
         />
       </section>
     </div>

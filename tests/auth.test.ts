@@ -3,7 +3,8 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { apiKeyFromHeaders, generateApiKey, hashApiKey } from "../lib/data/api-keys";
 import { isLocalRequest, isPrivateAddress } from "../lib/auth/local";
-import { checkLogin, createLoginLimiter, type AuthSettings } from "../lib/auth/login";
+import { validateSignup } from "../lib/auth/accounts";
+import { checkLogin, createLoginLimiter, type AuthSettings, type MemberLookup } from "../lib/auth/login";
 import { hashPassword, verifyPassword } from "../lib/auth/password";
 import { safeNextPath, signSession, verifySession } from "../lib/auth/session";
 
@@ -13,12 +14,23 @@ describe("session cookie", () => {
   const now = 1_800_000_000;
 
   it("verifies its own signature and returns the session", () => {
-    const token = signSession({ user: "admin", exp: now + 60 }, SECRET);
-    expect(verifySession(token, SECRET, now)).toEqual({ user: "admin", exp: now + 60 });
+    const token = signSession({ user: "admin", exp: now + 60, role: "owner" }, SECRET);
+    expect(verifySession(token, SECRET, now)).toEqual({ user: "admin", exp: now + 60, role: "owner" });
+    const member = signSession({ user: "a@b.co", exp: now + 60, role: "member" }, SECRET);
+    expect(verifySession(member, SECRET, now)?.role).toBe("member");
+  });
+
+  it("can't be turned into an owner session by editing the role", () => {
+    const token = signSession({ user: "a@b.co", exp: now + 60, role: "member" }, SECRET);
+    const [, mac] = token.split(".");
+    const forged = Buffer.from(JSON.stringify({ u: "a@b.co", exp: now + 60, r: "owner" })).toString(
+      "base64url",
+    );
+    expect(verifySession(`${forged}.${mac}`, SECRET, now)).toBeNull();
   });
 
   it("rejects expired, tampered, wrong-secret and malformed tokens", () => {
-    const token = signSession({ user: "admin", exp: now + 60 }, SECRET);
+    const token = signSession({ user: "admin", exp: now + 60, role: "owner" }, SECRET);
     expect(verifySession(token, SECRET, now + 60)).toBeNull();
     expect(verifySession(token, "y".repeat(32), now)).toBeNull();
     const [, mac] = token.split(".");
@@ -63,18 +75,53 @@ describe("login", () => {
     secret: SECRET,
     maxAgeDays: 30,
   });
+  const noMembers: MemberLookup = async () => null;
 
-  it("accepts the right credentials and rejects wrong ones", async () => {
+  it("accepts the owner's credentials and rejects wrong ones", async () => {
     const auth = await settings();
     const limiter = createLoginLimiter();
     const ok = { user: "admin", password: "right password", ip: "1.1.1.1" };
-    expect(await checkLogin(ok, auth, limiter)).toEqual({ ok: true });
-    expect(await checkLogin({ ...ok, password: "nope" }, auth, limiter)).toMatchObject({ ok: false });
-    expect(await checkLogin({ ...ok, user: "root" }, auth, limiter)).toMatchObject({ ok: false });
+    expect(await checkLogin(ok, auth, noMembers, limiter)).toEqual({
+      ok: true,
+      user: "admin",
+      role: "owner",
+    });
+    expect(await checkLogin({ ...ok, password: "nope" }, auth, noMembers, limiter)).toMatchObject({
+      ok: false,
+    });
+    expect(await checkLogin({ ...ok, user: "root" }, auth, noMembers, limiter)).toMatchObject({ ok: false });
+  });
+
+  it("signs in members by email only after they confirmed it", async () => {
+    const auth = await settings();
+    const passwordHash = await hashPassword("member password");
+    const accounts: Record<string, { verified: boolean }> = {
+      "new@example.com": { verified: false },
+      "done@example.com": { verified: true },
+    };
+    const lookup: MemberLookup = async (email) =>
+      accounts[email] ? { username: email, passwordHash, verified: accounts[email].verified } : null;
+    const limiter = createLoginLimiter();
+    const login = (user: string, password = "member password") =>
+      checkLogin({ user, password, ip: "2.2.2.2" }, auth, lookup, limiter);
+
+    expect(await login("Done@Example.com ")).toEqual({ ok: true, user: "done@example.com", role: "member" });
+    expect(await login("new@example.com")).toMatchObject({ ok: false, unverified: true });
+    // A wrong password never reveals whether the account is confirmed.
+    expect(await login("new@example.com", "wrong password")).toEqual({
+      ok: false,
+      error: "Wrong email or password.",
+    });
+    expect(await login("nobody@example.com")).toEqual({ ok: false, error: "Wrong email or password." });
   });
 
   it("refuses everyone when login is not configured", async () => {
-    const r = await checkLogin({ user: "admin", password: "x", ip: "1.1.1.1" }, null, createLoginLimiter());
+    const r = await checkLogin(
+      { user: "admin", password: "x", ip: "1.1.1.1" },
+      null,
+      noMembers,
+      createLoginLimiter(),
+    );
     expect(r).toMatchObject({ ok: false, error: expect.stringContaining("not configured") });
   });
 
@@ -83,18 +130,37 @@ describe("login", () => {
     let t = 0;
     const limiter = createLoginLimiter(() => t);
     const attempt = (ip: string, password = "guess") =>
-      checkLogin({ user: "admin", password, ip }, auth, limiter);
+      checkLogin({ user: "admin", password, ip }, auth, noMembers, limiter);
+    const owner = { ok: true, user: "admin", role: "owner" };
 
     for (let i = 0; i < 5; i++) expect((await attempt("6.6.6.6")).ok).toBe(false);
     // 6th attempt is blocked even with the right password.
     const blocked = await attempt("6.6.6.6", "right password");
     expect(blocked).toMatchObject({ ok: false, retryAfterSec: 60 });
     // Other IPs are unaffected.
-    expect(await attempt("7.7.7.7", "right password")).toEqual({ ok: true });
+    expect(await attempt("7.7.7.7", "right password")).toEqual(owner);
     // One minute later, one more try.
     t += 60_000;
-    expect(await attempt("6.6.6.6", "right password")).toEqual({ ok: true });
+    expect(await attempt("6.6.6.6", "right password")).toEqual(owner);
     expect(await attempt("6.6.6.6", "right password")).toMatchObject({ ok: false, retryAfterSec: 60 });
+  });
+});
+
+describe("signup validation", () => {
+  const good = { email: " Me@Example.COM ", password: "long enough pw", confirm: "long enough pw" };
+
+  it("normalizes the email", () => {
+    expect(validateSignup(good)).toEqual({ ok: true, email: "me@example.com" });
+  });
+
+  it("rejects bad emails, short or mismatched passwords", () => {
+    expect(validateSignup({ ...good, email: "not-an-email" })).toMatchObject({ ok: false });
+    expect(validateSignup({ ...good, email: "a@b" })).toMatchObject({ ok: false });
+    expect(validateSignup({ ...good, password: "short", confirm: "short" })).toMatchObject({ ok: false });
+    expect(validateSignup({ ...good, confirm: "different pw" })).toMatchObject({
+      ok: false,
+      error: expect.stringContaining("match"),
+    });
   });
 });
 

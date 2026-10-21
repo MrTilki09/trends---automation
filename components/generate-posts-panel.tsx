@@ -1,7 +1,7 @@
 "use client";
 
 import { Loader2, Sparkles } from "lucide-react";
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { generatePostsAction, type GenerateState } from "@/app/user-actions";
 import { Button } from "@/components/ui/button";
 
@@ -32,6 +32,19 @@ export function GeneratePostsPanel({
     errors: [],
   });
 
+  // Open the items that just got a new post (they are collapsed by default).
+  useEffect(() => {
+    for (const id of state.topicIds ?? []) {
+      const el = document.querySelector<HTMLDetailsElement>(`details[data-topic-id="${id}"]`);
+      if (el) el.open = true;
+    }
+    if (state.topicIds?.[0] != null) {
+      document
+        .querySelector(`details[data-topic-id="${state.topicIds[0]}"]`)
+        ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [state.topicIds]);
+
   const setAll = (checked: boolean) =>
     document
       .querySelectorAll<HTMLInputElement>(`input[form="${formId}"][name="topicId"]`)
@@ -57,7 +70,7 @@ export function GeneratePostsPanel({
         </select>
         <Button type="submit" size="sm" disabled={disabled || pending}>
           {pending ? <Loader2 className="animate-spin" /> : <Sparkles />}
-          {pending ? "Writing…" : "Generate"}
+          {pending ? "Writing post + image prompts…" : "Generate"}
         </Button>
         <Button type="button" size="xs" variant="ghost" onClick={() => setAll(true)}>
           Select all
@@ -71,7 +84,7 @@ export function GeneratePostsPanel({
       </form>
       {state.done && state.created > 0 && (
         <p className="text-sm">
-          Wrote {state.created} post{state.created === 1 ? "" : "s"}.
+          Wrote {state.created} post{state.created === 1 ? "" : "s"} with image prompts (opened below).
         </p>
       )}
       {state.errors.map((e) => (

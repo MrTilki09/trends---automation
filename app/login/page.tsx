@@ -18,7 +18,7 @@ export default async function LoginPage({
     <div className="mx-auto mt-16 max-w-sm space-y-4">
       <div>
         <h1 className="text-xl font-semibold">Sign in</h1>
-        <p className="text-sm text-muted-foreground">The Trend Pool dashboard is private.</p>
+        <p className="text-sm text-muted-foreground">Sign in with the email you signed up with.</p>
       </div>
       {!authSettings() && (
         <p className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm">

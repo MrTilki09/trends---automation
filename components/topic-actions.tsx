@@ -8,7 +8,18 @@ import type { TopicStatus } from "@/lib/db/schema";
  * Shortlist / Ignore / Reset buttons (server action forms, work without JavaScript), plus Save to the
  * signed-in user's own pool. `saved` is undefined when nobody is signed in: no Save button then.
  */
-export function TopicActions({ id, status, saved }: { id: number; status: TopicStatus; saved?: boolean }) {
+export function TopicActions({
+  id,
+  status,
+  saved,
+  canEdit = true,
+}: {
+  id: number;
+  status: TopicStatus;
+  saved?: boolean;
+  /** Shortlist/Ignore/Reset are owner-only. */
+  canEdit?: boolean;
+}) {
   const actions: { label: string; status: TopicStatus }[] = [
     { label: "Shortlist", status: "shortlisted" },
     { label: "Ignore", status: "ignored" },
@@ -32,7 +43,7 @@ export function TopicActions({ id, status, saved }: { id: number; status: TopicS
         </form>
       )}
       {actions
-        .filter((a) => a.status !== status)
+        .filter((a) => canEdit && a.status !== status)
         .map((a) => (
           <form key={a.status} action={setTopicStatusAction}>
             <input type="hidden" name="id" value={id} />
