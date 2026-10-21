@@ -7,5 +7,9 @@ export async function listSources(db: DB) {
 }
 
 export async function setSourceEnabled(db: DB, id: number, enabled: boolean): Promise<void> {
-  await db.update(sources).set({ enabled }).where(eq(sources.id, id));
+  // Turning a source off clears its last error: it no longer runs, so the old message would only confuse.
+  await db
+    .update(sources)
+    .set(enabled ? { enabled } : { enabled, lastError: null })
+    .where(eq(sources.id, id));
 }

@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { parseApproxTraffic, parseGoogleTrends } from "../lib/sources/google-trends";
 import { parseHnItem } from "../lib/sources/hackernews";
 import { parseRedditListing } from "../lib/sources/reddit";
+import { parseBridgeResponse } from "../lib/sources/reddit-devvit";
 import { parseFeed } from "../lib/sources/rss";
 
 const fixture = (name: string) => readFileSync(path.join(__dirname, "fixtures", name), "utf8");
@@ -147,5 +148,58 @@ describe("reddit adapter (parser only)", () => {
     const items = parseRedditListing(listing);
     expect(items).toHaveLength(1);
     expect(items[0]!.metrics).toEqual({ score: 120, comments: 30, upvoteRatio: 0.95 });
+  });
+});
+
+describe("reddit via Devvit bridge (parser only)", () => {
+  const post = {
+    id: "t3_abc",
+    subreddit: "technology",
+    title: "Nvidia unveils new GPU",
+    url: "https://www.theverge.com/nvidia-gpu",
+    permalink: "/r/technology/comments/abc/nvidia_unveils_new_gpu/",
+    author: "someone",
+    createdAt: "2026-10-21T08:00:00.000Z",
+    score: 1234,
+    comments: 210,
+    flair: "Hardware",
+  };
+
+  it("maps posts to items with article URL, metrics, tags and date", () => {
+    const { items, errors } = parseBridgeResponse({ posts: [post] });
+    expect(errors).toEqual([]);
+    expect(items[0]).toMatchObject({
+      externalId: "t3_abc",
+      url: "https://www.theverge.com/nvidia-gpu",
+      metrics: { score: 1234, comments: 210 },
+      tags: ["r/technology", "reddit", "Hardware"],
+    });
+    expect(items[0]!.publishedAt?.toISOString()).toBe("2026-10-21T08:00:00.000Z");
+  });
+
+  it("uses the Reddit permalink for text posts and skips stickied posts", () => {
+    const { items } = parseBridgeResponse({
+      posts: [
+        {
+          ...post,
+          id: "t3_self",
+          url: "https://www.reddit.com/r/technology/comments/self/",
+          body: "Discussion",
+        },
+        { ...post, id: "t3_pin", stickied: true },
+      ],
+    });
+    expect(items).toHaveLength(1);
+    expect(items[0]!.url).toBe("https://www.reddit.com/r/technology/comments/abc/nvidia_unveils_new_gpu/");
+    expect(items[0]!.summary).toBe("Discussion");
+  });
+
+  it("reports per-subreddit errors without failing the rest", () => {
+    const { items, errors } = parseBridgeResponse({
+      posts: [post],
+      errors: [{ subreddit: "private_sub", message: "forbidden" }],
+    });
+    expect(items).toHaveLength(1);
+    expect(errors).toEqual(["r/private_sub: forbidden"]);
   });
 });

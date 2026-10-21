@@ -1,3 +1,4 @@
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import Link from "next/link";
 import { StatusBadge } from "@/components/status-badge";
 import { TopicActions } from "@/components/topic-actions";
@@ -10,10 +11,12 @@ import {
   listFacets,
   listTopics,
   FOCUSES,
+  DEFAULT_DIR,
   SORTS,
   TIME_WINDOWS,
   TOPIC_STATUSES,
   type Focus,
+  type SortDir,
   type SortKey,
   type TimeWindow,
   type TopicFilters,
@@ -26,7 +29,7 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) || undefined;
 
 const selectClass =
-  "h-9 rounded-md border border-input bg-transparent px-2 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
+  "h-9 rounded-md border border-input bg-background px-2 text-sm text-foreground shadow-xs focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
 const LANG_NAMES: Record<string, string> = { tr: "Turkish", en: "English" };
 
@@ -39,6 +42,7 @@ function poolHref(current: TopicFilters, change: Partial<Record<keyof TopicFilte
     "status",
     "window",
     "sort",
+    "dir",
     "category",
     "tag",
     "lang",
@@ -65,17 +69,60 @@ const QUICK_VIEWS: { label: string; hint: string; change: Partial<Record<keyof T
   { label: "Türkiye", hint: "Turkish sources", change: { tag: "turkey" } },
 ];
 
+/**
+ * Clickable column header: first click sorts by this column (numbers/dates high→low, text A→Z),
+ * clicking the active column again reverses the direction.
+ */
+function SortHead({
+  col,
+  label,
+  filters,
+  className,
+  align,
+}: {
+  col: SortKey;
+  label: string;
+  filters: TopicFilters;
+  className?: string;
+  align?: "right";
+}) {
+  const active = filters.sort === col;
+  const dir = filters.dir ?? DEFAULT_DIR[col];
+  const nextDir = active ? (dir === "asc" ? "desc" : "asc") : DEFAULT_DIR[col];
+  const Icon = !active ? ArrowUpDown : dir === "asc" ? ArrowUp : ArrowDown;
+  return (
+    <TableHead
+      className={className}
+      aria-sort={active ? (dir === "asc" ? "ascending" : "descending") : "none"}
+    >
+      <Link
+        href={poolHref(filters, { sort: col, dir: nextDir })}
+        className={`inline-flex items-center gap-1 hover:text-foreground ${align === "right" ? "w-full justify-end" : ""} ${active ? "text-foreground" : ""}`}
+        title={`Sort by ${label.toLowerCase()}`}
+      >
+        {label}
+        <Icon className={`size-3.5 ${active ? "" : "opacity-40"}`} />
+      </Link>
+    </TableHead>
+  );
+}
+
 export default async function PoolPage({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
   const status = (one(sp.status) ?? "new") as TopicStatus | "all";
   const window = (one(sp.window) ?? "72h") as TimeWindow;
-  const sort = (one(sp.sort) ?? "score") as SortKey;
+  // "newest" (old links) = published, newest first.
+  const rawSort = one(sp.sort) === "newest" ? "published" : (one(sp.sort) ?? "score");
+  const sort = (rawSort in SORTS ? rawSort : "score") as SortKey;
+  const rawDir = one(sp.dir);
+  const dir: SortDir = rawDir === "asc" || rawDir === "desc" ? rawDir : DEFAULT_DIR[sort];
   const focus = (one(sp.focus) ?? "tech") as Focus;
   const filters: TopicFilters = {
     focus: focus in FOCUSES ? focus : "tech",
     status: status === "all" || TOPIC_STATUSES.includes(status) ? status : "new",
     window: window in TIME_WINDOWS ? window : "72h",
-    sort: sort in SORTS ? sort : "score",
+    sort,
+    dir,
     source: one(sp.source),
     category: one(sp.category),
     tag: one(sp.tag),
@@ -101,8 +148,8 @@ export default async function PoolPage({ searchParams }: { searchParams: SearchP
             <h1 className="text-xl font-semibold">Pool</h1>
             <p className="text-sm text-muted-foreground">
               {topics.length} topic{topics.length === 1 ? "" : "s"}
-              {filters.window !== "all" ? ` published in the last ${filters.window}` : ""},{" "}
-              {filters.sort === "newest" ? "newest first" : "ranked by score"}
+              {filters.window !== "all" ? ` published in the last ${filters.window}` : ""}, sorted by{" "}
+              {SORTS[sort].toLowerCase()} {dir === "asc" ? "↑" : "↓"}
             </p>
           </div>
           {hasExtraFilters && (
@@ -123,7 +170,13 @@ export default async function PoolPage({ searchParams }: { searchParams: SearchP
         <nav className="flex flex-wrap items-center gap-1.5 text-sm" aria-label="Quick views">
           {QUICK_VIEWS.map((v) => {
             const href = poolHref(
-              { focus: filters.focus, status: filters.status, window: filters.window, sort: filters.sort },
+              {
+                focus: filters.focus,
+                status: filters.status,
+                window: filters.window,
+                sort: filters.sort,
+                dir: filters.dir,
+              },
               v.change,
             );
             const active = filters.category === v.change.category && filters.tag === v.change.tag;
@@ -151,12 +204,21 @@ export default async function PoolPage({ searchParams }: { searchParams: SearchP
               </option>
             ))}
           </select>
-          <select name="sort" defaultValue={filters.sort} className={selectClass} aria-label="Sort">
-            {Object.entries(SORTS).map(([k, label]) => (
-              <option key={k} value={k}>
-                {label}
-              </option>
-            ))}
+          <select
+            // key: re-create when the sort changes (e.g. via a column header) so it shows the current value
+            key={filters.sort}
+            name="sort"
+            defaultValue={filters.sort}
+            className={selectClass}
+            aria-label="Sort"
+          >
+            {Object.entries(SORTS)
+              .filter(([k]) => k !== "newest")
+              .map(([k, label]) => (
+                <option key={k} value={k}>
+                  {label}
+                </option>
+              ))}
           </select>
           <select name="window" defaultValue={filters.window} className={selectClass} aria-label="Published">
             {Object.keys(TIME_WINDOWS).map((w) => (
@@ -226,12 +288,12 @@ export default async function PoolPage({ searchParams }: { searchParams: SearchP
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-16 text-right">Score</TableHead>
-              <TableHead>Topic</TableHead>
-              <TableHead>Sources</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Published</TableHead>
-              <TableHead>Status</TableHead>
+              <SortHead col="score" label="Score" filters={filters} className="w-20" align="right" />
+              <SortHead col="title" label="Topic" filters={filters} />
+              <SortHead col="sources" label="Sources" filters={filters} />
+              <SortHead col="category" label="Category" filters={filters} />
+              <SortHead col="published" label="Published" filters={filters} />
+              <SortHead col="status" label="Status" filters={filters} />
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>

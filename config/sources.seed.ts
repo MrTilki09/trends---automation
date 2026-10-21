@@ -163,7 +163,30 @@ export const sourceSeeds: SourceSeed[] = [
   rss("chip", "CHIP Online", "https://www.chip.com.tr/rss", "tr", ["tech", "turkey"]),
   rss("bbc-turkce", "BBC Türkçe", "https://feeds.bbci.co.uk/turkce/rss.xml", "tr", ["turkey"]),
 
-  // Optional: needs approved Reddit API credentials (see README). Disabled by default.
+  // Reddit through our own Devvit app (reddit-bridge/). Disabled until REDDIT_DEVVIT_URL/TOKEN are set.
+  {
+    key: "reddit-devvit",
+    name: "Reddit (via Devvit app)",
+    type: "reddit_devvit",
+    enabled: false,
+    weight: 1,
+    config: {
+      subreddits: [
+        "technology",
+        "artificial",
+        "LocalLLaMA",
+        "OpenAI",
+        "singularity",
+        "gadgets",
+        "programming",
+      ],
+      sort: "hot",
+      limit: 25,
+      tags: ["tech"],
+    },
+  },
+
+  // Optional: needs approved Reddit Data API credentials (see README). Disabled by default.
   {
     key: "reddit-tech",
     name: "Reddit (tech subs)",

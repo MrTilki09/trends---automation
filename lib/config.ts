@@ -48,6 +48,12 @@ const envSchema = z.object({
   REDDIT_CLIENT_SECRET: z.string().optional(),
   REDDIT_USERNAME: z.string().optional(),
   REDDIT_PASSWORD: z.string().optional(),
+  // Reddit via our Devvit app (reddit-bridge/)
+  REDDIT_DEVVIT_URL: z
+    .url()
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
+  REDDIT_DEVVIT_TOKEN: z.string().optional(),
 });
 
 export type AppConfig = z.infer<typeof envSchema>;

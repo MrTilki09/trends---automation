@@ -8,8 +8,29 @@ export const TOPIC_STATUSES: TopicStatus[] = ["new", "shortlisted", "ignored"];
 /** "Published within" options for the pool. `null` = no limit. */
 export const TIME_WINDOWS = { "6h": 6, "24h": 24, "72h": 72, "7d": 168, "30d": 720, all: null } as const;
 export type TimeWindow = keyof typeof TIME_WINDOWS;
-export const SORTS = { score: "Top score", newest: "Newest first" } as const;
+/** Sortable columns (label = dropdown text). "newest" is kept as an alias of published/desc for old links. */
+export const SORTS = {
+  score: "Score",
+  published: "Published",
+  sources: "Number of sources",
+  title: "Title",
+  category: "Category",
+  status: "Status",
+  newest: "Newest first",
+} as const;
 export type SortKey = keyof typeof SORTS;
+export type SortDir = "asc" | "desc";
+
+/** Direction used when a column is first clicked: numbers/dates high→low, text A→Z. */
+export const DEFAULT_DIR: Record<SortKey, SortDir> = {
+  score: "desc",
+  published: "desc",
+  sources: "desc",
+  title: "asc",
+  category: "asc",
+  status: "asc",
+  newest: "desc",
+};
 
 export const FOCUSES = { tech: "Tech only", all: "Everything" } as const;
 export type Focus = keyof typeof FOCUSES;
@@ -24,6 +45,7 @@ export type TopicFilters = {
   lang?: string;
   window?: TimeWindow;
   sort?: SortKey;
+  dir?: SortDir;
   q?: string;
   limit?: number;
 };
@@ -75,6 +97,22 @@ function baseWhere(f: Pick<TopicFilters, "status" | "window" | "focus">): SQL[] 
   return where;
 }
 
+const SORT_EXPR: Record<SortKey, SQL> = {
+  score: sql`t.score`,
+  published: PUBLISHED,
+  newest: PUBLISHED,
+  sources: sql`t.source_count`,
+  title: sql`lower(t.title)`,
+  category: sql`coalesce(t.category, t.llm_category)`,
+  status: sql`t.status`,
+};
+
+/** ORDER BY for a column; ties fall back to score then publish date. Empty values always go last. */
+function orderBy(sort: SortKey, dir?: SortDir): SQL {
+  const d = (dir ?? DEFAULT_DIR[sort]) === "asc" ? sql`ASC` : sql`DESC`;
+  return sql`${SORT_EXPR[sort]} ${d} NULLS LAST, t.score DESC, ${PUBLISHED} DESC`;
+}
+
 /** The pool: topics filtered by publish date, status, category, tag, language, source and text. */
 export async function listTopics(db: DB, f: TopicFilters = {}): Promise<TopicListRow[]> {
   const where = baseWhere(f);
@@ -92,8 +130,7 @@ export async function listTopics(db: DB, f: TopicFilters = {}): Promise<TopicLis
     where.push(sql`(t.title ILIKE ${like} OR EXISTS (
       SELECT 1 FROM raw_items r3 WHERE r3.topic_id = t.id AND r3.normalized_title LIKE ${normLike}))`);
   }
-  const order =
-    f.sort === "newest" ? sql`${PUBLISHED} DESC, t.score DESC` : sql`t.score DESC, ${PUBLISHED} DESC`;
+  const order = orderBy(f.sort ?? "score", f.dir);
 
   const res = await db.execute(sql`
     SELECT t.id, t.title, t.canonical_url, t.score, t.source_count, t.item_count,

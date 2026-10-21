@@ -13,6 +13,8 @@ export const logger = pino({
       "REDDIT_CLIENT_SECRET",
       "*.REDDIT_CLIENT_SECRET",
       "REDDIT_PASSWORD",
+      "REDDIT_DEVVIT_TOKEN",
+      "*.REDDIT_DEVVIT_TOKEN",
       "*.REDDIT_PASSWORD",
       "DATABASE_URL",
       "*.DATABASE_URL",

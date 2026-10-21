@@ -61,7 +61,9 @@ export default async function SourcesPage() {
                   )}
                 </TableCell>
                 <TableCell className="max-w-xs whitespace-normal text-xs">
-                  {s.lastError ? (
+                  {!s.enabled ? (
+                    <span className="text-muted-foreground">Off — not collected</span>
+                  ) : s.lastError ? (
                     <span className="text-red-600 dark:text-red-400">{s.lastError}</span>
                   ) : s.lastSuccessAt ? (
                     <StatusBadge status="succeeded" />
