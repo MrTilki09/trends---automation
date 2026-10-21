@@ -66,6 +66,7 @@ automatically. Postgres is also exposed on `127.0.0.1:5432` for DB tools.
 | `npm run migrate`                       | run migrations + seed in the dev stack                                                                                                                       |
 | `npm run db:generate`                   | after changing `lib/db/schema.ts`: create a new SQL migration                                                                                                |
 | `npm run db:studio`                     | Drizzle Studio (browse the DB; dev stack must be running)                                                                                                    |
+| `npm run db:reindex`                    | recompute dates, tags, language, category and scores for all topics (after changing rules)                                                                   |
 | `npm run db:seed` / `npm run db:reseed` | add missing sources / also overwrite existing ones from the seed file (from the host, set `DATABASE_URL=postgres://trendpool:<pw>@localhost:5432/trendpool`) |
 
 ## 3. How a run works
@@ -76,9 +77,11 @@ automatically. Postgres is also exposed on `127.0.0.1:5432` for DB tools.
    A failing source is recorded and skipped — the run becomes `partial`, never `failed` unless _all_ fail.
 2. **Normalize + de-dupe**: canonical URL (no `utm_*`/`fbclid`/…, no `www.`, no trailing slash) and normalized
    title (Turkish-aware lowercase, accents folded: `İSTANBUL'da IŞIK` → `istanbul da isik`). Items are unique per
-   source; seeing an item again only refreshes its metrics.
+   source; seeing an item again only refreshes its metrics. Each item also keeps its **publish date**,
+   **language** and **tags** (the feed's own `<category>` labels + the source's configured tags).
 3. **Cluster** new items into topics: same canonical URL → same topic; otherwise title trigram similarity
    ≥ `CLUSTER_SIMILARITY_THRESHOLD` (0.55) with topics seen in the last 72 h; otherwise a new topic.
+   Each topic gets its **publish date** (earliest article), top **tags**, **language** and a **category**.
 4. **Score** recent topics (below).
 5. **Optional LLM enrichment** (off by default).
 6. **Finish**: status `succeeded` / `partial` / `failed` (+ `interrupted` if the worker was stopped mid-run).
@@ -97,9 +100,29 @@ score = (engagement + cross_source_bonus + keyword_boost + llm_boost) × recency
 | cross_source_bonus | +0.3 per extra source, max +0.9                                                                                                                                  |
 | keyword_boost      | +0.2 if the title/keywords contain one of `NICHE_KEYWORDS` (whole words)                                                                                         |
 | llm_boost          | +0.5 × LLM relevance (only when enriched)                                                                                                                        |
-| recency_decay      | halves every `SCORE_HALF_LIFE_HOURS` (24 h) since first seen                                                                                                     |
+| recency_decay      | halves every `SCORE_HALF_LIFE_HOURS` (24 h) since the story was **published** (so an old article we only just found doesn't count as fresh)                      |
 
 The topic page in the dashboard shows each part. The weights live in `lib/pipeline/score.ts` (`DEFAULT_WEIGHTS`).
+
+### Dates, categories, tags and filters
+
+- **Published date**: every source provides one (HN post time, RSS `pubDate`, Google Trends start time).
+  A topic's date is its earliest article. Future dates are clamped to "now".
+- **Category**: one main category per topic from a keyword classifier (`lib/pipeline/classify.ts`), in
+  English and Turkish: AI, Startups, Mobile, Hardware, Gaming, Security, Software, Science & Space, Auto & EV,
+  Aviation & Defense, Business, Social & Media, Politics, Sports, Entertainment, Health. Feed tags count most,
+  then the title, then the summary. Topics with no clear signal (e.g. a person's name from Google Trends) stay
+  uncategorized; LLM enrichment (§5) can fill those in.
+- **Tags**: the feeds' own categories (e.g. TechCrunch "AI", Webrazzi "Yapay Zeka"), plus tags set per source in
+  `config/sources.seed.ts` (e.g. `turkey`, `startups`), plus `show hn`, `search trend`.
+- **Language**: `tr` / `en`, from the source.
+
+In the **Pool**: sort by _Top score_ or _Newest first_; filter by _Published last 6h / 24h / 72h / 7d / 30d_,
+status, category, tag, language, source and text. Clicking a category or `#tag` badge filters by it.
+
+To tune categories, edit `CATEGORY_RULES` in `lib/pipeline/classify.ts` (a `*` suffix matches Turkish
+word endings: `oyun*` → `oyunlari`), add a test case in `tests/classify.test.ts`, then recompute existing
+topics with `npm run db:reindex` (dev) or `docker compose run --rm migrate node dist/reindex.js` (prod).
 
 ## 4. Sources
 

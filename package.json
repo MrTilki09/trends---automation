@@ -22,6 +22,7 @@
     "db:migrate": "tsx worker/migrate.ts",
     "db:seed": "tsx worker/seed.ts",
     "db:reseed": "tsx worker/seed.ts --update",
+    "db:reindex": "tsx worker/reindex.ts",
     "db:studio": "drizzle-kit studio",
     "migrate": "docker compose -f compose.yaml -f compose.dev.yaml run --rm migrate",
     "logs": "docker compose -f compose.yaml -f compose.dev.yaml logs -f --tail=100"

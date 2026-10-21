@@ -6,10 +6,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { listSources } from "@/lib/data/sources";
-import { listCategories, listTopics, TIME_WINDOWS, TOPIC_STATUSES, type TimeWindow } from "@/lib/data/topics";
+import {
+  listFacets,
+  listTopics,
+  SORTS,
+  TIME_WINDOWS,
+  TOPIC_STATUSES,
+  type SortKey,
+  type TimeWindow,
+  type TopicFilters,
+} from "@/lib/data/topics";
 import { getDb } from "@/lib/db/client";
 import type { TopicStatus } from "@/lib/db/schema";
-import { hostOf, relativeTime } from "@/lib/utils";
+import { formatDateTime, hostOf, relativeTime } from "@/lib/utils";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) || undefined;
@@ -17,35 +26,87 @@ const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) 
 const selectClass =
   "h-9 rounded-md border border-input bg-transparent px-2 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
+const LANG_NAMES: Record<string, string> = { tr: "Turkish", en: "English" };
+
+/** Builds a /pool URL with the current filters plus `change` (undefined removes a key). */
+function poolHref(current: TopicFilters, change: Partial<Record<keyof TopicFilters, string | undefined>>) {
+  const params = new URLSearchParams();
+  const merged = { ...current, ...change };
+  for (const key of ["status", "window", "sort", "category", "tag", "lang", "source", "q"] as const) {
+    const v = merged[key];
+    if (v != null && v !== "") params.set(key, String(v));
+  }
+  return `/pool?${params.toString()}`;
+}
+
 export default async function PoolPage({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
   const status = (one(sp.status) ?? "new") as TopicStatus | "all";
   const window = (one(sp.window) ?? "72h") as TimeWindow;
-  const filters = {
+  const sort = (one(sp.sort) ?? "score") as SortKey;
+  const filters: TopicFilters = {
     status: status === "all" || TOPIC_STATUSES.includes(status) ? status : "new",
     window: window in TIME_WINDOWS ? window : "72h",
+    sort: sort in SORTS ? sort : "score",
     source: one(sp.source),
     category: one(sp.category),
+    tag: one(sp.tag),
+    lang: one(sp.lang),
     q: one(sp.q),
-  } as const;
+  };
 
   const db = getDb();
-  const [topics, sources, categories] = await Promise.all([
+  const [topics, sources, facets] = await Promise.all([
     listTopics(db, filters),
     listSources(db),
-    listCategories(db),
+    listFacets(db, filters),
   ]);
+  const hasExtraFilters = Boolean(
+    filters.source || filters.category || filters.tag || filters.lang || filters.q,
+  );
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-semibold">Pool</h1>
-          <p className="text-sm text-muted-foreground">
-            {topics.length} topic{topics.length === 1 ? "" : "s"}, ranked by score
-          </p>
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <div>
+            <h1 className="text-xl font-semibold">Pool</h1>
+            <p className="text-sm text-muted-foreground">
+              {topics.length} topic{topics.length === 1 ? "" : "s"}
+              {filters.window !== "all" ? ` published in the last ${filters.window}` : ""},{" "}
+              {filters.sort === "newest" ? "newest first" : "ranked by score"}
+            </p>
+          </div>
+          {hasExtraFilters && (
+            <Link
+              href={poolHref(filters, {
+                source: undefined,
+                category: undefined,
+                tag: undefined,
+                lang: undefined,
+                q: undefined,
+              })}
+              className="text-sm text-muted-foreground hover:underline"
+            >
+              Clear filters
+            </Link>
+          )}
         </div>
         <form className="flex flex-wrap items-center gap-2" method="get">
+          <select name="sort" defaultValue={filters.sort} className={selectClass} aria-label="Sort">
+            {Object.entries(SORTS).map(([k, label]) => (
+              <option key={k} value={k}>
+                {label}
+              </option>
+            ))}
+          </select>
+          <select name="window" defaultValue={filters.window} className={selectClass} aria-label="Published">
+            {Object.keys(TIME_WINDOWS).map((w) => (
+              <option key={w} value={w}>
+                {w === "all" ? "Any time" : `Published last ${w}`}
+              </option>
+            ))}
+          </select>
           <select name="status" defaultValue={filters.status} className={selectClass} aria-label="Status">
             <option value="all">All statuses</option>
             {TOPIC_STATUSES.map((s) => (
@@ -55,14 +116,31 @@ export default async function PoolPage({ searchParams }: { searchParams: SearchP
             ))}
           </select>
           <select
-            name="window"
-            defaultValue={filters.window}
+            name="category"
+            defaultValue={filters.category ?? ""}
             className={selectClass}
-            aria-label="Time window"
+            aria-label="Category"
           >
-            {Object.keys(TIME_WINDOWS).map((w) => (
-              <option key={w} value={w}>
-                Last {w}
+            <option value="">All categories</option>
+            {facets.categories.map((c) => (
+              <option key={c.value} value={c.value}>
+                {c.value} ({c.count})
+              </option>
+            ))}
+          </select>
+          <select name="tag" defaultValue={filters.tag ?? ""} className={selectClass} aria-label="Tag">
+            <option value="">All tags</option>
+            {facets.tags.map((t) => (
+              <option key={t.value} value={t.value}>
+                #{t.value} ({t.count})
+              </option>
+            ))}
+          </select>
+          <select name="lang" defaultValue={filters.lang ?? ""} className={selectClass} aria-label="Language">
+            <option value="">All languages</option>
+            {facets.langs.map((l) => (
+              <option key={l.value} value={l.value}>
+                {LANG_NAMES[l.value] ?? l.value} ({l.count})
               </option>
             ))}
           </select>
@@ -79,22 +157,9 @@ export default async function PoolPage({ searchParams }: { searchParams: SearchP
               </option>
             ))}
           </select>
-          <select
-            name="category"
-            defaultValue={filters.category ?? ""}
-            className={selectClass}
-            aria-label="Category"
-          >
-            <option value="">All categories</option>
-            {categories.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
           <Input name="q" defaultValue={filters.q ?? ""} placeholder="Search…" className="w-44" />
           <Button type="submit" variant="outline" size="sm">
-            Filter
+            Apply
           </Button>
         </form>
       </div>
@@ -107,7 +172,7 @@ export default async function PoolPage({ searchParams }: { searchParams: SearchP
               <TableHead>Topic</TableHead>
               <TableHead>Sources</TableHead>
               <TableHead>Category</TableHead>
-              <TableHead>First seen</TableHead>
+              <TableHead>Published</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -127,14 +192,24 @@ export default async function PoolPage({ searchParams }: { searchParams: SearchP
                   <Link href={`/pool/${t.id}`} className="font-medium hover:underline">
                     {t.title}
                   </Link>
-                  <div className="flex gap-2 text-xs text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 pt-0.5 text-xs text-muted-foreground">
+                    {t.lang && <span className="font-mono uppercase">{t.lang}</span>}
                     {t.canonicalUrl && (
                       <a href={t.canonicalUrl} target="_blank" rel="noreferrer" className="hover:underline">
                         {hostOf(t.canonicalUrl)} ↗
                       </a>
                     )}
-                    {t.llmSummary && <span className="truncate">{t.llmSummary}</span>}
+                    {t.tags.slice(0, 4).map((tag) => (
+                      <Link
+                        key={tag}
+                        href={poolHref(filters, { tag })}
+                        className="hover:text-foreground hover:underline"
+                      >
+                        #{tag}
+                      </Link>
+                    ))}
                   </div>
+                  {t.llmSummary && <p className="pt-0.5 text-xs text-muted-foreground">{t.llmSummary}</p>}
                 </TableCell>
                 <TableCell className="whitespace-normal">
                   <div className="flex max-w-56 flex-wrap gap-1">
@@ -149,10 +224,21 @@ export default async function PoolPage({ searchParams }: { searchParams: SearchP
                   </div>
                 </TableCell>
                 <TableCell className="text-sm">
-                  {t.category ?? <span className="text-muted-foreground">—</span>}
+                  {t.category ? (
+                    <Link href={poolHref(filters, { category: t.category })}>
+                      <Badge variant="secondary" className="font-normal hover:bg-secondary/60">
+                        {t.category}
+                      </Badge>
+                    </Link>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
                 </TableCell>
-                <TableCell className="text-sm text-muted-foreground" title={t.firstSeenAt.toISOString()}>
-                  {relativeTime(t.firstSeenAt)}
+                <TableCell
+                  className="whitespace-nowrap text-sm text-muted-foreground"
+                  title={formatDateTime(t.publishedAt)}
+                >
+                  {relativeTime(t.publishedAt)}
                 </TableCell>
                 <TableCell>
                   <StatusBadge status={t.status} />

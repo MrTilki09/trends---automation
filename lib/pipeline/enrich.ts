@@ -1,6 +1,7 @@
 import { and, desc, eq, gt, isNull } from "drizzle-orm";
 import { z } from "zod";
 import type { DB } from "../db/client";
+import { CATEGORIES } from "./classify";
 import { topics } from "../db/schema";
 import { LLMError, type LLMProvider } from "../llm/types";
 
@@ -32,7 +33,7 @@ export function buildEnrichPrompt(
     `Creator's niche: ${niche || "(not specified)"}`,
     "",
     "For each topic below return an object:",
-    '{ "id": <same id>, "category": <short category, e.g. "AI", "Startups", "Politics", "Sports">,',
+    `{ "id": <same id>, "category": <one of: ${CATEGORIES.join(", ")}, or "Other">,`,
     '  "relevance": <0..1, how relevant to the niche>, "oneLineSummary": <max 25 words, same language as the title> }',
     "",
     "Topics (JSON):",

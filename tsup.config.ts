@@ -7,6 +7,7 @@ export default defineConfig({
     worker: "worker/index.ts",
     migrate: "worker/migrate.ts",
     seed: "worker/seed.ts",
+    reindex: "worker/reindex.ts",
   },
   format: ["cjs"],
   platform: "node",

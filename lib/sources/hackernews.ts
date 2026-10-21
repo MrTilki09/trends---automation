@@ -24,6 +24,12 @@ const hnItem = z.object({
   deleted: z.boolean().optional(),
 });
 
+/** "Show HN: …" / "Ask HN: …" / "Launch HN: …" become tags. */
+function hnTags(title: string): string[] {
+  const m = title.match(/^(Show|Ask|Launch|Tell) HN\b/i);
+  return m ? [`${m[1]!.toLowerCase()} hn`] : [];
+}
+
 /** Converts one HN API item into a RawItemInput (null for non-stories / dead items). */
 export function parseHnItem(json: unknown): RawItemInput | null {
   const parsed = hnItem.safeParse(json);
@@ -37,6 +43,7 @@ export function parseHnItem(json: unknown): RawItemInput | null {
     author: it.by,
     publishedAt: it.time ? new Date(it.time * 1000) : undefined,
     lang: "en",
+    tags: hnTags(it.title),
     metrics: { points: it.score ?? 0, comments: it.descendants ?? 0 },
     raw: { ...it, hnUrl: `https://news.ycombinator.com/item?id=${it.id}` },
   };

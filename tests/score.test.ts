@@ -17,7 +17,7 @@ const base: ScoreInput = {
   normalizedTitle: "some story",
   keywords: ["story"],
   llmRelevance: null,
-  firstSeenAt: now,
+  publishedAt: now,
 };
 const score = (over: Partial<ScoreInput>, niche: string[] = []) =>
   scoreTopic({ ...base, ...over }, { now, nicheKeywords: niche });
@@ -73,7 +73,7 @@ describe("components", () => {
   });
 
   it("combines as (engagement + bonuses) × decay and explains itself", () => {
-    const r = score({ itemEngagements: [0.6], sourceCount: 2, llmRelevance: 0.4, firstSeenAt: hoursAgo(24) });
+    const r = score({ itemEngagements: [0.6], sourceCount: 2, llmRelevance: 0.4, publishedAt: hoursAgo(24) });
     expect(r.score).toBeCloseTo((0.6 + 0.3 + 0 + 0.2) * 0.5, 4);
     expect(r.breakdown).toMatchObject({
       engagement: 0.6,
@@ -86,8 +86,8 @@ describe("components", () => {
 
 describe("ranking", () => {
   it("recent multi-source topics outrank old single-source ones", () => {
-    const recentMulti = score({ itemEngagements: [0.5], sourceCount: 3, firstSeenAt: hoursAgo(2) });
-    const oldSingleViral = score({ itemEngagements: [1], sourceCount: 1, firstSeenAt: hoursAgo(36) });
+    const recentMulti = score({ itemEngagements: [0.5], sourceCount: 3, publishedAt: hoursAgo(2) });
+    const oldSingleViral = score({ itemEngagements: [1], sourceCount: 1, publishedAt: hoursAgo(36) });
     expect(recentMulti.score).toBeGreaterThan(oldSingleViral.score);
   });
 });

@@ -16,12 +16,21 @@ export type SourceSeed = {
   config: Record<string, unknown>;
 };
 
-const rss = (key: string, name: string, url: string, lang: "en" | "tr", weight = 1): SourceSeed => ({
+// `tags` are added to every item of the source: they show up as filters in the dashboard and help
+// the categorizer (e.g. "ai" on OpenAI News). Use lowercase; "turkey" marks Turkish/regional sources.
+const rss = (
+  key: string,
+  name: string,
+  url: string,
+  lang: "en" | "tr",
+  tags: string[],
+  weight = 1,
+): SourceSeed => ({
   key: `rss-${key}`,
   name,
   type: "rss",
   weight,
-  config: { feeds: [{ url, lang }], maxItemsPerFeed: 30 },
+  config: { feeds: [{ url, lang }], maxItemsPerFeed: 30, tags },
 });
 
 export const sourceSeeds: SourceSeed[] = [
@@ -30,7 +39,7 @@ export const sourceSeeds: SourceSeed[] = [
     name: "Hacker News (top)",
     type: "hackernews",
     weight: 1,
-    config: { list: "top", maxItems: 60 },
+    config: { list: "top", maxItems: 60, tags: ["tech"] },
   },
   {
     key: "google-trends",
@@ -41,18 +50,18 @@ export const sourceSeeds: SourceSeed[] = [
   },
 
   // AI & tech (global)
-  rss("techcrunch", "TechCrunch", "https://techcrunch.com/feed/", "en"),
-  rss("theverge", "The Verge", "https://www.theverge.com/rss/index.xml", "en"),
-  rss("arstechnica", "Ars Technica", "https://feeds.arstechnica.com/arstechnica/index", "en"),
-  rss("openai", "OpenAI News", "https://openai.com/news/rss.xml", "en", 1.2),
+  rss("techcrunch", "TechCrunch", "https://techcrunch.com/feed/", "en", ["tech", "startups"]),
+  rss("theverge", "The Verge", "https://www.theverge.com/rss/index.xml", "en", ["tech"]),
+  rss("arstechnica", "Ars Technica", "https://feeds.arstechnica.com/arstechnica/index", "en", ["tech"]),
+  rss("openai", "OpenAI News", "https://openai.com/news/rss.xml", "en", ["ai"], 1.2),
 
   // Turkish tech, startups and general news
-  rss("webrazzi", "Webrazzi", "https://webrazzi.com/feed/", "tr"),
-  rss("egirisim", "Egirişim", "https://egirisim.com/feed/", "tr"),
-  rss("shiftdelete", "ShiftDelete.Net", "https://shiftdelete.net/feed", "tr"),
-  rss("donanimhaber", "DonanımHaber", "https://www.donanimhaber.com/rss/tum/", "tr"),
-  rss("ntv-teknoloji", "NTV Teknoloji", "https://www.ntv.com.tr/teknoloji.rss", "tr"),
-  rss("bbc-turkce", "BBC Türkçe", "https://feeds.bbci.co.uk/turkce/rss.xml", "tr"),
+  rss("webrazzi", "Webrazzi", "https://webrazzi.com/feed/", "tr", ["tech", "turkey"]),
+  rss("egirisim", "Egirişim", "https://egirisim.com/feed/", "tr", ["startups", "turkey"]),
+  rss("shiftdelete", "ShiftDelete.Net", "https://shiftdelete.net/feed", "tr", ["tech", "turkey"]),
+  rss("donanimhaber", "DonanımHaber", "https://www.donanimhaber.com/rss/tum/", "tr", ["tech", "turkey"]),
+  rss("ntv-teknoloji", "NTV Teknoloji", "https://www.ntv.com.tr/teknoloji.rss", "tr", ["tech", "turkey"]),
+  rss("bbc-turkce", "BBC Türkçe", "https://feeds.bbci.co.uk/turkce/rss.xml", "tr", ["turkey"]),
 
   // Optional: needs approved Reddit API credentials (see README). Disabled by default.
   {
@@ -61,6 +70,11 @@ export const sourceSeeds: SourceSeed[] = [
     type: "reddit",
     enabled: false,
     weight: 1,
-    config: { subreddits: ["technology", "artificial", "LocalLLaMA"], sort: "hot", limit: 25 },
+    config: {
+      subreddits: ["technology", "artificial", "LocalLLaMA"],
+      sort: "hot",
+      limit: 25,
+      tags: ["tech"],
+    },
   },
 ];

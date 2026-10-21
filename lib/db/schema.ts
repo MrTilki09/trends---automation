@@ -93,7 +93,8 @@ export type ScoreBreakdown = {
   keywordBoost: number;
   llmBoost: number;
   recencyDecay: number;
-  hoursSinceFirstSeen: number;
+  /** Hours since the topic was published (earliest article), used for recency decay. */
+  ageHours: number;
   matchedKeywords: string[];
 };
 
@@ -107,7 +108,17 @@ export const topics = pgTable(
       .array()
       .notNull()
       .default(sql`'{}'::text[]`),
+    /** Main category from the rule-based classifier (lib/pipeline/classify.ts). */
     category: text("category"),
+    /** Most common tags of the topic's items (feed categories + source tags). */
+    tags: text("tags")
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    /** Most common language of the topic's items ('tr', 'en', ...). */
+    lang: text("lang"),
+    /** Earliest publish date among the topic's items (falls back to when we first saw it). */
+    publishedAt: tz("published_at"),
     score: doublePrecision("score").notNull().default(0),
     scoreBreakdown: jsonb("score_breakdown").$type<ScoreBreakdown>(),
     sourceCount: integer("source_count").notNull().default(0),
@@ -126,6 +137,9 @@ export const topics = pgTable(
     index("topics_last_seen_idx").on(t.lastSeenAt),
     index("topics_status_score_idx").on(t.status, t.score),
     index("topics_canonical_url_idx").on(t.canonicalUrl),
+    index("topics_published_at_idx").on(t.publishedAt),
+    index("topics_category_idx").on(t.category),
+    index("topics_tags_idx").using("gin", t.tags),
   ],
 );
 
@@ -145,6 +159,12 @@ export const rawItems = pgTable(
     summary: text("summary"),
     author: text("author"),
     publishedAt: tz("published_at"),
+    lang: text("lang"),
+    /** Normalized tags: the feed's own categories + tags configured on the source. */
+    tags: text("tags")
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
     metrics: jsonb("metrics").$type<Record<string, number>>().notNull().default({}),
     raw: jsonb("raw"),
     // fetched_at = first time we saw the item; last_seen_at = most recent run that returned it.

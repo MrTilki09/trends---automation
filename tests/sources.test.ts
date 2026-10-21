@@ -24,6 +24,12 @@ describe("hackernews adapter", () => {
       metrics: { points: 350, comments: 158 },
     });
     expect(item.publishedAt).toBeInstanceOf(Date);
+    expect(item.tags).toEqual([]);
+  });
+
+  it("tags Show HN / Ask HN posts", () => {
+    expect(parseHnItem({ ...lines[3], title: "Show HN: My tool" })!.tags).toEqual(["show hn"]);
+    expect(parseHnItem({ ...lines[3], title: "Ask HN: Anyone?" })!.tags).toEqual(["ask hn"]);
   });
 
   it("falls back to the HN discussion URL for text posts", () => {
@@ -61,6 +67,8 @@ describe("google trends adapter", () => {
     const raw = first.raw as { news: { title: string }[] };
     expect(raw.news.length).toBe(3);
     expect(first.summary).toContain("yalanlama");
+    expect(first.publishedAt).toBeInstanceOf(Date);
+    expect(first.tags).toEqual(["search trend", "turkey"]);
   });
 });
 
@@ -75,6 +83,10 @@ describe("rss adapter", () => {
       expect(it.lang).toBe("tr");
     }
     expect(items.some((i) => i.title.includes("Character.AI"))).toBe(true);
+    // Webrazzi sends <category> tags (e.g. "Yapay Zeka") and dates on every item.
+    expect(items.every((i) => i.publishedAt instanceof Date)).toBe(true);
+    expect(items.every((i) => (i.tags ?? []).length > 0)).toBe(true);
+    expect(items.flatMap((i) => i.tags ?? [])).toContain("Yapay Zeka");
   });
 
   it("parses an Atom feed (The Verge) and applies per-feed weight", async () => {

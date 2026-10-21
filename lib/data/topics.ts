@@ -4,14 +4,20 @@ import { rawItems, sources, topics, type TopicStatus } from "../db/schema";
 import { normalizeTitle } from "../pipeline/normalize";
 
 export const TOPIC_STATUSES: TopicStatus[] = ["new", "shortlisted", "ignored"];
-export const TIME_WINDOWS = { "24h": 24, "72h": 72, "7d": 168 } as const;
+/** "Published within" options for the pool. `null` = no limit. */
+export const TIME_WINDOWS = { "6h": 6, "24h": 24, "72h": 72, "7d": 168, "30d": 720, all: null } as const;
 export type TimeWindow = keyof typeof TIME_WINDOWS;
+export const SORTS = { score: "Top score", newest: "Newest first" } as const;
+export type SortKey = keyof typeof SORTS;
 
 export type TopicFilters = {
   status?: TopicStatus | "all";
   source?: string; // source key
   category?: string;
+  tag?: string;
+  lang?: string;
   window?: TimeWindow;
+  sort?: SortKey;
   q?: string;
   limit?: number;
 };
@@ -24,20 +30,35 @@ export type TopicListRow = {
   sourceCount: number;
   itemCount: number;
   category: string | null;
+  tags: string[];
+  lang: string | null;
   status: TopicStatus;
+  publishedAt: Date;
   firstSeenAt: Date;
   lastSeenAt: Date;
   sources: { key: string; name: string }[];
   llmSummary: string | null;
 };
 
-/** The pool: topics filtered and sorted by score. */
-export async function listTopics(db: DB, f: TopicFilters = {}): Promise<TopicListRow[]> {
+// A topic's publish date, falling back to when we first saw it (older rows before the column existed).
+const PUBLISHED = sql.raw("coalesce(t.published_at, t.first_seen_at)");
+
+function baseWhere(f: Pick<TopicFilters, "status" | "window">): SQL[] {
+  const where: SQL[] = [];
   const hours = TIME_WINDOWS[f.window ?? "72h"];
-  const where: SQL[] = [sql`t.last_seen_at > now() - make_interval(hours => ${hours})`];
+  if (hours != null) where.push(sql`${PUBLISHED} > now() - make_interval(hours => ${hours})`);
   const status = f.status ?? "new";
   if (status !== "all") where.push(sql`t.status = ${status}`);
-  if (f.category) where.push(sql`coalesce(t.category, t.llm_category) = ${f.category}`);
+  return where;
+}
+
+/** The pool: topics filtered by publish date, status, category, tag, language, source and text. */
+export async function listTopics(db: DB, f: TopicFilters = {}): Promise<TopicListRow[]> {
+  const where = baseWhere(f);
+  // Category filter matches the rule-based category or the LLM's (when enrichment is on).
+  if (f.category) where.push(sql`(t.category = ${f.category} OR t.llm_category = ${f.category})`);
+  if (f.tag) where.push(sql`${f.tag} = ANY(t.tags)`);
+  if (f.lang) where.push(sql`t.lang = ${f.lang}`);
   if (f.source) {
     where.push(sql`EXISTS (SELECT 1 FROM raw_items r2 JOIN sources s2 ON s2.id = r2.source_id
                            WHERE r2.topic_id = t.id AND s2.key = ${f.source})`);
@@ -48,16 +69,18 @@ export async function listTopics(db: DB, f: TopicFilters = {}): Promise<TopicLis
     where.push(sql`(t.title ILIKE ${like} OR EXISTS (
       SELECT 1 FROM raw_items r3 WHERE r3.topic_id = t.id AND r3.normalized_title LIKE ${normLike}))`);
   }
+  const order =
+    f.sort === "newest" ? sql`${PUBLISHED} DESC, t.score DESC` : sql`t.score DESC, ${PUBLISHED} DESC`;
 
   const res = await db.execute(sql`
     SELECT t.id, t.title, t.canonical_url, t.score, t.source_count, t.item_count,
-           coalesce(t.category, t.llm_category) AS category, t.status, t.first_seen_at, t.last_seen_at,
-           t.llm_summary,
+           coalesce(t.category, t.llm_category) AS category, t.tags, t.lang, t.status,
+           ${PUBLISHED} AS published_at, t.first_seen_at, t.last_seen_at, t.llm_summary,
            coalesce((SELECT json_agg(DISTINCT jsonb_build_object('key', s.key, 'name', s.name))
                      FROM raw_items r JOIN sources s ON s.id = r.source_id WHERE r.topic_id = t.id), '[]') AS sources
     FROM topics t
-    WHERE ${sql.join(where, sql` AND `)}
-    ORDER BY t.score DESC, t.last_seen_at DESC
+    ${where.length ? sql`WHERE ${sql.join(where, sql` AND `)}` : sql``}
+    ORDER BY ${order}
     LIMIT ${f.limit ?? 200}`);
 
   return (res.rows as Record<string, unknown>[]).map((r) => ({
@@ -68,7 +91,10 @@ export async function listTopics(db: DB, f: TopicFilters = {}): Promise<TopicLis
     sourceCount: Number(r.source_count),
     itemCount: Number(r.item_count),
     category: (r.category as string | null) ?? null,
+    tags: (r.tags as string[] | null) ?? [],
+    lang: (r.lang as string | null) ?? null,
     status: r.status as TopicStatus,
+    publishedAt: new Date(r.published_at as string),
     firstSeenAt: new Date(r.first_seen_at as string),
     lastSeenAt: new Date(r.last_seen_at as string),
     sources: r.sources as { key: string; name: string }[],
@@ -76,11 +102,30 @@ export async function listTopics(db: DB, f: TopicFilters = {}): Promise<TopicLis
   }));
 }
 
-export async function listCategories(db: DB): Promise<string[]> {
-  const res = await db.execute(sql`
-    SELECT DISTINCT coalesce(category, llm_category) AS c FROM topics
-    WHERE coalesce(category, llm_category) IS NOT NULL ORDER BY 1`);
-  return (res.rows as { c: string }[]).map((r) => r.c);
+export type Facet = { value: string; count: number };
+
+/**
+ * Filter options with counts, for the current status + time window
+ * (so the dropdowns only offer values that actually have topics).
+ */
+export async function listFacets(
+  db: DB,
+  f: Pick<TopicFilters, "status" | "window">,
+): Promise<{ categories: Facet[]; tags: Facet[]; langs: Facet[] }> {
+  const where = baseWhere(f);
+  const w = where.length ? sql`WHERE ${sql.join(where, sql` AND `)}` : sql``;
+  const facet = async (expr: SQL, from: SQL, limit: number) => {
+    const res = await db.execute(sql`
+      SELECT ${expr} AS value, count(*)::int AS count ${from} ${w}
+      GROUP BY 1 HAVING ${expr} IS NOT NULL ORDER BY 2 DESC, 1 LIMIT ${limit}`);
+    return res.rows as Facet[];
+  };
+  const [categories, tags, langs] = await Promise.all([
+    facet(sql`coalesce(t.category, t.llm_category)`, sql`FROM topics t`, 50),
+    facet(sql`tag`, sql`FROM topics t CROSS JOIN LATERAL unnest(t.tags) AS tag`, 60),
+    facet(sql`t.lang`, sql`FROM topics t`, 10),
+  ]);
+  return { categories, tags, langs };
 }
 
 export async function getTopic(db: DB, id: number) {
@@ -96,6 +141,8 @@ export async function getTopic(db: DB, id: number) {
       publishedAt: rawItems.publishedAt,
       fetchedAt: rawItems.fetchedAt,
       lastSeenAt: rawItems.lastSeenAt,
+      tags: rawItems.tags,
+      lang: rawItems.lang,
       metrics: rawItems.metrics,
       sourceKey: sources.key,
       sourceName: sources.name,

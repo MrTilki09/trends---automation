@@ -35,6 +35,15 @@ function stripHtml(s: string | undefined): string | undefined {
   return text ? text.slice(0, 1000) : undefined;
 }
 
+/** <category> values; rss-parser gives strings, or objects like { _: "AI" } for attributes. */
+function feedCategories(cats: unknown): string[] {
+  if (!Array.isArray(cats)) return [];
+  return cats
+    .map((c) => (typeof c === "string" ? c : typeof c === "object" && c && "_" in c ? String(c._) : ""))
+    .map((c) => c.trim())
+    .filter(Boolean);
+}
+
 /** Parses an RSS 2.0 or Atom document into RawItemInputs. */
 export async function parseFeed(
   xml: string,
@@ -57,6 +66,7 @@ export async function parseFeed(
       author: item.creator ?? (item as { author?: string }).author,
       publishedAt: date && !Number.isNaN(date.getTime()) ? date : undefined,
       lang: opts.lang,
+      tags: feedCategories(item.categories),
       // RSS has no engagement numbers. `weight` is the per-feed multiplier used in scoring.
       metrics: opts.weight && opts.weight !== 1 ? { weight: opts.weight } : {},
       raw: { feedTitle: feed.title, guid: item.guid, link: item.link, categories: item.categories },

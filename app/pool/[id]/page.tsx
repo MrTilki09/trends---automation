@@ -34,7 +34,7 @@ export default async function TopicPage({ params }: { params: Promise<{ id: stri
           `+${b.llmBoost.toFixed(2)}`,
           topic.llmRelevance != null ? `0.5 × relevance ${topic.llmRelevance}` : "Not enriched",
         ],
-        ["Recency decay", `× ${b.recencyDecay.toFixed(3)}`, `${b.hoursSinceFirstSeen} h since first seen`],
+        ["Recency decay", `× ${b.recencyDecay.toFixed(3)}`, `${b.ageHours ?? "?"} h since published`],
       ]
     : [];
 
@@ -50,9 +50,15 @@ export default async function TopicPage({ params }: { params: Promise<{ id: stri
             <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
               <StatusBadge status={topic.status} />
               {(topic.category ?? topic.llmCategory) && (
-                <Badge variant="outline">{topic.category ?? topic.llmCategory}</Badge>
+                <Link href={`/pool?category=${encodeURIComponent((topic.category ?? topic.llmCategory)!)}`}>
+                  <Badge variant="outline">{topic.category ?? topic.llmCategory}</Badge>
+                </Link>
               )}
-              <span>first seen {formatDateTime(topic.firstSeenAt)}</span>
+              {topic.lang && <span className="font-mono uppercase">{topic.lang}</span>}
+              <span title={formatDateTime(topic.publishedAt)}>
+                published {formatDateTime(topic.publishedAt ?? topic.firstSeenAt)}
+              </span>
+              <span>· first seen {relativeTime(topic.firstSeenAt)}</span>
               <span>· last seen {relativeTime(topic.lastSeenAt)}</span>
               {topic.canonicalUrl && (
                 <a href={topic.canonicalUrl} target="_blank" rel="noreferrer" className="hover:underline">
@@ -60,6 +66,19 @@ export default async function TopicPage({ params }: { params: Promise<{ id: stri
                 </a>
               )}
             </div>
+            {topic.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1 pt-1 text-xs">
+                {topic.tags.map((t) => (
+                  <Link
+                    key={t}
+                    href={`/pool?tag=${encodeURIComponent(t)}`}
+                    className="text-muted-foreground hover:text-foreground hover:underline"
+                  >
+                    #{t}
+                  </Link>
+                ))}
+              </div>
+            )}
             {topic.keywords.length > 0 && (
               <div className="flex flex-wrap gap-1 pt-1">
                 {topic.keywords.map((k) => (
@@ -155,6 +174,11 @@ export default async function TopicPage({ params }: { params: Promise<{ id: stri
                       <span className="font-medium">{it.title}</span>
                     )}
                     {it.summary && <p className="line-clamp-2 text-xs text-muted-foreground">{it.summary}</p>}
+                    {it.tags.length > 0 && (
+                      <p className="pt-0.5 text-xs text-muted-foreground">
+                        {it.tags.map((t) => `#${t}`).join(" ")}
+                      </p>
+                    )}
                   </TableCell>
                   <TableCell className="font-mono text-xs">
                     {Object.entries(it.metrics).length

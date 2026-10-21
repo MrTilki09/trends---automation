@@ -10,6 +10,8 @@ export interface RawItemInput {
   publishedAt?: Date;
   /** Language hint for normalization ('tr' enables Turkish-aware lowercasing). */
   lang?: string;
+  /** The source's own labels for the item (feed <category> tags, "show hn", subreddit...). */
+  tags?: string[];
   metrics: Record<string, number>; // e.g. { points, comments } or { approxTraffic }
   raw: unknown; // original payload, kept for debugging
 }

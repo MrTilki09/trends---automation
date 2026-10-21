@@ -71,8 +71,8 @@ export function matchKeywords(
   });
 }
 
-export function recencyDecay(hoursSinceFirstSeen: number, halfLifeHours: number): number {
-  return Math.pow(0.5, Math.max(0, hoursSinceFirstSeen) / halfLifeHours);
+export function recencyDecay(ageHours: number, halfLifeHours: number): number {
+  return Math.pow(0.5, Math.max(0, ageHours) / halfLifeHours);
 }
 
 export type ScoreInput = {
@@ -82,7 +82,8 @@ export type ScoreInput = {
   normalizedTitle: string;
   keywords: string[];
   llmRelevance: number | null;
-  firstSeenAt: Date;
+  /** When the story was published (earliest article); drives the recency decay. */
+  publishedAt: Date;
 };
 
 export function scoreTopic(
@@ -95,7 +96,7 @@ export function scoreTopic(
   const matched = matchKeywords(input.normalizedTitle, input.keywords, opts.nicheKeywords);
   const keywordBoost = matched.length > 0 ? w.keywordBoost : 0;
   const llmBoost = input.llmRelevance != null ? w.llmBoostFactor * input.llmRelevance : 0;
-  const hours = (opts.now.getTime() - input.firstSeenAt.getTime()) / 3600_000;
+  const hours = (opts.now.getTime() - input.publishedAt.getTime()) / 3600_000;
   const decay = recencyDecay(hours, w.halfLifeHours);
   const round = (x: number) => Math.round(x * 10_000) / 10_000;
   return {
@@ -106,7 +107,7 @@ export function scoreTopic(
       keywordBoost,
       llmBoost: round(llmBoost),
       recencyDecay: round(decay),
-      hoursSinceFirstSeen: Math.round(hours * 10) / 10,
+      ageHours: Math.round(Math.max(0, hours) * 10) / 10,
       matchedKeywords: matched,
     },
   };
@@ -127,6 +128,7 @@ export async function scoreRecentTopics(db: DB, opts: { windowHours: number; now
       sourceCount: topics.sourceCount,
       llmRelevance: topics.llmRelevance,
       firstSeenAt: topics.firstSeenAt,
+      publishedAt: topics.publishedAt,
     })
     .from(topics)
     .where(gt(topics.lastSeenAt, cutoff));
@@ -186,7 +188,8 @@ export async function scoreRecentTopics(db: DB, opts: { windowHours: number; now
           normalizedTitle: entry?.titles.join(" ") ?? normalizeTitle(t.title),
           keywords: t.keywords,
           llmRelevance: t.llmRelevance,
-          firstSeenAt: t.firstSeenAt,
+          // An old article we only just found is not fresh news: decay from the publish date.
+          publishedAt: t.publishedAt ?? t.firstSeenAt,
         },
         { now, nicheKeywords: cfg.NICHE_KEYWORDS, weights },
       );

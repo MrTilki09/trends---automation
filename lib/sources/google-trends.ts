@@ -13,6 +13,9 @@ export const googleTrendsConfig = z.object({
   langs: z.record(z.string(), z.string()).default({ TR: "tr" }),
 });
 
+// Region tag per country, so trends line up with the "turkey" tag of Turkish feeds.
+const GEO_TAGS: Record<string, string> = { TR: "turkey", US: "usa", GB: "uk", DE: "germany" };
+
 type NewsItem = { title?: string; url?: string; source?: string };
 type TrendItem = {
   title?: string;
@@ -74,6 +77,7 @@ export async function parseGoogleTrends(xml: string, geo: string, lang?: string)
         summary: summary || undefined,
         publishedAt: valid ? published : undefined,
         lang,
+        tags: ["search trend", GEO_TAGS[geo] ?? geo.toLowerCase()],
         metrics: { approxTraffic: parseApproxTraffic(item.approxTraffic) },
         raw: { geo, approxTraffic: item.approxTraffic, news },
       },

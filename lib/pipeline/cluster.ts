@@ -1,6 +1,7 @@
 import { and, eq, gt, inArray, isNull, sql } from "drizzle-orm";
 import type { DB } from "../db/client";
 import { rawItems, topics } from "../db/schema";
+import { classify, topByFrequency } from "./classify";
 import { extractKeywords } from "./normalize";
 
 /*
@@ -79,7 +80,10 @@ export function assignClusters(
   return result;
 }
 
-/** Recomputes source_count, item_count, first/last seen and keywords for the given topics. */
+/**
+ * Recomputes everything a topic derives from its items: counts, first/last seen, publish date,
+ * keywords, tags, language and category.
+ */
 export async function refreshTopicAggregates(db: DB, topicIds: number[]): Promise<void> {
   if (topicIds.length === 0) return;
   for (let i = 0; i < topicIds.length; i += 500) {
@@ -90,27 +94,49 @@ export async function refreshTopicAggregates(db: DB, topicIds: number[]): Promis
         item_count = a.item_count,
         first_seen_at = LEAST(t.first_seen_at, a.first_seen),
         last_seen_at = a.last_seen,
+        published_at = a.published,
         updated_at = now()
       FROM (
         SELECT topic_id, count(DISTINCT source_id)::int AS source_count, count(*)::int AS item_count,
-               min(fetched_at) AS first_seen, max(last_seen_at) AS last_seen
+               min(fetched_at) AS first_seen, max(last_seen_at) AS last_seen,
+               -- the story's "upload date": its earliest article (or when we first saw it)
+               min(coalesce(published_at, fetched_at)) AS published
         FROM raw_items WHERE topic_id IN ${sql.raw(`(${ids.join(",")})`)}
         GROUP BY topic_id
       ) a
       WHERE t.id = a.topic_id`);
-    const titles = await db
-      .select({ topicId: rawItems.topicId, normalizedTitle: rawItems.normalizedTitle })
+    const rows = await db
+      .select({
+        topicId: rawItems.topicId,
+        normalizedTitle: rawItems.normalizedTitle,
+        tags: rawItems.tags,
+        lang: rawItems.lang,
+        summary: rawItems.summary,
+      })
       .from(rawItems)
       .where(inArray(rawItems.topicId, ids));
-    const byTopic = new Map<number, string[]>();
-    for (const r of titles) {
+    const byTopic = new Map<number, typeof rows>();
+    for (const r of rows) {
       if (r.topicId == null) continue;
-      byTopic.set(r.topicId, [...(byTopic.get(r.topicId) ?? []), r.normalizedTitle]);
+      byTopic.set(r.topicId, [...(byTopic.get(r.topicId) ?? []), r]);
     }
-    for (const [id, list] of byTopic) {
+    for (const [id, items] of byTopic) {
+      const titles = items.map((r) => r.normalizedTitle);
+      const allTags = items.flatMap((r) => r.tags);
+      const langs = items.map((r) => r.lang).filter((l): l is string => !!l);
+      const { category } = classify({
+        titles,
+        tags: allTags,
+        summaries: items.map((r) => r.summary ?? "").filter(Boolean),
+      });
       await db
         .update(topics)
-        .set({ keywords: extractKeywords(list) })
+        .set({
+          keywords: extractKeywords(titles),
+          tags: topByFrequency(allTags, 10),
+          lang: topByFrequency(langs, 1)[0] ?? null,
+          category,
+        })
         .where(eq(topics.id, id));
     }
   }

@@ -185,6 +185,7 @@ async function collectSource(
       runId,
       items,
       defaultLang: typeof cfgLang === "string" ? cfgLang : undefined,
+      sourceTags: sourceTagsOf(source),
     });
     fetched = res.fetched;
     created = res.new;
@@ -213,4 +214,10 @@ async function collectSource(
     .set(ok ? { lastSuccessAt: new Date(), lastError: null } : { lastError: error })
     .where(eq(sources.id, source.id));
   return { ok, fetched, new: created };
+}
+
+/** `tags` from the source's config (see config/sources.seed.ts), e.g. ["tech", "turkey"]. */
+function sourceTagsOf(source: Source): string[] {
+  const tags = (source.config as { tags?: unknown } | null)?.tags;
+  return Array.isArray(tags) ? tags.filter((t): t is string => typeof t === "string") : [];
 }
