@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
+  <defs><radialGradient id="bg" cx="50%" cy="45%" r="65%"><stop offset="0" stop-color="#20252D"/><stop offset="1" stop-color="#0B0D10"/></radialGradient></defs><rect width="1080" height="1080" fill="url(#bg)"/><g transform="translate(530 548) scale(1.05) translate(-485 -554)">
+  <!-- the pool: ripples -->
+  <g fill="none" stroke="#C6F432" stroke-width="16">
+    <ellipse cx="520" cy="720" rx="380" ry="92" opacity="0.22"/>
+    <ellipse cx="520" cy="720" rx="275" ry="66" opacity="0.45"/>
+    <ellipse cx="520" cy="720" rx="170" ry="40" opacity="0.8"/>
+  </g>
+  <!-- the trend rising out of it -->
+  <polyline points="300,700 440,520 560,620 760,380" fill="none" stroke="#C6F432" stroke-width="64"
+    stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="830,296 821,431 699,329" fill="#C6F432" stroke="#C6F432" stroke-width="18" stroke-linejoin="round"/>
+</g></svg>

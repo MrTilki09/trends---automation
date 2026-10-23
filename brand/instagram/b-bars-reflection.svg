@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
+  <defs><radialGradient id="bg" cx="50%" cy="45%" r="65%"><stop offset="0" stop-color="#20252D"/><stop offset="1" stop-color="#0B0D10"/></radialGradient>
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#C6F432" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#C6F432" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="1080" fill="url(#bg)"/><g transform="translate(540 545) scale(1.14) translate(-515 -540)">
+  <!-- rising bars (the trends) -->
+  <g fill="#C6F432">
+    <rect x="300" y="470" width="130" height="160" rx="26"/>
+    <rect x="475" y="360" width="130" height="270" rx="26"/>
+    <rect x="650" y="230" width="130" height="400" rx="26"/>
+  </g>
+  <!-- their reflection in the pool -->
+  <g fill="url(#fade)">
+    <rect x="300" y="650" width="130" height="80" rx="20"/>
+    <rect x="475" y="650" width="130" height="135" rx="20"/>
+    <rect x="650" y="650" width="130" height="200" rx="20"/>
+  </g>
+  <!-- water line -->
+  <path d="M250 640 q 45 -16 90 0 t 90 0 t 90 0 t 90 0 t 90 0 t 90 0 t 90 0" fill="none" stroke="#FFFFFF"
+    stroke-width="12" stroke-linecap="round" opacity="0.9"/>
+</g></svg>
