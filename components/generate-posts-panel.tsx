@@ -5,6 +5,11 @@ import { useActionState, useEffect } from "react";
 import { generatePostsAction, type GenerateState } from "@/app/user-actions";
 import { Button } from "@/components/ui/button";
 
+/** Unique per click. randomUUID needs a secure context (https / localhost), hence the fallback. */
+const newRequestId = () =>
+  globalThis.crypto?.randomUUID?.() ??
+  `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+
 const select =
   "h-8 rounded-md border border-input bg-background px-2 text-sm text-foreground shadow-xs focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
@@ -31,6 +36,12 @@ export function GeneratePostsPanel({
     created: 0,
     errors: [],
   });
+  // Idempotency key, created once per click: the server writes the posts once per id, so a re-sent
+  // copy of this HTTP request (browser, extension or proxy retry) can't generate them again.
+  const submit = (formData: FormData) => {
+    formData.set("requestId", newRequestId());
+    action(formData);
+  };
 
   // Open the items that just got a new post (they are collapsed by default).
   useEffect(() => {
@@ -52,7 +63,7 @@ export function GeneratePostsPanel({
 
   return (
     <div className="space-y-2 rounded-lg border bg-muted/40 px-3 py-2 text-sm">
-      <form id={formId} action={action} className="flex flex-wrap items-center gap-2">
+      <form id={formId} action={submit} className="flex flex-wrap items-center gap-2">
         <span className="font-medium">Generate posts for the selected topics</span>
         <select name="platform" className={select} aria-label="Platform" defaultValue={platforms[0]?.value}>
           {platforms.map((p) => (
