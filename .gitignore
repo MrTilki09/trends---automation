@@ -11,3 +11,4 @@ next-env.d.ts
 backups/
 npm-debug.log*
 .DS_Store
+generated/
