@@ -14,9 +14,20 @@ import "./globals.css";
 // Every page reads live data from Postgres: never pre-render at build time.
 export const dynamic = "force-dynamic";
 
+const DESCRIPTION =
+  "Free, live-ranked tech news: stories from 45+ sources, de-duplicated and ranked by how much they're trending. Filter, search and export.";
+
+// Title/description also used for the link preview when the page is shared (LinkedIn, X, Slack...).
 export const metadata: Metadata = {
-  title: "Trend Pool",
-  description: "Collected and ranked trending topics",
+  title: "Trend Pool · Live-ranked tech news",
+  description: DESCRIPTION,
+  openGraph: {
+    title: "Trend Pool · Live-ranked tech news",
+    description: DESCRIPTION,
+    type: "website",
+    siteName: "Trend Pool",
+  },
+  twitter: { card: "summary", title: "Trend Pool · Live-ranked tech news", description: DESCRIPTION },
 };
 
 const NAV = [{ href: "/pool", label: "Pool" }];
@@ -102,13 +113,42 @@ async function Header({ viewer }: { viewer: Viewer }) {
   );
 }
 
+/** Header for signed-out visitors of the public home page: no run controls, just sign in / sign up. */
+async function PublicHeader() {
+  const run = await latestRun(getDb());
+  return (
+    <header className="border-b">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-6 gap-y-3 px-4 py-3">
+        <Link href="/pool" className="font-semibold tracking-tight">
+          Trend Pool
+        </Link>
+        {run && (
+          <span className="text-sm text-muted-foreground" title={run.startedAt.toISOString()}>
+            Updated {relativeTime(run.startedAt)}
+          </span>
+        )}
+        <div className="ml-auto flex items-center gap-3 text-sm">
+          <Link href="/login" className="text-muted-foreground hover:text-foreground">
+            Sign in
+          </Link>
+          <Link
+            href="/signup"
+            className="rounded-md bg-primary px-3 py-1.5 font-medium text-primary-foreground hover:bg-primary/90"
+          >
+            Sign up free
+          </Link>
+        </div>
+      </div>
+    </header>
+  );
+}
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  // Signed-out visitors only ever see /login (proxy.ts), without the header's live data.
   const viewer = await getViewer();
   return (
     <html lang="en">
       <body className="min-h-screen">
-        {viewer && <Header viewer={viewer} />}
+        {viewer ? <Header viewer={viewer} /> : <PublicHeader />}
         <main className="mx-auto max-w-7xl px-4 py-6">{children}</main>
       </body>
     </html>

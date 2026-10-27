@@ -79,6 +79,51 @@ export function parsePaging(params: URLSearchParams): { limit: number; offset: n
   };
 }
 
+/**
+ * What signed-out visitors see: every status except topics the owner marked "ignored" (the status
+ * filter is the owner's curation tool and isn't offered to them).
+ */
+export function publicView(f: TopicFilters): TopicFilters {
+  return { ...f, status: "all", hideIgnored: true };
+}
+
+/** Rows per page offered on the Pool page; the first is the default. */
+export const PAGE_SIZES = [50, 25, 100] as const;
+export type PageSize = (typeof PAGE_SIZES)[number];
+/** Most rows one export may contain. */
+export const EXPORT_MAX_ROWS = 5000;
+
+/** Pool page paging: ?page= (1-based) and ?per= (one of PAGE_SIZES). Invalid values fall back to defaults. */
+export function parsePage(input: URLSearchParams | Record<string, string | string[] | undefined>): {
+  page: number;
+  per: PageSize;
+} {
+  const get = (k: string) => {
+    const v = input instanceof URLSearchParams ? input.get(k) : input[k];
+    return Array.isArray(v) ? v[0] : (v ?? undefined);
+  };
+  const page = Number.parseInt(get("page") ?? "", 10);
+  const per = Number.parseInt(get("per") ?? "", 10);
+  return {
+    page: Number.isFinite(page) && page >= 1 ? Math.min(page, 10_000) : 1,
+    per: (PAGE_SIZES as readonly number[]).includes(per) ? (per as PageSize) : PAGE_SIZES[0],
+  };
+}
+
+/** Page numbers to show around `current` (1 … 4 5 [6] 7 8 … 20); null = a gap. */
+export function pageWindow(current: number, total: number, around = 2): (number | null)[] {
+  const pages = new Set([1, total]);
+  for (let p = current - around; p <= current + around; p++) if (p >= 1 && p <= total) pages.add(p);
+  const sorted = [...pages].filter((p) => p >= 1).sort((a, b) => a - b);
+  const out: (number | null)[] = [];
+  for (const p of sorted) {
+    const prev = out[out.length - 1];
+    if (typeof prev === "number" && p - prev > 1) out.push(p - prev === 2 ? p - 1 : null);
+    out.push(p);
+  }
+  return out;
+}
+
 /** Query string for `filters` with `change` applied (undefined removes a key). Always lists every set filter. */
 export function filtersToQuery(
   filters: TopicFilters,

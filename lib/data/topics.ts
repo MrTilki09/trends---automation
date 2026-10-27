@@ -47,6 +47,8 @@ export type TopicFilters = {
   sort?: SortKey;
   dir?: SortDir;
   q?: string;
+  /** Public visitors never see topics the owner marked "ignored" (whatever the status filter says). */
+  hideIgnored?: boolean;
   limit?: number;
   offset?: number;
 };
@@ -88,14 +90,35 @@ const TECH_ONLY = sql`(
       AND t.tags && ARRAY[${list(TECH_TAGS)}]::text[])
 )`;
 
-function baseWhere(f: Pick<TopicFilters, "status" | "window" | "focus">): SQL[] {
+function baseWhere(f: Pick<TopicFilters, "status" | "window" | "focus" | "hideIgnored">): SQL[] {
   const where: SQL[] = [];
   if ((f.focus ?? "tech") === "tech") where.push(TECH_ONLY);
   const hours = TIME_WINDOWS[f.window ?? "72h"];
   if (hours != null) where.push(sql`${PUBLISHED} > now() - make_interval(hours => ${hours})`);
   const status = f.status ?? "new";
   if (status !== "all") where.push(sql`t.status = ${status}`);
+  if (f.hideIgnored) where.push(sql`t.status <> 'ignored'`);
   return where;
+}
+
+/** WHERE for the pool: the base filters plus category, tag, language, source and text search. */
+function topicWhere(f: TopicFilters): SQL {
+  const where = baseWhere(f);
+  // Category filter matches the rule-based category or the LLM's (when enrichment is on).
+  if (f.category) where.push(sql`(t.category = ${f.category} OR t.llm_category = ${f.category})`);
+  if (f.tag) where.push(sql`${f.tag} = ANY(t.tags)`);
+  if (f.lang) where.push(sql`t.lang = ${f.lang}`);
+  if (f.source) {
+    where.push(sql`EXISTS (SELECT 1 FROM raw_items r2 JOIN sources s2 ON s2.id = r2.source_id
+                           WHERE r2.topic_id = t.id AND s2.key = ${f.source})`);
+  }
+  if (f.q?.trim()) {
+    const like = `%${f.q.trim().replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+    const normLike = `%${normalizeTitle(f.q)}%`;
+    where.push(sql`(t.title ILIKE ${like} OR EXISTS (
+      SELECT 1 FROM raw_items r3 WHERE r3.topic_id = t.id AND r3.normalized_title LIKE ${normLike}))`);
+  }
+  return where.length ? sql`WHERE ${sql.join(where, sql` AND `)}` : sql``;
 }
 
 const SORT_EXPR: Record<SortKey, SQL> = {
@@ -116,21 +139,6 @@ function orderBy(sort: SortKey, dir?: SortDir): SQL {
 
 /** The pool: topics filtered by publish date, status, category, tag, language, source and text. */
 export async function listTopics(db: DB, f: TopicFilters = {}): Promise<TopicListRow[]> {
-  const where = baseWhere(f);
-  // Category filter matches the rule-based category or the LLM's (when enrichment is on).
-  if (f.category) where.push(sql`(t.category = ${f.category} OR t.llm_category = ${f.category})`);
-  if (f.tag) where.push(sql`${f.tag} = ANY(t.tags)`);
-  if (f.lang) where.push(sql`t.lang = ${f.lang}`);
-  if (f.source) {
-    where.push(sql`EXISTS (SELECT 1 FROM raw_items r2 JOIN sources s2 ON s2.id = r2.source_id
-                           WHERE r2.topic_id = t.id AND s2.key = ${f.source})`);
-  }
-  if (f.q?.trim()) {
-    const like = `%${f.q.trim().replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
-    const normLike = `%${normalizeTitle(f.q)}%`;
-    where.push(sql`(t.title ILIKE ${like} OR EXISTS (
-      SELECT 1 FROM raw_items r3 WHERE r3.topic_id = t.id AND r3.normalized_title LIKE ${normLike}))`);
-  }
   const order = orderBy(f.sort ?? "score", f.dir);
 
   const res = await db.execute(sql`
@@ -140,7 +148,7 @@ export async function listTopics(db: DB, f: TopicFilters = {}): Promise<TopicLis
            coalesce((SELECT json_agg(DISTINCT jsonb_build_object('key', s.key, 'name', s.name))
                      FROM raw_items r JOIN sources s ON s.id = r.source_id WHERE r.topic_id = t.id), '[]') AS sources
     FROM topics t
-    ${where.length ? sql`WHERE ${sql.join(where, sql` AND `)}` : sql``}
+    ${topicWhere(f)}
     ORDER BY ${order}
     LIMIT ${f.limit ?? 200} OFFSET ${f.offset ?? 0}`);
 
@@ -163,6 +171,12 @@ export async function listTopics(db: DB, f: TopicFilters = {}): Promise<TopicLis
   }));
 }
 
+/** How many topics match (for pagination and the export button). */
+export async function countTopics(db: DB, f: TopicFilters = {}): Promise<number> {
+  const res = await db.execute(sql`SELECT count(*)::int AS n FROM topics t ${topicWhere(f)}`);
+  return Number((res.rows[0] as { n: number } | undefined)?.n ?? 0);
+}
+
 export type Facet = { value: string; count: number };
 
 /**
@@ -171,7 +185,7 @@ export type Facet = { value: string; count: number };
  */
 export async function listFacets(
   db: DB,
-  f: Pick<TopicFilters, "status" | "window" | "focus">,
+  f: Pick<TopicFilters, "status" | "window" | "focus" | "hideIgnored">,
 ): Promise<{ categories: Facet[]; tags: Facet[]; langs: Facet[] }> {
   const where = baseWhere(f);
   const w = where.length ? sql`WHERE ${sql.join(where, sql` AND `)}` : sql``;

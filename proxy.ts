@@ -5,16 +5,22 @@ import { SESSION_COOKIE, verifySession } from "@/lib/auth/session";
 import { getConfig } from "@/lib/config";
 
 /*
- * Next.js 16 Proxy (formerly Middleware; Node.js runtime): signed-out visitors of the dashboard are
- * sent to /login. This is the first gate only; pages and server actions check again (lib/auth/server.ts).
+ * Next.js 16 Proxy (formerly Middleware; Node.js runtime): signed-out visitors may only read the home
+ * page (the Pool); everything else sends them to /login. This is the first gate only; pages and server actions check again (lib/auth/server.ts).
  * /api/* is skipped here: /api/topics checks its own API key (and answers JSON, not a redirect).
  */
 const PUBLIC_PATHS = new Set(["/login", "/signup", "/verify"]);
+// The home page is public and read-only: anyone may view the Pool and export it. Only GET/HEAD:
+// every button on it (save, shortlist, run now) is a POST and still needs a signed-in account.
+const PUBLIC_READ_PATHS = new Set(["/", "/pool", "/pool/export"]);
 
 export function proxy(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
   // Public: sign-in, sign-up, the emailed confirmation link, and the API (which checks its own key).
   if (PUBLIC_PATHS.has(pathname) || pathname.startsWith("/api/")) return NextResponse.next();
+  if (PUBLIC_READ_PATHS.has(pathname) && (req.method === "GET" || req.method === "HEAD")) {
+    return NextResponse.next();
+  }
 
   const cfg = getConfig();
   if (cfg.AUTH_LOCALHOST_BYPASS && isLocalRequest(req.headers)) return NextResponse.next();

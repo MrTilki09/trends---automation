@@ -2,17 +2,26 @@ import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { ApiUrlBox } from "@/components/api-url-box";
+import { ExportButtons } from "@/components/export-buttons";
+import { PoolPagination } from "@/components/pool-pagination";
 import { StatusBadge } from "@/components/status-badge";
 import { TopicActions } from "@/components/topic-actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getSignedInUser, requireViewer } from "@/lib/auth/server";
+import { getSignedInUser, getViewer } from "@/lib/auth/server";
 import { savedTopicIds } from "@/lib/data/saved";
 import { listSources } from "@/lib/data/sources";
-import { filtersToQuery, parseTopicFilters } from "@/lib/data/topic-filters";
 import {
+  filtersToQuery,
+  PAGE_SIZES,
+  parsePage,
+  parseTopicFilters,
+  publicView,
+} from "@/lib/data/topic-filters";
+import {
+  countTopics,
   DEFAULT_DIR,
   FOCUSES,
   listFacets,
@@ -33,9 +42,19 @@ const selectClass =
 
 const LANG_NAMES: Record<string, string> = { tr: "Turkish", en: "English" };
 
-/** Builds a /pool URL with the current filters plus `change` (undefined removes a key). */
-function poolHref(current: TopicFilters, change: Partial<Record<keyof TopicFilters, string | undefined>>) {
-  return `/pool?${filtersToQuery(current, change)}`;
+/**
+ * Builds a /pool URL with the current filters plus `change` (undefined removes a key). Keeps a
+ * non-default page size; any filter change starts again at page 1.
+ */
+function poolHref(
+  current: TopicFilters,
+  change: Partial<Record<keyof TopicFilters, string | undefined>>,
+  paging: { page?: number; per?: number } = {},
+) {
+  const params = new URLSearchParams(filtersToQuery(current, change));
+  if (paging.per && paging.per !== PAGE_SIZES[0]) params.set("per", String(paging.per));
+  if (paging.page && paging.page > 1) params.set("page", String(paging.page));
+  return `/pool?${params}`;
 }
 
 /** One-click views at the top of the Pool (each sets these filters, keeping focus/status/window/sort). */
@@ -62,12 +81,14 @@ function SortHead({
   filters,
   className,
   align,
+  per,
 }: {
   col: SortKey;
   label: string;
   filters: TopicFilters;
   className?: string;
   align?: "right";
+  per: number;
 }) {
   const active = filters.sort === col;
   const dir = filters.dir ?? DEFAULT_DIR[col];
@@ -79,7 +100,7 @@ function SortHead({
       aria-sort={active ? (dir === "asc" ? "ascending" : "descending") : "none"}
     >
       <Link
-        href={poolHref(filters, { sort: col, dir: nextDir })}
+        href={poolHref(filters, { sort: col, dir: nextDir }, { per })}
         className={`inline-flex items-center gap-1 hover:text-foreground ${align === "right" ? "w-full justify-end" : ""} ${active ? "text-foreground" : ""}`}
         title={`Sort by ${label.toLowerCase()}`}
       >
@@ -99,39 +120,71 @@ async function requestOrigin(): Promise<string> {
   return `${proto}://${host}`;
 }
 
+/**
+ * The home page. Public and read-only for signed-out visitors (proxy.ts lets GET through): they see
+ * every topic except ones the owner ignored, can filter, page and export, but get no buttons that
+ * change anything and no links to the private topic pages.
+ */
 export default async function PoolPage({ searchParams }: { searchParams: SearchParams }) {
-  const viewer = await requireViewer();
-  const filters = parseTopicFilters(await searchParams);
+  const viewer = await getViewer();
+  const isPublic = !viewer;
+  const params = await searchParams;
+  const parsed = parseTopicFilters(params);
+  const filters = isPublic ? publicView(parsed) : parsed;
   const sort = filters.sort ?? "score";
   const dir = filters.dir ?? DEFAULT_DIR[sort];
+  const { page: requestedPage, per } = parsePage(params);
 
   const db = getDb();
-  const user = await getSignedInUser();
-  const [topics, sources, facets, savedIds] = await Promise.all([
-    listTopics(db, filters),
+  const user = isPublic ? null : await getSignedInUser();
+  const [total, sources, facets, savedIds] = await Promise.all([
+    countTopics(db, filters),
     listSources(db),
     listFacets(db, filters),
     user ? savedTopicIds(db, user.id) : null,
   ]);
+  // A page past the end (e.g. after narrowing the filters) shows the last page instead of nothing.
+  const pageCount = Math.max(1, Math.ceil(total / per));
+  const page = Math.min(requestedPage, pageCount);
+  const topics = await listTopics(db, { ...filters, limit: per, offset: (page - 1) * per });
+  const href = (change: Partial<Record<keyof TopicFilters, string | undefined>>) =>
+    poolHref(filters, change, { per });
+  const pageHref = (p: number, n: number) => poolHref(filters, {}, { page: p, per: n });
+  const columns = isPublic ? 5 : 7;
   const hasExtraFilters = Boolean(
     filters.source || filters.category || filters.tag || filters.lang || filters.q,
   );
 
   return (
     <div className="space-y-4">
+      {isPublic && (
+        <div className="rounded-lg border bg-muted/40 px-4 py-3 text-sm">
+          <p>
+            <span className="font-medium">Free, live-ranked tech news.</span> Stories from 45+ sources, merged
+            when several outlets cover the same thing and ranked by how much they&apos;re trending. Filter,
+            search, and export what you see.
+          </p>
+          <p className="pt-1 text-muted-foreground">
+            <Link href="/signup" className="font-medium text-foreground underline underline-offset-2">
+              Create a free account
+            </Link>{" "}
+            to save stories and turn them into ready-to-post social media drafts.
+          </p>
+        </div>
+      )}
       <div className="space-y-3">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <div>
-            <h1 className="text-xl font-semibold">Pool</h1>
+            <h1 className="text-xl font-semibold">{isPublic ? "Trending tech news" : "Pool"}</h1>
             <p className="text-sm text-muted-foreground">
-              {topics.length} topic{topics.length === 1 ? "" : "s"}
+              {total} topic{total === 1 ? "" : "s"}
               {filters.window !== "all" ? ` published in the last ${filters.window}` : ""}, sorted by{" "}
               {SORTS[sort].toLowerCase()} {dir === "asc" ? "↑" : "↓"}
             </p>
           </div>
           {hasExtraFilters && (
             <Link
-              href={poolHref(filters, {
+              href={href({
                 source: undefined,
                 category: undefined,
                 tag: undefined,
@@ -146,21 +199,22 @@ export default async function PoolPage({ searchParams }: { searchParams: SearchP
         </div>
         <nav className="flex flex-wrap items-center gap-1.5 text-sm" aria-label="Quick views">
           {QUICK_VIEWS.map((v) => {
-            const href = poolHref(
+            const viewHref = poolHref(
               {
                 focus: filters.focus,
-                status: filters.status,
+                status: isPublic ? undefined : filters.status,
                 window: filters.window,
                 sort: filters.sort,
                 dir: filters.dir,
               },
               v.change,
+              { per },
             );
             const active = filters.category === v.change.category && filters.tag === v.change.tag;
             return (
               <Link
                 key={v.label}
-                href={href}
+                href={viewHref}
                 className={
                   active
                     ? "rounded-full bg-primary px-3 py-1 text-primary-foreground"
@@ -174,6 +228,7 @@ export default async function PoolPage({ searchParams }: { searchParams: SearchP
           })}
         </nav>
         <form className="flex flex-wrap items-center gap-2" method="get">
+          {per !== PAGE_SIZES[0] && <input type="hidden" name="per" value={per} />}
           <select name="focus" defaultValue={filters.focus} className={selectClass} aria-label="Focus">
             {Object.entries(FOCUSES).map(([k, label]) => (
               <option key={k} value={k}>
@@ -204,14 +259,16 @@ export default async function PoolPage({ searchParams }: { searchParams: SearchP
               </option>
             ))}
           </select>
-          <select name="status" defaultValue={filters.status} className={selectClass} aria-label="Status">
-            <option value="all">All statuses</option>
-            {TOPIC_STATUSES.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
+          {!isPublic && (
+            <select name="status" defaultValue={filters.status} className={selectClass} aria-label="Status">
+              <option value="all">All statuses</option>
+              {TOPIC_STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          )}
           <select
             name="category"
             defaultValue={filters.category ?? ""}
@@ -261,26 +318,46 @@ export default async function PoolPage({ searchParams }: { searchParams: SearchP
         </form>
       </div>
 
-      <ApiUrlBox query={filtersToQuery(filters)} serverOrigin={await requestOrigin()} />
+      {viewer?.role === "owner" && (
+        <ApiUrlBox query={filtersToQuery(filters)} serverOrigin={await requestOrigin()} />
+      )}
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <ExportButtons query={filtersToQuery(filters)} total={total} />
+        {pageCount > 1 && (
+          <span className="text-sm text-muted-foreground">
+            Page {page} of {pageCount}
+          </span>
+        )}
+      </div>
 
       <div className="rounded-lg border">
         <Table>
           <TableHeader>
             <TableRow>
-              <SortHead col="score" label="Score" filters={filters} className="w-20" align="right" />
-              <SortHead col="title" label="Topic" filters={filters} />
-              <SortHead col="sources" label="Sources" filters={filters} />
-              <SortHead col="category" label="Category" filters={filters} />
-              <SortHead col="published" label="Published" filters={filters} />
-              <SortHead col="status" label="Status" filters={filters} />
-              <TableHead className="text-right">Actions</TableHead>
+              <SortHead
+                col="score"
+                label="Score"
+                filters={filters}
+                per={per}
+                className="w-20"
+                align="right"
+              />
+              <SortHead col="title" label="Topic" filters={filters} per={per} />
+              <SortHead col="sources" label="Sources" filters={filters} per={per} />
+              <SortHead col="category" label="Category" filters={filters} per={per} />
+              <SortHead col="published" label="Published" filters={filters} per={per} />
+              {!isPublic && <SortHead col="status" label="Status" filters={filters} per={per} />}
+              {!isPublic && <TableHead className="text-right">Actions</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
             {topics.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
-                  No topics match. Press “Run now” to collect, or widen the filters.
+                <TableCell colSpan={columns} className="py-10 text-center text-muted-foreground">
+                  {isPublic
+                    ? "No topics match. Try a longer time window or fewer filters."
+                    : "No topics match. Press “Run now” to collect, or widen the filters."}
                 </TableCell>
               </TableRow>
             )}
@@ -288,9 +365,24 @@ export default async function PoolPage({ searchParams }: { searchParams: SearchP
               <TableRow key={t.id}>
                 <TableCell className="text-right font-mono tabular-nums">{t.score.toFixed(2)}</TableCell>
                 <TableCell className="max-w-xl whitespace-normal">
-                  <Link href={`/pool/${t.id}`} className="font-medium hover:underline">
-                    {t.title}
-                  </Link>
+                  {isPublic ? (
+                    t.canonicalUrl ? (
+                      <a
+                        href={t.canonicalUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-medium hover:underline"
+                      >
+                        {t.title}
+                      </a>
+                    ) : (
+                      <span className="font-medium">{t.title}</span>
+                    )
+                  ) : (
+                    <Link href={`/pool/${t.id}`} className="font-medium hover:underline">
+                      {t.title}
+                    </Link>
+                  )}
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1 pt-0.5 text-xs text-muted-foreground">
                     {t.lang && <span className="font-mono uppercase">{t.lang}</span>}
                     {t.canonicalUrl && (
@@ -299,11 +391,7 @@ export default async function PoolPage({ searchParams }: { searchParams: SearchP
                       </a>
                     )}
                     {t.tags.slice(0, 4).map((tag) => (
-                      <Link
-                        key={tag}
-                        href={poolHref(filters, { tag })}
-                        className="hover:text-foreground hover:underline"
-                      >
+                      <Link key={tag} href={href({ tag })} className="hover:text-foreground hover:underline">
                         #{tag}
                       </Link>
                     ))}
@@ -324,7 +412,7 @@ export default async function PoolPage({ searchParams }: { searchParams: SearchP
                 </TableCell>
                 <TableCell className="text-sm">
                   {t.category ? (
-                    <Link href={poolHref(filters, { category: t.category })}>
+                    <Link href={href({ category: t.category })}>
                       <Badge variant="secondary" className="font-normal hover:bg-secondary/60">
                         {t.category}
                       </Badge>
@@ -339,22 +427,27 @@ export default async function PoolPage({ searchParams }: { searchParams: SearchP
                 >
                   {relativeTime(t.publishedAt)}
                 </TableCell>
-                <TableCell>
-                  <StatusBadge status={t.status} />
-                </TableCell>
-                <TableCell className="text-right">
-                  <TopicActions
-                    id={t.id}
-                    status={t.status}
-                    saved={savedIds?.has(t.id)}
-                    canEdit={viewer.role === "owner"}
-                  />
-                </TableCell>
+                {!isPublic && (
+                  <TableCell>
+                    <StatusBadge status={t.status} />
+                  </TableCell>
+                )}
+                {!isPublic && (
+                  <TableCell className="text-right">
+                    <TopicActions
+                      id={t.id}
+                      status={t.status}
+                      saved={savedIds?.has(t.id)}
+                      canEdit={viewer?.role === "owner"}
+                    />
+                  </TableCell>
+                )}
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </div>
+      <PoolPagination page={page} per={per} total={total} href={pageHref} />
     </div>
   );
 }
