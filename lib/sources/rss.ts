@@ -20,7 +20,21 @@ export const rssConfig = z.object({
   lang: z.string().optional(),
 });
 
-const parser = new Parser();
+// <source> is the original publisher on aggregator feeds (Google News).
+const parser = new Parser({ customFields: { item: ["source"] } });
+
+/**
+ * Google News titles end with " - Publisher" and links are news.google.com redirects. Strip the
+ * suffix so the title clusters with the publisher's own feed, and keep the publisher as author.
+ */
+function splitGoogleNewsTitle(title: string, link: string | undefined, source: unknown) {
+  if (!link || !/^https:\/\/news\.google\.com\//.test(link)) return { title };
+  const publisher = textOf(source);
+  const suffix = publisher ? ` - ${publisher}` : undefined;
+  if (suffix && title.endsWith(suffix)) return { title: title.slice(0, -suffix.length).trim(), publisher };
+  const m = title.match(/^(.+) - ([^-]{2,60})$/);
+  return m ? { title: m[1]!.trim(), publisher: publisher ?? m[2]!.trim() } : { title, publisher };
+}
 
 export function sha1(s: string): string {
   return createHash("sha1").update(s).digest("hex");
@@ -66,9 +80,11 @@ export async function parseFeed(
   const feed = await parser.parseString(xml);
   const out: RawItemInput[] = [];
   for (const item of feed.items.slice(0, opts.maxItems ?? 30)) {
-    const title = item.title?.trim();
-    if (!title) continue;
+    const rawTitle = item.title?.trim();
+    if (!rawTitle) continue;
     const url = item.link?.trim() || undefined;
+    const { title, publisher } = splitGoogleNewsTitle(rawTitle, url, (item as { source?: unknown }).source);
+    if (!title) continue;
     const idSource = item.guid || (item as { id?: string }).id || url || title;
     const published = item.isoDate ?? item.pubDate;
     const date = published ? new Date(published) : undefined;
@@ -77,7 +93,7 @@ export async function parseFeed(
       url,
       title,
       summary: stripHtml(item.contentSnippet ?? item.summary ?? item.content),
-      author: textOf(item.creator) ?? textOf((item as { author?: unknown }).author),
+      author: textOf(item.creator) ?? textOf((item as { author?: unknown }).author) ?? publisher,
       publishedAt: date && !Number.isNaN(date.getTime()) ? date : undefined,
       lang: opts.lang,
       tags: feedCategories(item.categories),

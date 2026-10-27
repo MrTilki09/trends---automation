@@ -107,6 +107,22 @@ describe("rss adapter", () => {
     expect(item!.tags).toEqual(["AI"]);
   });
 
+  it("strips the publisher suffix from Google News titles and keeps it as author", async () => {
+    const xml = `<?xml version="1.0"?><rss version="2.0"><channel><title>"OpenAI" - Google News</title>
+      <item><title>OpenAI launches GPT-6 - Reuters</title><link>https://news.google.com/rss/articles/abc?oc=5</link>
+      <pubDate>Mon, 26 Oct 2026 08:00:00 GMT</pubDate><source url="https://www.reuters.com">Reuters</source></item>
+      <item><title>Nvidia earnings - what to expect - The Verge</title><link>https://news.google.com/rss/articles/def</link></item>
+      <item><title>Plain title - Reuters</title><link>https://www.reuters.com/x</link></item></channel></rss>`;
+    const items = await parseFeed(xml);
+    expect(items.map((i) => i.title)).toEqual([
+      "OpenAI launches GPT-6",
+      "Nvidia earnings - what to expect",
+      "Plain title - Reuters",
+    ]);
+    expect(items[0]!.author).toBe("Reuters");
+    expect(items[1]!.author).toBe("The Verge");
+  });
+
   it("respects maxItems", async () => {
     expect(await parseFeed(fixture("rss-webrazzi.xml"), { maxItems: 5 })).toHaveLength(5);
   });
