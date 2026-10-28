@@ -9,7 +9,7 @@ import { getConfig } from "@/lib/config";
  * page (the Pool); everything else sends them to /login. This is the first gate only; pages and server actions check again (lib/auth/server.ts).
  * /api/* is skipped here: /api/topics checks its own API key (and answers JSON, not a redirect).
  */
-const PUBLIC_PATHS = new Set(["/login", "/signup", "/verify"]);
+const PUBLIC_PATHS = new Set(["/login", "/signup", "/verify", "/forgot", "/reset"]);
 // The home page is public and read-only: anyone may view the Pool and export it. Only GET/HEAD:
 // every button on it (save, shortlist, run now) is a POST and still needs a signed-in account.
 const PUBLIC_READ_PATHS = new Set(["/", "/pool", "/pool/export"]);

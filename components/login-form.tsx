@@ -18,7 +18,15 @@ export function LoginForm({ next }: { next: string }) {
           <Input name="user" autoComplete="username" required autoFocus />
         </label>
         <label className="block space-y-1 text-sm">
-          <span>Password</span>
+          <span className="flex items-baseline justify-between">
+            Password
+            <Link
+              href="/forgot"
+              className="text-xs text-muted-foreground hover:text-foreground hover:underline"
+            >
+              Forgot password?
+            </Link>
+          </span>
           <Input name="password" type="password" autoComplete="current-password" required />
         </label>
         {state.error && (

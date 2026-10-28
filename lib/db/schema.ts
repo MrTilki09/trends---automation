@@ -239,7 +239,7 @@ export const users = pgTable("users", {
   updatedAt: updatedAt(),
 });
 
-/** One-time email links (signup verification). Only a SHA-256 of the token is stored. */
+/** One-time email links (confirm email, reset password). Only a SHA-256 of the token is stored. */
 export const emailTokens = pgTable(
   "email_tokens",
   {
@@ -247,7 +247,7 @@ export const emailTokens = pgTable(
     userId: integer("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    purpose: text("purpose").$type<"verify_email">().notNull(),
+    purpose: text("purpose").$type<"verify_email" | "reset_password">().notNull(),
     tokenHash: text("token_hash").notNull().unique(),
     expiresAt: tz("expires_at").notNull(),
     usedAt: tz("used_at"),

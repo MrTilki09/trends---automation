@@ -8,12 +8,17 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import {
+  completeEmailToken,
+  createEmailToken,
   createVerificationToken,
   memberLookup,
+  passwordHelpFor,
   signUp,
   unverifiedMemberId,
+  validateNewPassword,
   validateSignup,
 } from "@/lib/auth/accounts";
+import { emailLinkOrigin } from "@/lib/auth/links";
 import { checkLogin } from "@/lib/auth/login";
 import { assertOwner, authSettings, endSession, startSession } from "@/lib/auth/server";
 import { safeNextPath } from "@/lib/auth/session";
@@ -25,7 +30,7 @@ import { getDb } from "@/lib/db/client";
 import type { TopicStatus } from "@/lib/db/schema";
 import { getConfig } from "@/lib/config";
 import { logger } from "@/lib/logger";
-import { sendMail, verificationMail } from "@/lib/mail";
+import { alreadyRegisteredMail, resetPasswordMail, sendMail, verificationMail } from "@/lib/mail";
 import { clientIp, RateLimiter } from "@/lib/util/rate-limit";
 
 export async function runNowAction(): Promise<{ queued: boolean }> {
@@ -94,17 +99,13 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
   redirect(safeNextPath(formData.get("next")));
 }
 
-// Signup and "send the link again" share one limit: 5 emails per IP, then 1 every 10 minutes.
+// Every action that sends an email (sign-up, "send the link again", forgot password) shares one
+// limit: 5 emails per IP, then 1 every 10 minutes.
 const emailLimiter = new RateLimiter(5, 1 / 600);
 
-/** Absolute link for emails: APP_URL, else the host the visitor used (works behind Caddy). */
+/** Base URL for emailed links (APP_URL, or the public host the visitor used; lib/auth/links.ts). */
 async function appOrigin(): Promise<string> {
-  const configured = getConfig().APP_URL;
-  if (configured) return configured.replace(/\/$/, "");
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
-  const proto = h.get("x-forwarded-proto")?.split(",")[0]?.trim() ?? "http";
-  return `${proto}://${host}`;
+  return emailLinkOrigin(getConfig().APP_URL, await headers());
 }
 
 async function sendVerification(userId: number, email: string): Promise<void> {
@@ -138,7 +139,12 @@ export async function signupAction(_prev: SignupState, formData: FormData): Prom
   const outcome = await signUp(getDb(), valid.email, raw.password);
   if (outcome.kind !== "taken") {
     try {
-      await sendVerification(outcome.userId, outcome.email);
+      if (outcome.kind === "registered") {
+        // Already confirmed: tell the inbox owner instead of silently doing nothing.
+        await sendMail(alreadyRegisteredMail(outcome.email, await appOrigin(), getConfig().MAIL_FROM_NAME));
+      } else {
+        await sendVerification(outcome.userId, outcome.email);
+      }
     } catch (err) {
       logger.error({ err, email: outcome.email }, "verification email failed");
       return {
@@ -172,6 +178,95 @@ export async function resendVerificationAction(_prev: ResendState, formData: For
     message:
       "If that account still needs confirming, a new link is on its way. Check your inbox and spam folder.",
   };
+}
+
+/** After a confirm/reset link was completed: sign the member in and go to the Pool. */
+async function signInAfterLink(email: string): Promise<never> {
+  const auth = authSettings();
+  if (auth) {
+    await startSession(email, "member", auth);
+    redirect("/pool");
+  }
+  redirect("/login");
+}
+
+export type ConfirmState = { error?: string; wrongPassword?: boolean };
+
+/**
+ * The form on /verify: re-enter the password chosen at sign-up, or (if it doesn't match: forgotten,
+ * or someone else signed up with this email) choose a new one. Only then is the link used up.
+ */
+export async function confirmEmailAction(_prev: ConfirmState, formData: FormData): Promise<ConfirmState> {
+  const token = String(formData.get("token") ?? "");
+  const newPassword = formData.get("newPassword");
+  let result;
+  if (newPassword !== null) {
+    const valid = validateNewPassword(String(newPassword), String(formData.get("confirm") ?? ""));
+    if (!valid.ok) return { error: valid.error, wrongPassword: true };
+    result = await completeEmailToken(getDb(), token, "verify_email", { newPassword: String(newPassword) });
+  } else {
+    result = await completeEmailToken(getDb(), token, "verify_email", {
+      currentPassword: String(formData.get("password") ?? ""),
+    });
+  }
+  if (!result.ok) {
+    if (result.reason === "wrong_password") {
+      return {
+        wrongPassword: true,
+        error: "That isn't the password this account was created with. Choose a new one below instead.",
+      };
+    }
+    return {
+      error: "This link is no longer valid. Sign up again or use “Forgot password” to get a new one.",
+    };
+  }
+  logger.info({ email: result.email }, "email confirmed");
+  return signInAfterLink(result.email);
+}
+
+export type ForgotState = { sentTo?: string; error?: string };
+
+/** /forgot: always the same answer, so nobody can find out which emails have an account. */
+export async function forgotPasswordAction(_prev: ForgotState, formData: FormData): Promise<ForgotState> {
+  const email = String(formData.get("email") ?? "").trim();
+  if (!email.includes("@")) return { error: "Enter the email you signed up with." };
+  const rl = emailLimiter.take(clientIp(await headers()));
+  if (!rl.allowed)
+    return { error: `Please wait ${Math.ceil(rl.retryAfterSec / 60)} min before asking again.` };
+
+  const help = await passwordHelpFor(getDb(), email);
+  if (help) {
+    try {
+      if (help.kind === "reset") {
+        const token = await createEmailToken(getDb(), help.userId, "reset_password");
+        const link = `${await appOrigin()}/reset?${new URLSearchParams({ token })}`;
+        await sendMail(resetPasswordMail(help.email, link, getConfig().MAIL_FROM_NAME));
+      } else {
+        await sendVerification(help.userId, help.email);
+      }
+    } catch (err) {
+      logger.error({ err, email: help.email }, "password help email failed");
+      return { error: "We couldn't send the email. Try again in a few minutes." };
+    }
+  }
+  logger.info({ email: email.toLowerCase(), sent: help?.kind ?? "nothing" }, "password help");
+  return { sentTo: email.toLowerCase() };
+}
+
+export type ResetState = { error?: string };
+
+/** /reset: the new password from the emailed link; signs the member in. */
+export async function resetPasswordAction(_prev: ResetState, formData: FormData): Promise<ResetState> {
+  const newPassword = String(formData.get("newPassword") ?? "");
+  const valid = validateNewPassword(newPassword, String(formData.get("confirm") ?? ""));
+  if (!valid.ok) return { error: valid.error };
+  const result = await completeEmailToken(getDb(), String(formData.get("token") ?? ""), "reset_password", {
+    newPassword,
+  });
+  if (!result.ok)
+    return { error: "This link is no longer valid (links work for 1 hour, once). Ask for a new one." };
+  logger.info({ email: result.email }, "password reset");
+  return signInAfterLink(result.email);
 }
 
 export async function logoutAction(): Promise<void> {
