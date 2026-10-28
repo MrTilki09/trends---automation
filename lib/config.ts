@@ -32,7 +32,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
 
-  COLLECT_CRON: z.string().default("0 7,13,19 * * *"),
+  COLLECT_CRON: z.string().default("0 * * * *"), // every hour, on the hour (TZ)
   CLEANUP_CRON: z.string().default("30 3 * * *"),
   SOURCE_TIMEOUT_MS: z.coerce.number().int().positive().default(30_000),
   CLUSTER_SIMILARITY_THRESHOLD: z.coerce.number().min(0).max(1).default(0.55),

@@ -3,7 +3,7 @@
 **A personal tech-news radar that finds what's trending in AI and tech, ranks it, and helps turn it into
 social media posts, with you approving every step.**
 
-Trend Pool watches ~45 news sources, company newsrooms and trend feeds three times a day, merges the same story
+Trend Pool watches ~45 news sources, company newsrooms and trend feeds every hour, merges the same story
 from different sites into one topic, and ranks the topics so the important launches and announcements float to
 the top. You pick the stories worth talking about, and it drafts posts for X, LinkedIn or a blog, plus image
 prompts for an Instagram carousel, in English or Turkish.
@@ -61,7 +61,7 @@ Nothing is ever posted automatically. Trend Pool prepares; you decide.
  ─────────────────     ┌───────────────────────────────────────────┐     ─────────────────
  Company newsrooms     │  worker                                   │
  Tech & AI news   ───▶ │   collect → de-dupe → group into topics   │
- Hacker News, PH       │   → categorize & tag → rank   (3× a day)  │
+ Hacker News, PH       │   → categorize & tag → rank   (hourly)    │
  Google Trends         │                  │                        │
  Turkish tech media    │                  ▼                        │
                        │            Postgres database              │
@@ -329,7 +329,7 @@ A new RSS feed needs no code: just add an `rss(...)` line to the seed file.
   programming). To connect it:
   1. Use (or create) a Reddit account.
   2. Request Data API access through Reddit's developer / Data API request form (non-commercial, personal use;
-     describe: read-only, a few requests 3× a day, no redistribution). Wait for approval.
+     describe: read-only, a few requests per hour, no redistribution). Wait for approval.
   3. Once approved, create a **script** app at <https://www.reddit.com/prefs/apps> (redirect URI can be
      `http://localhost`). Note the client id (under the app name) and secret.
   4. Put `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`, `REDDIT_USERNAME`, `REDDIT_PASSWORD` in `.env`
@@ -587,7 +587,7 @@ The restore command is at the bottom of the script.
 | --------------------------------------------- | ----------------- | ---------------------------------------------------- |
 | `POSTGRES_*`, `DATABASE_URL`                  | —                 | DB credentials (keep the password identical in both) |
 | `TZ`                                          | `Europe/Istanbul` | timezone for cron and display                        |
-| `COLLECT_CRON`                                | `0 7,13,19 * * *` | when runs are queued (3× a day)                      |
+| `COLLECT_CRON`                                | `0 * * * *`       | when runs are queued (every hour)                    |
 | `CLEANUP_CRON`                                | `30 3 * * *`      | daily retention cleanup                              |
 | `SOURCE_TIMEOUT_MS`                           | 30000             | per-source timeout                                   |
 | `CLUSTER_SIMILARITY_THRESHOLD`                | 0.55              | title similarity needed to merge items               |
