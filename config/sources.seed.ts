@@ -31,6 +31,7 @@ const rss = (
   lang: "en" | "tr",
   tags: string[],
   weight = 1,
+  maxItemsPerFeed = 30,
 ): SourceSeed => ({
   key: `rss-${key}`,
   name,
@@ -38,22 +39,34 @@ const rss = (
   weight,
   config: {
     feeds: (Array.isArray(url) ? url : [url]).map((u) => ({ url: u, lang })),
-    maxItemsPerFeed: 30,
+    maxItemsPerFeed,
     tags,
   },
 });
 
 // Google News search: any query becomes a feed of the last day's articles from many outlets.
 // Titles end in " - Publisher"; the RSS adapter strips that so they cluster with direct feeds.
-const googleNewsUrl = (query: string, lang: "en" | "tr") => {
-  const region = lang === "tr" ? "hl=tr&gl=TR&ceid=TR:tr" : "hl=en-US&gl=US&ceid=US:en";
-  return `https://news.google.com/rss/search?q=${encodeURIComponent(`${query} when:1d`)}&${region}`;
+// `edition` is the Google News country edition (language + region of the results).
+const EDITIONS = {
+  US: { hl: "en-US", gl: "US", ceid: "US:en", lang: "en" },
+  GB: { hl: "en-GB", gl: "GB", ceid: "GB:en", lang: "en" },
+  IN: { hl: "en-IN", gl: "IN", ceid: "IN:en", lang: "en" },
+  AU: { hl: "en-AU", gl: "AU", ceid: "AU:en", lang: "en" },
+  CA: { hl: "en-CA", gl: "CA", ceid: "CA:en", lang: "en" },
+  SG: { hl: "en-SG", gl: "SG", ceid: "SG:en", lang: "en" },
+  TR: { hl: "tr", gl: "TR", ceid: "TR:tr", lang: "tr" },
+} as const;
+type Edition = keyof typeof EDITIONS;
+const googleNewsUrl = (query: string, edition: Edition) => {
+  const { hl, gl, ceid } = EDITIONS[edition];
+  const params = new URLSearchParams({ q: `${query} when:1d`, hl, gl, ceid });
+  return `https://news.google.com/rss/search?${params}`;
 };
 const gnews = (
   key: string,
   name: string,
   queries: string[],
-  lang: "en" | "tr",
+  edition: Edition | Edition[],
   tags: string[],
   weight = 1,
   maxItemsPerFeed = 30,
@@ -63,8 +76,12 @@ const gnews = (
   type: "rss",
   weight,
   config: {
-    feeds: queries.map((q) => ({ url: googleNewsUrl(q, lang), lang })),
+    feeds: [edition]
+      .flat()
+      .flatMap((e) => queries.map((q) => ({ url: googleNewsUrl(q, e), lang: EDITIONS[e].lang }))),
     maxItemsPerFeed,
+    // Google News answers fast; many queries in one source must still fit the per-source timeout.
+    concurrency: 8,
     tags,
   },
 });
@@ -175,7 +192,7 @@ export const sourceSeeds: SourceSeed[] = [
 
   // Big newsrooms' tech desks (Reuters has no public feed, so it comes via Google News; AP tech
   // stories arrive through the big-tech queries below, a site search for AP is mostly sports)
-  gnews("reuters", "Reuters Technology", ["site:reuters.com technology"], "en", ["tech"], 1.1, 40),
+  gnews("reuters", "Reuters Technology", ["site:reuters.com technology"], "US", ["tech"], 1.1, 40),
   rss("bloomberg", "Bloomberg Technology", "https://feeds.bloomberg.com/technology/news.rss", "en", ["tech"]),
   rss("ft", "Financial Times Technology", "https://www.ft.com/technology?format=rss", "en", ["tech"]),
   rss("cnbc", "CNBC Technology", "https://www.cnbc.com/id/19854910/device/rss/rss.html", "en", ["tech"]),
@@ -202,9 +219,65 @@ export const sourceSeeds: SourceSeed[] = [
       'DeepSeek OR Qwen OR "Mistral AI"',
       "Intel OR AMD OR Qualcomm OR TSMC",
     ],
-    "en",
+    "US",
     ["tech"],
     0.8,
+    20,
+  ),
+
+  // Companies without a usable feed of their own, and the next tier down.
+  gnews(
+    "companies",
+    "Google News (more tech companies)",
+    [
+      "Netflix OR Spotify OR Uber OR Airbnb",
+      "Adobe OR Salesforce OR Oracle OR IBM",
+      '"Arm Holdings" OR Broadcom OR Micron OR "SK Hynix"',
+      "Huawei OR Xiaomi OR OnePlus OR Oppo",
+      "ByteDance OR TikTok OR Alibaba OR Baidu OR Tencent",
+      'SpaceX OR Starlink OR "Blue Origin"',
+      'Perplexity OR "Hugging Face" OR Cohere OR "Stability AI"',
+      "Figma OR Notion OR Canva OR Shopify",
+      "Stripe OR PayPal OR Revolut OR Klarna",
+      '"Snap Inc" OR Snapchat OR Pinterest OR Reddit OR Discord',
+      "PlayStation OR Nintendo OR Xbox OR Steam",
+      "Dell OR HP OR Lenovo OR Asus",
+    ],
+    "US",
+    ["tech"],
+    0.7,
+    15,
+  ),
+  // Topics: launches, funding, chips, security... regardless of company or outlet.
+  gnews(
+    "topics",
+    "Google News (tech topics)",
+    [
+      '"AI model" OR "large language model" OR LLM',
+      "launches OR unveils smartphone OR laptop OR app",
+      'startup raises OR "funding round" OR "Series A" OR "Series B"',
+      "semiconductor OR chipmaker OR GPU",
+      'cyberattack OR "data breach" OR ransomware OR vulnerability',
+      '"quantum computing" OR "quantum computer"',
+      'robotics OR "humanoid robot" OR "self-driving"',
+      '"electric vehicle" OR "EV battery"',
+      '"AI regulation" OR "AI Act" OR "tech antitrust"',
+      '"open source" release',
+    ],
+    "US",
+    ["tech"],
+    0.7,
+    15,
+  ),
+  // Other English editions: regional launches and local tech business the US edition misses.
+  // One source: the editions share about half their stories, which must not count as extra sources.
+  gnews(
+    "tech-intl",
+    "Google News UK/IN/AU/CA/SG (tech)",
+    ['"artificial intelligence" OR "AI startup"', 'smartphone OR software OR chipmaker OR "tech company"'],
+    ["GB", "IN", "AU", "CA", "SG"],
+    ["tech"],
+    0.6,
     20,
   ),
 
@@ -306,8 +379,14 @@ export const sourceSeeds: SourceSeed[] = [
   gnews(
     "tr-tech",
     "Google News TR (yapay zeka, big tech)",
-    ["yapay zeka", "Apple OR Samsung OR Google OR Microsoft OR OpenAI OR Nvidia OR akıllı telefon"],
-    "tr",
+    [
+      "yapay zeka",
+      "Apple OR Samsung OR Google OR Microsoft OR OpenAI OR Nvidia OR akıllı telefon",
+      'girişim yatırım OR "yatırım aldı"',
+      '"siber saldırı" OR "veri sızıntısı"',
+      'Turkcell OR "Türk Telekom" OR Baykar OR Togg OR Aselsan',
+    ],
+    "TR",
     ["tech", "turkey"],
     0.8,
   ),
@@ -320,6 +399,222 @@ export const sourceSeeds: SourceSeed[] = [
   rss("log", "LOG", "https://www.log.com.tr/feed/", "tr", ["tech", "turkey"]),
   rss("chip", "CHIP Online", "https://www.chip.com.tr/rss", "tr", ["tech", "turkey"]),
   rss("bbc-turkce", "BBC Türkçe", "https://feeds.bbci.co.uk/turkce/rss.xml", "tr", ["turkey"]),
+
+  // ---- Second batch (Oct 2026 probe): lower volume or broader, but all working ----
+
+  // Newsrooms and business press
+  rss("bbc-tech", "BBC Technology", "https://feeds.bbci.co.uk/news/technology/rss.xml", "en", ["tech"]),
+  rss("wsj-tech", "WSJ Tech", "https://feeds.content.dowjones.io/public/rss/RSSWSJD", "en", ["tech"]),
+  rss("fastcompany", "Fast Company Tech", "https://www.fastcompany.com/technology/rss", "en", ["tech"]),
+  rss("theinformation", "The Information", "https://www.theinformation.com/feed", "en", ["tech"], 1.1),
+  // General news: no "tech" tag, the categorizer decides what counts as tech.
+  rss("businessinsider", "Business Insider", "https://feeds.businessinsider.com/custom/all", "en", [], 0.6),
+  rss("aljazeera", "Al Jazeera", "https://www.aljazeera.com/xml/rss/all.xml", "en", [], 0.5),
+
+  // Tech sites
+  rss("cnet", "CNET", "https://www.cnet.com/rss/news/", "en", ["tech"]),
+  rss("pcworld", "PCWorld", "https://www.pcworld.com/feed", "en", ["tech", "hardware"]),
+  rss("windowscentral", "Windows Central", "https://www.windowscentral.com/feeds/all", "en", [
+    "tech",
+    "microsoft",
+  ]),
+  rss("siliconangle", "SiliconANGLE", "https://siliconangle.com/feed/", "en", ["tech"]),
+  rss("geekwire", "GeekWire", "https://www.geekwire.com/feed/", "en", ["tech", "startups"]),
+  rss("ghacks", "Ghacks", "https://www.ghacks.net/feed/", "en", ["tech"]),
+  rss("futurism", "Futurism", "https://futurism.com/feed", "en", ["tech"], 0.8),
+  rss("newatlas", "New Atlas", "https://newatlas.com/index.rss", "en", ["tech"]),
+  rss("insideevs", "InsideEVs", "https://insideevs.com/rss/news/all/", "en", ["tech", "auto"]),
+  rss("ieee-spectrum", "IEEE Spectrum", "https://spectrum.ieee.org/feeds/feed.rss", "en", ["tech"]),
+  rss("servethehome", "ServeTheHome", "https://www.servethehome.com/feed/", "en", ["tech", "hardware"]),
+  rss(
+    "notebookcheck",
+    "Notebookcheck",
+    "https://www.notebookcheck.net/RSS-Feed-Notebook-Reviews.8156.0.html",
+    "en",
+    ["tech", "hardware"],
+  ),
+  rss("hackaday", "Hackaday", "https://hackaday.com/blog/feed/", "en", ["tech", "hardware"]),
+  rss("daringfireball", "Daring Fireball", "https://daringfireball.net/feeds/main", "en", ["tech", "apple"]),
+  rss("stratechery", "Stratechery", "https://stratechery.com/feed/", "en", ["tech"]),
+  rss("platformer", "Platformer", "https://www.platformer.news/rss/", "en", ["tech"]),
+  rss("space", "Space.com", "https://www.space.com/feeds/all", "en", ["tech", "space"]),
+  rss("spacenews", "SpaceNews", "https://spacenews.com/feed/", "en", ["tech", "space"]),
+  rss("robotreport", "The Robot Report", "https://www.therobotreport.com/feed/", "en", ["tech", "robotics"]),
+  rss(
+    "techcrunch-ai",
+    "TechCrunch AI",
+    "https://techcrunch.com/category/artificial-intelligence/feed/",
+    "en",
+    ["ai"],
+  ),
+
+  // Startups and regional tech
+  rss("crunchbase", "Crunchbase News", "https://news.crunchbase.com/feed/", "en", ["tech", "startups"]),
+  rss("techeu", "Tech.eu", "https://tech.eu/feed/", "en", ["tech", "startups"]),
+  rss("pandaily", "Pandaily", "https://pandaily.com/feed/", "en", ["tech", "china"]),
+  rss("technode", "TechNode", "https://technode.com/feed/", "en", ["tech", "china"]),
+
+  // Security
+  rss("krebs", "Krebs on Security", "https://krebsonsecurity.com/feed/", "en", ["tech", "security"]),
+  rss("darkreading", "Dark Reading", "https://www.darkreading.com/rss.xml", "en", ["tech", "security"]),
+  rss("therecord", "The Record", "https://therecord.media/feed", "en", ["tech", "security"]),
+
+  // Developers
+  rss("infoq", "InfoQ", "https://feed.infoq.com/", "en", ["tech", "dev"]),
+  rss("thenewstack", "The New Stack", "https://thenewstack.io/feed/", "en", ["tech", "dev"]),
+  rss("devto", "DEV Community", "https://dev.to/feed", "en", ["tech", "dev"], 0.6),
+  rss("lwn", "LWN", "https://lwn.net/headlines/rss", "en", ["tech", "dev"]),
+
+  // AI: news, newsletters and writers
+  rss("wired-ai", "Wired AI", "https://www.wired.com/feed/tag/ai/latest/rss", "en", ["ai"]),
+  rss("therundown", "The Rundown AI", "https://www.therundown.ai/feed", "en", ["ai"]),
+  rss("importai", "Import AI", "https://importai.substack.com/feed", "en", ["ai"]),
+  rss("garymarcus", "Gary Marcus", "https://garymarcus.substack.com/feed", "en", ["ai"], 0.8),
+  rss("interconnects", "Interconnects", "https://www.interconnects.ai/feed", "en", ["ai"]),
+  rss("raschka", "Sebastian Raschka", "https://magazine.sebastianraschka.com/feed", "en", ["ai"]),
+  rss("oneusefulthing", "One Useful Thing", "https://www.oneusefulthing.org/feed", "en", ["ai"]),
+  rss("aisnakeoil", "AI Snake Oil", "https://www.aisnakeoil.com/feed", "en", ["ai"]),
+  rss("bensbites", "Ben's Bites", "https://www.bensbites.com/feed", "en", ["ai"]),
+  rss("tds", "Towards Data Science", "https://towardsdatascience.com/feed", "en", ["ai"], 0.7),
+  // New research papers: hundreds a day, so a low weight and only the first 40 per list.
+  rss(
+    "arxiv",
+    "arXiv (AI/ML papers)",
+    ["https://rss.arxiv.org/rss/cs.AI", "https://rss.arxiv.org/rss/cs.LG", "https://rss.arxiv.org/rss/cs.CL"],
+    "en",
+    ["ai", "research"],
+    0.4,
+    40,
+  ),
+
+  // More official company blogs
+  rss("google-cloud", "Google Cloud Blog", "https://cloudblog.withgoogle.com/rss/", "en", [
+    "tech",
+    "official",
+    "google",
+  ]),
+  rss(
+    "android-dev",
+    "Android Developers Blog",
+    "https://android-developers.googleblog.com/feeds/posts/default",
+    "en",
+    ["tech", "official", "google", "dev"],
+  ),
+  rss(
+    "microsoft-more",
+    "Microsoft (Research, Windows, Azure, DevBlogs)",
+    [
+      "https://www.microsoft.com/en-us/research/feed/",
+      "https://blogs.windows.com/feed/",
+      "https://azure.microsoft.com/en-us/blog/feed/",
+      "https://devblogs.microsoft.com/feed/",
+    ],
+    "en",
+    ["tech", "official", "microsoft"],
+  ),
+  rss("meta-eng", "Meta Engineering", "https://engineering.fb.com/feed/", "en", [
+    "tech",
+    "official",
+    "meta",
+    "dev",
+  ]),
+  rss("amazon-news", "Amazon News", "https://www.aboutamazon.com/news/rss", "en", [
+    "tech",
+    "official",
+    "amazon",
+  ]),
+  rss(
+    "apple-dev",
+    "Apple (Developer News, Machine Learning)",
+    ["https://developer.apple.com/news/rss/news.rss", "https://machinelearning.apple.com/rss.xml"],
+    "en",
+    ["tech", "official", "apple"],
+  ),
+  rss("salesforce", "Salesforce News", "https://www.salesforce.com/news/feed/", "en", [
+    "tech",
+    "official",
+    "salesforce",
+  ]),
+  rss("cloudflare", "Cloudflare Blog", "https://blog.cloudflare.com/rss/", "en", [
+    "tech",
+    "official",
+    "cloudflare",
+  ]),
+  rss("vercel", "Vercel", "https://vercel.com/atom", "en", ["tech", "official", "vercel", "dev"]),
+  rss("stripe", "Stripe Blog", "https://stripe.com/blog/feed.rss", "en", ["tech", "official", "stripe"]),
+  rss("ollama", "Ollama", "https://ollama.com/blog/rss.xml", "en", ["ai", "official", "ollama"]),
+  rss("docker", "Docker Blog", "https://www.docker.com/blog/feed/", "en", [
+    "tech",
+    "official",
+    "docker",
+    "dev",
+  ]),
+  rss("kubernetes", "Kubernetes Blog", "https://kubernetes.io/feed.xml", "en", ["tech", "official", "dev"]),
+  rss("mozilla", "Mozilla Blog", "https://blog.mozilla.org/en/feed/", "en", ["tech", "official", "mozilla"]),
+  rss("spotify", "Spotify Newsroom", "https://newsroom.spotify.com/feed/", "en", [
+    "tech",
+    "official",
+    "spotify",
+  ]),
+
+  // Community and video
+  rss("hn-launch", "Launch HN (hnrss)", "https://hnrss.org/launches", "en", ["tech", "launch", "startups"]),
+  rss("tildes-tech", "Tildes ~tech", "https://tildes.net/~tech/topics.rss", "en", ["tech"]),
+  // YouTube channel feeds are free and keyless: add any channel_id here.
+  rss(
+    "youtube-tech",
+    "YouTube tech channels",
+    [
+      "UCBJycsmduvYEL83R_U4JriQ", // MKBHD
+      "UCXuqSBlHAE6Xw-yeJA0Tunw", // Linus Tech Tips
+      "UCsBjURrPoezykLs9EqgamOA", // Fireship
+      "UCbfYPyITQ-7l4upoX8nvctg", // Two Minute Papers
+      "UCNJ1Ymd5yFuUPtn21xtRbbw", // AI Explained
+    ].map((id) => `https://www.youtube.com/feeds/videos.xml?channel_id=${id}`),
+    "en",
+    ["tech", "video"],
+    0.8,
+    10,
+  ),
+
+  // More Turkish
+  rss(
+    "milliyet-teknoloji",
+    "Milliyet Teknoloji",
+    "https://www.milliyet.com.tr/rss/rssnew/teknolojirss.xml",
+    "tr",
+    ["tech", "turkey"],
+  ),
+  rss(
+    "haberturk-teknoloji",
+    "Habertürk Teknoloji",
+    "https://www.haberturk.com/rss/kategori/teknoloji.xml",
+    "tr",
+    ["tech", "turkey"],
+  ),
+  rss("hurriyet-teknoloji", "Hürriyet Teknoloji", "https://www.hurriyet.com.tr/rss/teknoloji", "tr", [
+    "tech",
+    "turkey",
+  ]),
+  rss(
+    "sozcu-teknoloji",
+    "Sözcü Bilim-Teknoloji",
+    "https://www.sozcu.com.tr/feeds-rss-category-bilim-teknoloji",
+    "tr",
+    ["tech", "turkey"],
+  ),
+  rss(
+    "trt-teknoloji",
+    "TRT Haber Bilim-Teknoloji",
+    "https://www.trthaber.com/bilim_teknoloji_articles.rss",
+    "tr",
+    ["tech", "turkey"],
+  ),
+  rss("teknoseyir", "TeknoSeyir", "https://teknoseyir.com/feed", "tr", ["tech", "turkey"]),
+  rss("swipeline", "Swipeline", "https://swipeline.co/feed/", "tr", ["tech", "startups", "turkey"]),
+  rss("foundern", "FounderN", "https://www.foundern.com/feed/", "tr", ["tech", "startups", "turkey"]),
+  rss("evrimagaci", "Evrim Ağacı", "https://evrimagaci.org/rss.xml", "tr", ["turkey", "science"]),
+  rss("indir", "Indir.com Haber", "https://www.indir.com/haber/rss/", "tr", ["tech", "turkey"]),
 
   // Reddit through our own Devvit app (reddit-bridge/). Disabled until REDDIT_DEVVIT_URL/TOKEN are set.
   {

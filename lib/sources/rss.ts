@@ -17,6 +17,8 @@ export const rssConfig = z.object({
     )
     .min(1),
   maxItemsPerFeed: z.number().int().positive().default(30),
+  /** Feeds fetched at once. Sources with many quick feeds (Google News searches) raise it. */
+  concurrency: z.number().int().positive().max(10).default(3),
   lang: z.string().optional(),
 });
 
@@ -110,7 +112,7 @@ export const rssAdapter: SourceAdapter = {
   async fetch(config, { signal, logger }) {
     const cfg = rssConfig.parse(config);
     const errors: string[] = [];
-    const perFeed = await mapLimit(cfg.feeds, 3, async (feed) => {
+    const perFeed = await mapLimit(cfg.feeds, cfg.concurrency, async (feed) => {
       try {
         const xml = await getText(feed.url, { signal });
         return await parseFeed(xml, {
