@@ -42,41 +42,99 @@ export type ClusterCandidate = { topicId: number; canonicalUrl: string | null; n
 /** `existing:<topicId>` or `new:<itemId of the first item>` */
 export type ClusterKey = `existing:${number}` | `new:${number}`;
 
-/** Pure clustering step. Returns item id -> cluster key. */
+/**
+ * Pure clustering step. Returns item id -> cluster key. Each item joins the most similar title
+ * (earliest on ties) among the candidates and the items before it, if similarity >= threshold.
+ *
+ * Speed: comparing every item with every title is quadratic (minutes at ~10k items). Prefix
+ * filtering gives the same answer much faster: with trigrams ordered rarest-first, two titles with
+ * similarity >= threshold always share a trigram within each one's first
+ * |set| - ceil(threshold * |set|) + 1 trigrams, so only those are indexed and looked up.
+ */
 export function assignClusters(
   items: ClusterItem[],
   candidates: ClusterCandidate[],
   threshold: number,
 ): Map<number, ClusterKey> {
-  type Entry = { key: ClusterKey; canonicalUrl: string | null; grams: Set<string> };
-  const pool: Entry[] = candidates.map((c) => ({
-    key: `existing:${c.topicId}`,
-    canonicalUrl: c.canonicalUrl,
-    grams: trigrams(c.normalizedTitle),
-  }));
-  const byUrl = new Map<string, ClusterKey>();
-  for (const e of pool) if (e.canonicalUrl && !byUrl.has(e.canonicalUrl)) byUrl.set(e.canonicalUrl, e.key);
+  // Trigrams as numbers, rarest first: each title becomes a sorted Int32Array.
+  const candSets = candidates.map((c) => trigrams(c.normalizedTitle));
+  const itemSets = items.map((i) => trigrams(i.normalizedTitle));
+  const freq = new Map<string, number>();
+  for (const set of [...candSets, ...itemSets]) for (const t of set) freq.set(t, (freq.get(t) ?? 0) + 1);
+  const rank = new Map(
+    [...freq.keys()]
+      .sort((a, b) => freq.get(a)! - freq.get(b)! || (a < b ? -1 : a > b ? 1 : 0))
+      .map((t, i) => [t, i] as const),
+  );
+  const encode = (set: Set<string>) => Int32Array.from(set, (t) => rank.get(t)!).sort();
+  const prefixLength = (n: number) => Math.max(0, n - Math.ceil(threshold * n) + 1);
+  /** Jaccard of two sorted id arrays (same value as `similarity` on the sets). */
+  const jaccard = (a: Int32Array, b: Int32Array) => {
+    if (a.length === 0 || b.length === 0) return 0;
+    let i = 0;
+    let j = 0;
+    let shared = 0;
+    while (i < a.length && j < b.length) {
+      if (a[i] === b[j]) {
+        shared++;
+        i++;
+        j++;
+      } else if (a[i]! < b[j]!) i++;
+      else j++;
+    }
+    return shared / (a.length + b.length - shared);
+  };
 
+  const pool: { key: ClusterKey; grams: Int32Array }[] = [];
+  const index = new Map<number, number[]>(); // trigram id -> positions in `pool`
+  const addToPool = (key: ClusterKey, grams: Int32Array) => {
+    const pos = pool.length;
+    pool.push({ key, grams });
+    for (let k = 0; k < prefixLength(grams.length); k++) {
+      const list = index.get(grams[k]!);
+      if (list) list.push(pos);
+      else index.set(grams[k]!, [pos]);
+    }
+  };
+  const byUrl = new Map<string, ClusterKey>();
+  candidates.forEach((c, i) => {
+    const key: ClusterKey = `existing:${c.topicId}`;
+    addToPool(key, encode(candSets[i]!));
+    if (c.canonicalUrl && !byUrl.has(c.canonicalUrl)) byUrl.set(c.canonicalUrl, key);
+  });
+
+  const checkedBy = new Int32Array(candidates.length + items.length).fill(-1);
   const result = new Map<number, ClusterKey>();
-  for (const item of items) {
-    const grams = trigrams(item.normalizedTitle);
+  items.forEach((item, i) => {
+    const grams = encode(itemSets[i]!);
     let key: ClusterKey | undefined = item.canonicalUrl ? byUrl.get(item.canonicalUrl) : undefined;
     if (!key) {
       let best = 0;
-      for (const e of pool) {
-        const s = similarity(grams, e.grams);
-        if (s >= threshold && s > best) {
-          best = s;
-          key = e.key;
+      let bestPos = Infinity;
+      // Similarity >= threshold is impossible when the sizes differ too much.
+      const minLen = threshold * grams.length;
+      const maxLen = threshold > 0 ? grams.length / threshold : Infinity;
+      for (let k = 0; k < prefixLength(grams.length); k++) {
+        for (const pos of index.get(grams[k]!) ?? []) {
+          if (checkedBy[pos] === i) continue;
+          checkedBy[pos] = i;
+          const other = pool[pos]!.grams;
+          if (other.length < minLen || other.length > maxLen) continue;
+          const s = jaccard(grams, other);
+          if (s > 0 && s >= threshold && (s > best || (s === best && pos < bestPos))) {
+            best = s;
+            bestPos = pos;
+            key = pool[pos]!.key;
+          }
         }
       }
     }
     key ??= `new:${item.id}`;
     result.set(item.id, key);
     // Make this item matchable by the items that follow it in the same batch.
-    pool.push({ key, canonicalUrl: item.canonicalUrl, grams });
+    addToPool(key, grams);
     if (item.canonicalUrl && !byUrl.has(item.canonicalUrl)) byUrl.set(item.canonicalUrl, key);
-  }
+  });
   return result;
 }
 
@@ -133,7 +191,8 @@ export async function refreshTopicAggregates(db: DB, topicIds: number[]): Promis
         .update(topics)
         .set({
           keywords: extractKeywords(titles),
-          tags: topByFrequency(allTags, 10),
+          // Generous, so the Pool's tag filter finds a topic by any common label of its articles.
+          tags: topByFrequency(allTags, 30),
           lang: topByFrequency(langs, 1)[0] ?? null,
           category,
         })

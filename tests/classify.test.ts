@@ -44,9 +44,47 @@ describe("classify", () => {
 
 describe("normalizeTags", () => {
   it("folds case/accents, removes noise and duplicates", () => {
-    expect(normalizeTags(["Yapay Zeka", "yapay zekâ", "Genel", "AI", " ", null, "Haberler"])).toEqual([
-      "yapay zeka",
-      "ai",
+    expect(
+      normalizeTags(["Startup", "Genel", "girişim", " ", null, "Haberler", "Storytype: Standard"]),
+    ).toEqual(["startups"]);
+  });
+
+  it("merges synonyms across spellings and languages", () => {
+    expect(
+      normalizeTags(["Yapay Zeka", "yapay zekâ", "AI (artificial intelligence)", "Artificial Intelligence"]),
+    ).toEqual(["ai"]);
+    expect(normalizeTags(["Bilim-Teknoloji"])).toEqual(["science", "tech"]);
+    expect(normalizeTags(["cs.CL", "stat.ML", "Akıllı Telefon", "Cybersecurity", "#Deals"])).toEqual([
+      "nlp",
+      "machine learning",
+      "smartphones",
+      "security",
+      "deals",
+    ]);
+  });
+
+  it("splits hierarchical categories and strips topic-path prefixes", () => {
+    expect(normalizeTags(["Security / National Security", "Data Center / Cloud"])).toEqual([
+      "security",
+      "national security",
+      "data centers",
+      "cloud",
+    ]);
+    expect(normalizeTags(["Fox News Tech Topics Security", "topics/people/elon-musk"])).toEqual([
+      "security",
+      "elon musk",
+      "tesla",
+    ]);
+  });
+
+  it("adds the company a tag is about", () => {
+    expect(normalizeTags(["iPhone", "Windows 11", "PS5"])).toEqual([
+      "iphone",
+      "apple",
+      "windows 11",
+      "microsoft",
+      "ps5",
+      "sony",
     ]);
   });
 

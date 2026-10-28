@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { exportFilename, toCsv, toExportRow, toJson } from "../lib/data/export";
 import { pageWindow, parsePage, parseTopicFilters, publicView } from "../lib/data/topic-filters";
-import type { TopicListRow } from "../lib/data/topics";
+import { parseTagFilter, type TopicListRow } from "../lib/data/topics";
 
 describe("Pool paging", () => {
   it("defaults to page 1 with 50 per page", () => {
@@ -98,5 +98,17 @@ describe("export", () => {
     expect(exportFilename("json", { category: "AI", tag: "show hn" }, now, "UTC")).toBe(
       "trend-pool-2026-10-27-ai-show-hn.json",
     );
+  });
+});
+
+describe("Pool tag filter", () => {
+  it("takes several tags, exclusions and any spelling of a tag", () => {
+    expect(parseTagFilter("Apple, launch, -Deals, !sponsored")).toEqual({
+      include: ["apple", "launch"],
+      exclude: ["deals", "sponsored"],
+    });
+    expect(parseTagFilter("Yapay Zeka")).toEqual({ include: ["ai"], exclude: [] });
+    expect(parseTagFilter(" , ")).toEqual({ include: [], exclude: [] });
+    expect(parseTagFilter(undefined)).toEqual({ include: [], exclude: [] });
   });
 });

@@ -1,7 +1,7 @@
 import { asc, desc, eq, sql, type SQL } from "drizzle-orm";
 import type { DB } from "../db/client";
 import { rawItems, sources, topics, type TopicStatus } from "../db/schema";
-import { NON_TECH_CATEGORIES, TECH_CATEGORIES, TECH_TAGS } from "../pipeline/classify";
+import { canonicalTag, NON_TECH_CATEGORIES, TECH_CATEGORIES, TECH_TAGS } from "../pipeline/classify";
 import { normalizeTitle } from "../pipeline/normalize";
 
 export const TOPIC_STATUSES: TopicStatus[] = ["new", "shortlisted", "ignored"];
@@ -41,6 +41,7 @@ export type TopicFilters = {
   status?: TopicStatus | "all";
   source?: string; // source key
   category?: string;
+  /** One or more tags, comma-separated; "-tag" excludes: "apple, launch, -deals" (see parseTagFilter). */
   tag?: string;
   lang?: string;
   window?: TimeWindow;
@@ -101,12 +102,30 @@ function baseWhere(f: Pick<TopicFilters, "status" | "window" | "focus" | "hideIg
   return where;
 }
 
+/**
+ * The tag filter: "apple, launch, -deals" = tagged apple AND launch, NOT deals. Each term goes
+ * through the same synonyms as stored tags, so "Yapay Zeka" or "Artificial Intelligence" finds "ai".
+ */
+export function parseTagFilter(tag: string | undefined): { include: string[]; exclude: string[] } {
+  const include = new Set<string>();
+  const exclude = new Set<string>();
+  for (const term of (tag ?? "").split(",")) {
+    const t = term.trim();
+    if (!t) continue;
+    const negated = t.startsWith("-") || t.startsWith("!");
+    for (const c of canonicalTag(negated ? t.slice(1) : t)) (negated ? exclude : include).add(c);
+  }
+  return { include: [...include], exclude: [...exclude] };
+}
+
 /** WHERE for the pool: the base filters plus category, tag, language, source and text search. */
 function topicWhere(f: TopicFilters): SQL {
   const where = baseWhere(f);
   // Category filter matches the rule-based category or the LLM's (when enrichment is on).
   if (f.category) where.push(sql`(t.category = ${f.category} OR t.llm_category = ${f.category})`);
-  if (f.tag) where.push(sql`${f.tag} = ANY(t.tags)`);
+  const tags = parseTagFilter(f.tag);
+  if (tags.include.length) where.push(sql`t.tags @> ARRAY[${list(tags.include)}]::text[]`);
+  if (tags.exclude.length) where.push(sql`NOT (t.tags && ARRAY[${list(tags.exclude)}]::text[])`);
   if (f.lang) where.push(sql`t.lang = ${f.lang}`);
   if (f.source) {
     where.push(sql`EXISTS (SELECT 1 FROM raw_items r2 JOIN sources s2 ON s2.id = r2.source_id
@@ -197,7 +216,8 @@ export async function listFacets(
   };
   const [categories, tags, langs] = await Promise.all([
     facet(sql`coalesce(t.category, t.llm_category)`, sql`FROM topics t`, 50),
-    facet(sql`tag`, sql`FROM topics t CROSS JOIN LATERAL unnest(t.tags) AS tag`, 60),
+    // Suggestions for the tag box (any tag can be typed; these are the most common in view).
+    facet(sql`tag`, sql`FROM topics t CROSS JOIN LATERAL unnest(t.tags) AS tag`, 500),
     facet(sql`t.lang`, sql`FROM topics t`, 10),
   ]);
   return { categories, tags, langs };

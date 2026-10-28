@@ -5,7 +5,8 @@ import { parseApproxTraffic, parseGoogleTrends } from "../lib/sources/google-tre
 import { parseHnItem } from "../lib/sources/hackernews";
 import { parseRedditListing } from "../lib/sources/reddit";
 import { parseBridgeResponse } from "../lib/sources/reddit-devvit";
-import { parseFeed } from "../lib/sources/rss";
+import { dedupeBatch } from "../lib/pipeline/dedupe";
+import { parseFeed, repairXml, urlSections } from "../lib/sources/rss";
 
 const fixture = (name: string) => readFileSync(path.join(__dirname, "fixtures", name), "utf8");
 
@@ -126,6 +127,99 @@ describe("rss adapter", () => {
   it("respects maxItems", async () => {
     expect(await parseFeed(fixture("rss-webrazzi.xml"), { maxItems: 5 })).toHaveLength(5);
   });
+
+  it("reads Atom <category term> tags (The Verge, ZDNet, CNET, Business Insider format)", async () => {
+    const xml = `<?xml version="1.0"?><feed xmlns="http://www.w3.org/2005/Atom"><title>t</title>
+      <entry><title>iPhone hinge</title><link rel="alternate" href="https://www.theverge.com/tech/1/iphone-hinge"/>
+      <id>1</id><published>2026-10-27T18:55:05-04:00</published>
+      <category scheme="https://www.theverge.com" term="Apple"/><category term="Foldable Phones" label="Foldables"/>
+      </entry></feed>`;
+    const [item] = await parseFeed(xml, { feedUrl: "https://www.theverge.com/rss/index.xml" });
+    expect(item!.tags).toEqual(["Apple", "Foldables", "tech"]);
+  });
+
+  it("collects keywords, hashtags, subcategories, flags, comment counts and the image", async () => {
+    const xml = `<?xml version="1.0"?><rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/"
+      xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:slash="http://purl.org/rss/1.0/modules/slash/"
+      xmlns:cf="https://example.com/cf" xmlns:neowin="https://neowin.net"><channel><title>t</title>
+      <item><title>One</title><link>https://example.com/a</link><category>Security</category>
+        <media:keywords>privacy, free speech</media:keywords><dc:subject>Repeat History</dc:subject>
+        <neowin:tags>#Microsoft #SharePoint</neowin:tags><subcategory>Yapay Zeka</subcategory>
+        <cf:isSponsored>true</cf:isSponsored><cf:hasAffiliateLinks>false</cf:hasAffiliateLinks>
+        <slash:comments>42</slash:comments><media:content url="https://img.example.com/a.jpg" medium="image"/>
+      </item></channel></rss>`;
+    const [item] = await parseFeed(xml);
+    expect(item!.tags).toEqual([
+      "Security",
+      "Yapay Zeka",
+      "Repeat History",
+      "privacy",
+      "free speech",
+      "Microsoft",
+      "SharePoint",
+      "sponsored",
+    ]);
+    expect(item!.metrics).toEqual({ comments: 42 });
+    expect((item!.raw as { image?: string }).image).toBe("https://img.example.com/a.jpg");
+  });
+
+  it("reads YouTube views/likes and Hacker News points from feeds", async () => {
+    const yt = `<?xml version="1.0"?><feed xmlns="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/">
+      <title>MKBHD</title><entry><id>yt:video:x</id><title>This can SEE Sound!</title>
+      <link rel="alternate" href="https://www.youtube.com/shorts/x"/><published>2026-10-27T20:14:55+00:00</published>
+      <media:group><media:title>t</media:title><media:thumbnail url="https://i.ytimg.com/x.jpg"/>
+      <media:community><media:starRating count="31909" average="5.00"/><media:statistics views="984788"/></media:community>
+      </media:group></entry></feed>`;
+    const [video] = await parseFeed(yt);
+    expect(video!.metrics).toEqual({ views: 984788, likes: 31909 });
+    expect(video!.tags).toEqual(["shorts"]);
+    expect((video!.raw as { image?: string }).image).toBe("https://i.ytimg.com/x.jpg");
+
+    const hn = `<?xml version="1.0"?><rss version="2.0"><channel><title>HN</title><item><title>Ghostty 1.4</title>
+      <link>https://ghostty.org/</link><description><![CDATA[<p>Article URL: x</p><p>Points: 996</p><p># Comments: 315</p>]]></description>
+      </item></channel></rss>`;
+    expect((await parseFeed(hn))[0]!.metrics).toEqual({ points: 996, comments: 315 });
+  });
+
+  it("adds feed-level tags and skips arXiv re-announcements of old papers", async () => {
+    const xml = `<?xml version="1.0"?><rss version="2.0" xmlns:arxiv="http://arxiv.org/schemas/atom"><channel><title>arXiv</title>
+      <item><title>New paper</title><link>https://arxiv.org/abs/1</link><category>cs.AI</category><arxiv:announce_type>new</arxiv:announce_type></item>
+      <item><title>Old paper v3</title><link>https://arxiv.org/abs/2</link><arxiv:announce_type>replace</arxiv:announce_type></item>
+      </channel></rss>`;
+    const items = await parseFeed(xml, { tags: ["research"] });
+    expect(items.map((i) => i.title)).toEqual(["New paper"]);
+    expect(items[0]!.tags).toEqual(["research", "cs.AI"]);
+  });
+
+  it("recovers feeds that are almost XML (raw HTML, bare &, HTML entities)", async () => {
+    const xml = `<?xml version="1.0"?><rss version="2.0"><channel><title>Rest of World</title>
+      <item><title>AI &amp; you&nbsp;&mdash; why</title><link>https://restofworld.org/2026/x/?a=1&b=2</link>
+      <description><p>Broken <img src=x async> html</p></description></item></channel></rss>`;
+    expect(repairXml(xml)).toContain("<![CDATA[<p>Broken");
+    const [item] = await parseFeed(xml);
+    expect(item!.title).toBe("AI & you — why");
+    expect(item!.url).toBe("https://restofworld.org/2026/x/?a=1&b=2");
+    expect(item!.summary).toBe("Broken html");
+  });
+});
+
+describe("urlSections (section labels from article paths)", () => {
+  const feed = "https://feeds.example.com/rss";
+  it("takes section words before the slug and skips dates, ids and structure words", () => {
+    expect(
+      urlSections("https://www.example.com/tech-industry/artificial-intelligence/some-slug", feed),
+    ).toEqual(["tech industry", "artificial intelligence"]);
+    expect(urlSections("https://example.com/technology/2026/oct/27/slug", feed)).toEqual(["technology"]);
+    expect(urlSections("https://example.com/news/articles/c123abc", feed)).toEqual([]);
+    expect(urlSections("https://example.com/sites/janedoe/2026/10/27/slug", feed)).toEqual([]);
+    expect(urlSections("https://example.com/p/a-substack-post", feed)).toEqual([]);
+  });
+  it("ignores links to other sites (aggregators like Hacker News or Google News)", () => {
+    expect(urlSections("https://other.com/security/slug", feed)).toEqual([]);
+    expect(
+      urlSections("https://news.google.com/rss/articles/abc", "https://news.google.com/rss/search?q=x"),
+    ).toEqual([]);
+  });
 });
 
 describe("reddit adapter (parser only)", () => {
@@ -217,5 +311,39 @@ describe("reddit via Devvit bridge (parser only)", () => {
     });
     expect(items).toHaveLength(1);
     expect(errors).toEqual(["r/private_sub: forbidden"]);
+  });
+});
+
+describe("dedupeBatch", () => {
+  it("merges copies of one article from a publisher's main and section feeds", () => {
+    const base = { externalId: "a", title: "T", raw: null };
+    const merged = dedupeBatch([
+      { ...base, tags: ["Apple"], metrics: { comments: 3 } },
+      { ...base, externalId: "b", tags: [], metrics: {} },
+      { ...base, tags: ["ai", "Apple"], metrics: { comments: 5, weight: 1.2 } },
+    ]);
+    expect(merged).toHaveLength(2);
+    expect(merged[0]!.tags).toEqual(["Apple", "ai"]);
+    expect(merged[0]!.metrics).toEqual({ comments: 5, weight: 1.2 });
+  });
+});
+
+describe("rss tags vs author", () => {
+  it("drops a category that is only the author's name", async () => {
+    const xml = `<?xml version="1.0"?><rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/"><channel><title>t</title>
+      <item><title>X</title><link>https://example.com/x</link><dc:creator>Levent Pekcan</dc:creator>
+      <category>Levent Pekcan</category><category>Yapay Zeka</category></item></channel></rss>`;
+    const [item] = await parseFeed(xml);
+    expect(item!.tags).toEqual(["Yapay Zeka"]);
+    expect(item!.author).toBe("Levent Pekcan");
+  });
+});
+
+describe("rss ids", () => {
+  it("falls back to the link when <guid> is empty (attributes only)", async () => {
+    const xml = `<?xml version="1.0"?><rss version="2.0"><channel><title>NASA</title>
+      <item><title>Curiosity</title><link>https://science.nasa.gov/blog/x/</link><guid isPermaLink="false"/></item>
+      </channel></rss>`;
+    expect((await parseFeed(xml))[0]!.externalId).toBe("https://science.nasa.gov/blog/x/");
   });
 });

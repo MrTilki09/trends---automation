@@ -594,7 +594,7 @@ export function classify(input: ClassifyInput): { category: string | null; score
 
 export const CATEGORIES = Object.keys(CATEGORY_RULES);
 
-// Feed categories that carry no information.
+// Feed categories that carry no information (feed plumbing, "latest", page furniture).
 const NOISE_TAGS = new Set([
   "genel",
   "haberler",
@@ -607,25 +607,330 @@ const NOISE_TAGS = new Set([
   "diger",
   "other",
   "blog",
+  "blogs",
   "manset",
   "gundem",
   "son dakika",
   "one cikanlar",
   "popular",
   "home",
+  "homepage",
+  "anasayfa",
+  "top",
+  "latest",
+  "latest news",
+  "the latest",
+  "news feed",
+  "article",
+  "articles",
+  "articleshow",
+  "post",
+  "posts",
+  "link",
+  "standard",
+  "storytype standard",
+  "structure technology",
+  "structure business",
+  "featured article",
+  "featured tech news",
+  "all the latest android tech news",
+  "editor s picks",
+  "editors pick",
+  "editors picks",
+  "guncel",
+  "son haberler",
+  "tum haberler",
+  "chip galeri",
+  "dc",
+  "fnc",
+  "fox news",
+  "fox news tech",
+  "se tech",
+  "se stackoverflow",
+  "cc by sa",
+  "region us",
+  "language en us",
+  "type ti",
+  "staff",
+  "contributed",
+  "sponsored post contributed",
+  "guest blog",
+  "site news",
+  "news events",
+  "news and events",
+  "in brief",
+  "weekly update",
+  "morning summary",
+  "the official microsoft blog",
+  "misc",
+  "slider",
+  "spotlight",
+  "most popular",
+  "sticky",
+  "nofollow",
+  "sidebar featured",
+  "more stories",
+  "recent news",
+  "news by brand",
+  "show types",
+  "source",
+  "advanced 300",
+  "intermediate 200",
+  "introductory 100",
+  "expert 400",
+  "snowflake site",
+  "google news",
+  "premium",
+  "sponsor cncf",
+  "must read",
 ]);
 
-/** Normalizes raw tags (feed categories + source tags): folded lowercase, de-duplicated, noise removed. */
+/*
+ * Synonyms -> one canonical tag, so a filter catches every spelling (EN + TR + feed codes).
+ * Keys and values are in normalized form (see normalizeTitle). A value can be several tags
+ * ("bilim teknoloji" -> science + tech).
+ */
+const TAG_ALIASES: Record<string, string | string[]> = {};
+const alias = (canonical: string | string[], ...variants: string[]) => {
+  for (const v of variants) TAG_ALIASES[v] = canonical;
+};
+alias(
+  "ai",
+  "artificial intelligence",
+  "ai artificial intelligence",
+  "artificial intelligence ai",
+  "yapay zeka",
+  "yapay zeka ai",
+  "ai news",
+  "a i",
+  "machine intelligence",
+  "innovation and ai",
+  "cs ai",
+  "yz",
+  "ai yapay zeka",
+);
+alias(["ai", "machine learning"], "ai and ml", "ai machine learning", "ai ml");
+alias(["business", "ai"], "business artificial intelligence");
+alias("machine learning", "ml", "makine ogrenmesi", "cs lg", "stat ml");
+alias("generative ai", "genai", "gen ai", "generative artificial intelligence", "uretken yapay zeka");
+alias("ai agents", "agentic ai", "ai agent", "agents", "agentic", "yapay zeka ajanlari");
+alias(["ai agents", "generative ai"], "agentic ai generative ai");
+alias(
+  "llm",
+  "llms",
+  "large language models",
+  "large language model",
+  "language model",
+  "language models",
+  "buyuk dil modeli",
+  "buyuk dil modelleri",
+);
+alias("nlp", "natural language processing", "cs cl");
+alias("computer vision", "cs cv");
+alias("robotics", "robots", "robot", "robotik", "cs ro");
+alias("software engineering", "cs se");
+alias("information retrieval", "cs ir");
+alias(
+  "security",
+  "cybersecurity",
+  "cyber security",
+  "siber guvenlik",
+  "information security",
+  "infosec",
+  "cs cr",
+);
+alias("cybercrime", "cyber crime", "siber suc");
+alias("vulnerabilities", "vulnerability", "guvenlik acigi");
+alias("data breach", "data breaches", "veri sizintisi");
+alias(
+  "tech",
+  "technology",
+  "teknoloji",
+  "tech news",
+  "technology news",
+  "teknoloji haberleri",
+  "computer science and technology",
+);
+alias(
+  ["science", "tech"],
+  "sci tech",
+  "science and technology",
+  "bilim teknoloji",
+  "bilim ve teknoloji",
+  "science technology",
+);
+alias("science", "bilim", "general science", "sciences");
+alias("space", "uzay");
+alias(
+  "gaming",
+  "games",
+  "video games",
+  "oyun",
+  "oyunlar",
+  "oyun haber",
+  "oyun haberleri",
+  "gaming news",
+  "game",
+);
+alias(
+  "smartphones",
+  "smartphone",
+  "phones",
+  "akilli telefon",
+  "akilli telefonlar",
+  "mobile phones",
+  "cep telefonu",
+  "telefon",
+);
+alias(["smartphones", "android"], "android phones");
+alias("mobile", "mobil");
+alias("startups", "startup", "girisim", "girisimler", "girisimcilik", "start ups", "startup news");
+alias(
+  "funding",
+  "fundraising",
+  "venture capital",
+  "vc",
+  "yatirim",
+  "venture",
+  "investment",
+  "investments",
+  "funding rounds",
+);
+alias("ipo", "ipos", "halka arz");
+alias(
+  "deals",
+  "deal",
+  "gear deals",
+  "firsat",
+  "firsatlar",
+  "indirim",
+  "indirimler",
+  "kampanya",
+  "coupons",
+  "steals",
+);
+alias("review", "reviews", "inceleme", "incelemeler");
+alias(
+  "how to",
+  "how tos",
+  "technical how to",
+  "nasil yapilir",
+  "rehber",
+  "guide",
+  "guides",
+  "tutorial",
+  "tutorials",
+);
+alias("opinion", "opinions", "column", "columns", "gorus", "yorum", "commentary");
+alias("podcast", "podcasts");
+alias("press release", "press releases", "basin bulteni");
+alias("research", "arastirma");
+alias("open source", "opensource", "acik kaynak");
+alias("cloud", "cloud computing", "bulut", "bulut bilisim");
+alias("data centers", "data center", "veri merkezi", "veri merkezleri");
+alias(["data centers", "cloud"], "data center cloud");
+alias("social media", "sosyal medya");
+alias("semiconductors", "semiconductor", "chips", "chip", "cipler", "yari iletken", "yari iletkenler");
+alias("gpus", "gpu", "graphics cards", "ekran karti", "ekran kartlari");
+alias(
+  "electric vehicles",
+  "electric cars",
+  "elektrikli arac",
+  "elektrikli araclar",
+  "bev",
+  "electric vehicle",
+);
+alias(
+  "autonomous vehicles",
+  "self driving",
+  "self driving cars",
+  "autonomous driving",
+  "otonom surus",
+  "robotaxi",
+  "robotaxis",
+);
+alias("automotive", "automobile", "otomobil", "otomotiv");
+alias("crypto", "cryptocurrency", "cryptocurrencies", "kripto", "kripto para", "crypto ecosystems");
+alias("quantum computing", "quantum", "kuantum", "quantum computers", "kuantum bilgisayar");
+alias("privacy", "gizlilik", "data privacy");
+alias("policy", "tech policy", "regulation", "duzenleme");
+alias(["policy", "politics"], "policy politics");
+alias("wearables", "wearable", "giyilebilir teknoloji");
+alias("smart home", "akilli ev");
+alias("laptops", "laptop", "notebooks", "dizustu bilgisayar");
+alias("tablets", "tablet");
+alias("tv", "tvs", "televisions", "televizyon", "smart tv");
+alias("launch", "new releases", "release", "releases", "product launch", "product launches", "launches");
+alias("changelog", "changelogs", "release notes");
+alias("apple", "apple inc");
+alias("google", "google llc", "alphabet");
+alias("microsoft", "microsoft corp");
+alias("meta", "meta platforms");
+alias("nvidia", "nvidia corp");
+alias("amazon", "amazon com");
+alias("world", "dunya", "world news");
+alias("economy", "ekonomi", "economics");
+alias("politics", "politika", "siyaset");
+alias("health", "saglik");
+alias("sports", "sport", "spor");
+alias("entertainment", "eglence");
+alias("environment", "cevre");
+alias("energy", "enerji");
+alias("education", "egitim");
+alias("turkey", "turkiye");
+alias("usa", "abd");
+alias("china", "cin");
+alias("europe", "avrupa");
+alias("ai", "artificial intelligence news");
+alias("tech industry", "technology industry");
+alias("anthropic", "anthropic ai llc", "anthropic pbc");
+alias("meta", "meta platforms inc");
+alias("openai", "openai inc");
+alias(["cyberattacks", "hacking"], "cyberattacks and hacks");
+alias("cyberattacks", "cyberattack", "siber saldiri", "siber saldirilar");
+alias("hacking", "hackers", "hacker");
+alias("smartphones", "phone");
+alias("tv", "tvs displays");
+alias("laptops", "dizustu bilgisayarlar");
+alias("software", "yazilim");
+alias("hardware", "donanim");
+alias("interview", "interviews", "roportaj");
+alias("android", "android news");
+alias("research", "research blog");
+
+// Hierarchical or listed categories ("Security / National Security", "AI; Policy") become separate tags.
+const TAG_SPLIT = /\s+[/>|]\s+|;\s*|,\s+/;
+// "Fox News Tech Topics Security", "topics/people/elon-musk" -> drop the path prefix.
+const TAG_PREFIX =
+  /^(fox news (tech )?(topics )?(us )?|topics (people |organisations |organizations |things |places |events )?)/;
+
+/**
+ * Normalizes raw tags (feed categories + source tags): folded lowercase, synonyms merged, noise removed,
+ * de-duplicated. Company names found in a tag are added too ("iPhone 18" -> "apple").
+ */
 export function normalizeTags(raw: (string | null | undefined)[], max = 15): string[] {
   const out: string[] = [];
+  const add = (n: string) => {
+    if (out.length < max && n && n.length <= 40 && !NOISE_TAGS.has(n) && !out.includes(n)) out.push(n);
+  };
   for (const t of raw) {
     if (!t) continue;
-    const n = normalizeTitle(t);
-    if (!n || n.length > 40 || NOISE_TAGS.has(n) || out.includes(n)) continue;
-    out.push(n);
+    for (const part of t.split(TAG_SPLIT)) {
+      const canonical = canonicalTag(part);
+      canonical.forEach(add);
+      if (canonical.some((c) => !NOISE_TAGS.has(c)))
+        for (const c of companiesIn(normalizeTitle(part))) add(c);
+    }
     if (out.length >= max) break;
   }
   return out;
+}
+
+/** One label as it is stored: normalized and mapped through the synonyms ("Yapay Zekâ" -> ["ai"]). */
+export function canonicalTag(label: string): string[] {
+  const n = normalizeTitle(label.replace(/^#/, "")).replace(TAG_PREFIX, "");
+  const mapped = TAG_ALIASES[n] ?? n;
+  return (Array.isArray(mapped) ? mapped : [mapped]).filter(Boolean);
 }
 
 /** Most frequent values first (ties keep first-seen order). */
@@ -722,14 +1027,18 @@ function matcher(keywords: string[]): (padded: string, words: Set<string>) => bo
 const isLaunch = matcher(LAUNCH_KEYWORDS);
 const companyMatchers = Object.entries(COMPANIES).map(([name, kws]) => [name, matcher(kws)] as const);
 
+/** Company names mentioned in a normalized text. */
+function companiesIn(normalized: string): string[] {
+  const padded = ` ${normalized} `;
+  const words = new Set(normalized.split(" "));
+  return companyMatchers.filter(([, match]) => match(padded, words)).map(([name]) => name);
+}
+
 /** Tags derived from a normalized title: "launch" and company names. */
 export function detectSignals(normalizedTitle: string): string[] {
   const padded = ` ${normalizedTitle} `;
   const words = new Set(normalizedTitle.split(" "));
-  const tags: string[] = [];
-  if (isLaunch(padded, words)) tags.push("launch");
-  for (const [name, match] of companyMatchers) if (match(padded, words)) tags.push(name);
-  return tags;
+  return [...(isLaunch(padded, words) ? ["launch"] : []), ...companiesIn(normalizedTitle)];
 }
 
 /** Categories that count as tech for the Pool's "Tech only" view. */

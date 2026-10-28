@@ -5,10 +5,30 @@ import type { RawItemInput } from "../sources/types";
 import { detectSignals, normalizeTags } from "./classify";
 import { canonicalizeUrl, guessLang, normalizeTitle } from "./normalize";
 
-/** Removes repeated externalIds inside one batch (a feed can list the same item twice). */
+/** Most tags kept per item (source tags + signals + the feed's own labels). */
+export const MAX_ITEM_TAGS = 30;
+
+/**
+ * Removes repeated externalIds inside one batch. A feed can list an item twice, and a publisher's
+ * main feed and its section feed (e.g. The Verge + The Verge AI) often carry the same article:
+ * the copies are merged, so the item keeps every feed's tags and the highest metrics.
+ */
 export function dedupeBatch(items: RawItemInput[]): RawItemInput[] {
   const seen = new Map<string, RawItemInput>();
-  for (const it of items) if (!seen.has(it.externalId)) seen.set(it.externalId, it);
+  for (const it of items) {
+    const prev = seen.get(it.externalId);
+    if (!prev) {
+      seen.set(it.externalId, it);
+      continue;
+    }
+    const metrics = { ...it.metrics, ...prev.metrics };
+    for (const [k, v] of Object.entries(it.metrics)) metrics[k] = Math.max(v, prev.metrics[k] ?? v);
+    seen.set(it.externalId, {
+      ...prev,
+      tags: [...new Set([...(prev.tags ?? []), ...(it.tags ?? [])])],
+      metrics,
+    });
+  }
   return [...seen.values()];
 }
 
@@ -51,7 +71,7 @@ export async function upsertRawItems(
         // Source tags and detected signals first, so a feed with many categories can't crowd them out.
         tags: normalizeTags(
           [...(params.sourceTags ?? []), ...detectSignals(normalizedTitle), ...(it.tags ?? [])],
-          20,
+          MAX_ITEM_TAGS,
         ),
         metrics: it.metrics,
         raw: it.raw ?? null,

@@ -7,6 +7,7 @@ import { rawItems } from "../lib/db/schema";
 import { logger } from "../lib/logger";
 import { detectSignals, normalizeTags } from "../lib/pipeline/classify";
 import { refreshTopicAggregates } from "../lib/pipeline/cluster";
+import { MAX_ITEM_TAGS } from "../lib/pipeline/dedupe";
 import { scoreRecentTopics } from "../lib/pipeline/score";
 
 async function main() {
@@ -14,7 +15,8 @@ async function main() {
   // 1. Recompute every item's tags (feed categories + source tags + detected signals) and fill
   //    in language for items stored before those columns existed.
   const items = await db.execute(sql`
-    SELECT r.id, r.raw->'categories' AS cats, s.config->'tags' AS stags, r.normalized_title AS norm,
+    SELECT r.id, coalesce(r.raw->'tags', r.raw->'categories') AS cats, s.config->'tags' AS stags,
+           r.normalized_title AS norm,
            coalesce(r.lang, s.config->'feeds'->0->>'lang', s.config->>'lang') AS lang, s.type,
            r.raw->>'geo' AS geo, r.title
     FROM raw_items r JOIN sources s ON s.id = r.source_id`);
@@ -50,7 +52,7 @@ async function main() {
           : null);
     await db
       .update(rawItems)
-      .set({ tags: normalizeTags(raw, 20), lang })
+      .set({ tags: normalizeTags(raw, MAX_ITEM_TAGS), lang })
       .where(eq(rawItems.id, row.id));
   }
   logger.info({ items: items.rows.length }, "item tags/lang recomputed");

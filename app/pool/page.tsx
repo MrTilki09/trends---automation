@@ -282,14 +282,23 @@ export default async function PoolPage({ searchParams }: { searchParams: SearchP
               </option>
             ))}
           </select>
-          <select name="tag" defaultValue={filters.tag ?? ""} className={selectClass} aria-label="Tag">
-            <option value="">All tags</option>
+          {/* Free text with suggestions: "apple, launch, -deals" = all of these tags, none of "deals". */}
+          <Input
+            name="tag"
+            list="tag-options"
+            defaultValue={filters.tag ?? ""}
+            placeholder="Tags: ai, -deals"
+            aria-label="Tags"
+            title="Comma-separated tags; prefix with - to exclude (e.g. apple, launch, -deals)"
+            className="w-44"
+          />
+          <datalist id="tag-options">
             {facets.tags.map((t) => (
               <option key={t.value} value={t.value}>
-                #{t.value} ({t.count})
+                {`#${t.value} (${t.count})`}
               </option>
             ))}
-          </select>
+          </datalist>
           <select name="lang" defaultValue={filters.lang ?? ""} className={selectClass} aria-label="Language">
             <option value="">All languages</option>
             {facets.langs.map((l) => (
