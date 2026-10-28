@@ -1,14 +1,24 @@
 "use server";
 
-// Server actions for a signed-in user's own data: Saved topics, generated posts, NVIDIA settings.
+// Server actions for a signed-in user's own data: Saved topics, generated posts, NVIDIA settings,
+// and the profile (password, deleting the account).
 // Each one resolves the user from the session cookie itself (localhost access is not enough) and
 // every lib/ call is scoped to that user's id.
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
-import { assertSignedInUser } from "@/lib/auth/server";
+import { redirect } from "next/navigation";
+import { validateNewPassword } from "@/lib/auth/accounts";
+import { assertSignedInUser, endSession } from "@/lib/auth/server";
 import { getConfig } from "@/lib/config";
 import { deletePost, saveTopic, unsaveTopic } from "@/lib/data/saved";
-import { clearNvidiaKey, setBrandName, setNvidiaKey, setNvidiaModel } from "@/lib/data/users";
+import {
+  changeMemberPassword,
+  clearNvidiaKey,
+  deleteMemberAccount,
+  setBrandName,
+  setNvidiaKey,
+  setNvidiaModel,
+} from "@/lib/data/users";
 import { getDb } from "@/lib/db/client";
 import type { PostPlatform } from "@/lib/db/schema";
 import { isNvidiaModel, looksLikeNvidiaKey } from "@/lib/llm/nvidia";
@@ -16,6 +26,7 @@ import { logger } from "@/lib/logger";
 import { generatePosts, type GenerateResult } from "@/lib/posts/generate";
 import { PLATFORMS, POST_LANGS, type PostLang } from "@/lib/posts/prompt";
 import { sharedOnce } from "@/lib/util/once";
+import { clientIp, RateLimiter } from "@/lib/util/rate-limit";
 
 const intOf = (v: FormDataEntryValue | null) => {
   const n = Number(v);
@@ -114,4 +125,40 @@ export async function clearNvidiaKeyAction(): Promise<void> {
   const user = await assertSignedInUser();
   await clearNvidiaKey(getDb(), user.id);
   revalidatePath("/settings");
+}
+
+// Password checks on the profile page get the same limit as sign-in: 5 tries, then 1 per minute.
+const passwordCheckLimiter = new RateLimiter(5, 1 / 60);
+
+export type ProfileState = { message?: string; error?: string };
+
+export async function changePasswordAction(_prev: ProfileState, formData: FormData): Promise<ProfileState> {
+  const user = await assertSignedInUser();
+  const rl = passwordCheckLimiter.take(clientIp(await headers()));
+  if (!rl.allowed) return { error: `Too many attempts. Try again in ${rl.retryAfterSec} s.` };
+  const next = String(formData.get("newPassword") ?? "");
+  const valid = validateNewPassword(next, String(formData.get("confirm") ?? ""));
+  if (!valid.ok) return { error: valid.error };
+  const result = await changeMemberPassword(getDb(), user, String(formData.get("current") ?? ""), next);
+  if (!result.ok) return { error: result.error };
+  logger.info({ userId: user.id }, "password changed");
+  return { message: "Password changed." };
+}
+
+export async function deleteAccountAction(_prev: ProfileState, formData: FormData): Promise<ProfileState> {
+  const user = await assertSignedInUser();
+  if (
+    String(formData.get("confirmText") ?? "")
+      .trim()
+      .toUpperCase() !== "DELETE"
+  ) {
+    return { error: "Type DELETE to confirm." };
+  }
+  const rl = passwordCheckLimiter.take(clientIp(await headers()));
+  if (!rl.allowed) return { error: `Too many attempts. Try again in ${rl.retryAfterSec} s.` };
+  const result = await deleteMemberAccount(getDb(), user, String(formData.get("password") ?? ""));
+  if (!result.ok) return { error: result.error };
+  logger.info({ userId: user.id }, "account deleted");
+  await endSession();
+  redirect("/pool");
 }

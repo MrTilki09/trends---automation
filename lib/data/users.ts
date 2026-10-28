@@ -1,4 +1,5 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
+import { hashPassword, verifyPassword } from "../auth/password";
 import { decryptSecret, encryptSecret, maskSecret } from "../auth/secrets";
 import type { DB } from "../db/client";
 import { users, type User } from "../db/schema";
@@ -62,4 +63,51 @@ export function nvidiaKeyStatus(
   if (!u.nvidiaApiKeyEnc) return { state: "none" };
   const key = nvidiaKeyOf(u, secretsKey);
   return key ? { state: "saved", masked: maskSecret(key) } : { state: "unreadable" };
+}
+
+/** What the profile page shows next to the account details. */
+export async function accountStats(
+  db: DB,
+  userId: number,
+): Promise<{ saved: number; posts: number; lastPostAt: Date | null }> {
+  const res = await db.execute(sql`
+    SELECT (SELECT count(*)::int FROM saved_topics WHERE user_id = ${userId}) AS saved,
+           (SELECT count(*)::int FROM posts WHERE user_id = ${userId}) AS posts,
+           (SELECT max(created_at) FROM posts WHERE user_id = ${userId}) AS last_post_at`);
+  const r = res.rows[0] as { saved: number; posts: number; last_post_at: string | null };
+  return { saved: r.saved, posts: r.posts, lastPostAt: r.last_post_at ? new Date(r.last_post_at) : null };
+}
+
+/**
+ * Changes a member's password after checking the current one. The owner's password lives in .env
+ * (DASHBOARD_PASSWORD_HASH) and can't be changed here.
+ */
+export async function changeMemberPassword(
+  db: DB,
+  user: User,
+  current: string,
+  next: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (!user.passwordHash)
+    return { ok: false, error: "This account's password is set in the server's .env file." };
+  if (!(await verifyPassword(current, user.passwordHash))) {
+    return { ok: false, error: "Your current password is wrong." };
+  }
+  await db
+    .update(users)
+    .set({ passwordHash: await hashPassword(next) })
+    .where(eq(users.id, user.id));
+  return { ok: true };
+}
+
+/** Deletes a member's account and, through the foreign keys, its saved topics, posts and links. */
+export async function deleteMemberAccount(
+  db: DB,
+  user: User,
+  password: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (!user.passwordHash) return { ok: false, error: "The owner account can't be deleted here." };
+  if (!(await verifyPassword(password, user.passwordHash))) return { ok: false, error: "Wrong password." };
+  await db.delete(users).where(eq(users.id, user.id));
+  return { ok: true };
 }

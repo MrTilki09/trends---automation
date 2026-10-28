@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Trend Pool mark (brand/instagram/b-bars-reflection.svg), simplified to stay sharp at 16 px. -->
+  <rect width="64" height="64" rx="14" fill="#0B0D10"/>
+  <g fill="#C6F432">
+    <rect x="13" y="31" width="10" height="13" rx="2.5"/>
+    <rect x="27" y="22" width="10" height="22" rx="2.5"/>
+    <rect x="41" y="12" width="10" height="32" rx="2.5"/>
+  </g>
+  <path d="M9 50 q 5.5 -3 11 0 t 11 0 t 11 0 t 11 0" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round"/>
+</svg>

@@ -41,6 +41,7 @@ const OWNER_NAV = [
 const USER_NAV = [
   { href: "/saved", label: "Saved" },
   { href: "/settings", label: "Settings" },
+  { href: "/profile", label: "Profile" },
 ];
 
 async function Header({ viewer }: { viewer: Viewer }) {
