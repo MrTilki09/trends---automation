@@ -36,6 +36,7 @@ const OWNER_NAV = [
   { href: "/runs", label: "Runs" },
   { href: "/sources", label: "Sources" },
   { href: "/keys", label: "API keys" },
+  { href: "/moderation", label: "Moderation" },
 ];
 // Personal pages: only with a real login (not via the localhost bypass).
 const USER_NAV = [

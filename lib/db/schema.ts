@@ -273,6 +273,14 @@ export const users = pgTable("users", {
   nvidiaModel: text("nvidia_model"),
   /** Watermark text on generated carousel slides (e.g. the user's handle); null = app name. */
   brandName: text("brand_name"),
+  /** App profile: shown next to comments. */
+  displayName: text("display_name"),
+  /** App handle (lowercase, unique), e.g. "deniz". */
+  handle: text("handle").unique(),
+  /** When the user finished the app's onboarding (picked interests). */
+  onboardedAt: tz("onboarded_at"),
+  /** Banned by the owner (moderation): can read, can't write. */
+  bannedAt: tz("banned_at"),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });
@@ -307,6 +315,191 @@ export const savedTopics = pgTable(
     createdAt: createdAt(),
   },
   (t) => [primaryKey({ columns: [t.userId, t.topicId] })],
+);
+
+/* ------------------------------------------------------------------ app (Trend Feed) */
+
+/** App sign-in sessions: one per device. Only a SHA-256 of the refresh token is stored. */
+export const appSessions = pgTable(
+  "app_sessions",
+  {
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    refreshHash: text("refresh_hash").notNull().unique(),
+    device: text("device"),
+    createdAt: createdAt(),
+    lastUsedAt: tz("last_used_at").notNull().defaultNow(),
+    expiresAt: tz("expires_at").notNull(),
+    revokedAt: tz("revoked_at"),
+  },
+  (t) => [index("app_sessions_user_idx").on(t.userId)],
+);
+
+export type FollowKind = "category" | "company" | "tag" | "lang";
+
+export const follows = pgTable(
+  "follows",
+  {
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    kind: text("kind").$type<FollowKind>().notNull(),
+    value: text("value").notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.kind, t.value] })],
+);
+
+export type ReactionType = "hot" | "useful" | "skeptical" | "wow";
+
+/** One reaction per user per topic. */
+export const reactions = pgTable(
+  "reactions",
+  {
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    topicId: integer("topic_id")
+      .notNull()
+      .references(() => topics.id, { onDelete: "cascade" }),
+    type: text("type").$type<ReactionType>().notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.topicId] }), index("reactions_topic_idx").on(t.topicId)],
+);
+
+export type CommentStatus = "visible" | "hidden" | "deleted";
+
+export const comments = pgTable(
+  "comments",
+  {
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+    topicId: integer("topic_id")
+      .notNull()
+      .references(() => topics.id, { onDelete: "cascade" }),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    /** null = top level; replies are one level deep. */
+    parentId: integer("parent_id"),
+    body: text("body").notNull(),
+    status: text("status").$type<CommentStatus>().notNull().default("visible"),
+    createdAt: createdAt(),
+    editedAt: tz("edited_at"),
+  },
+  (t) => [
+    index("comments_topic_idx").on(t.topicId, t.createdAt),
+    index("comments_user_idx").on(t.userId, t.createdAt),
+    index("comments_parent_idx").on(t.parentId),
+  ],
+);
+
+/** Likes on comments (for "Top" sorting). */
+export const commentLikes = pgTable(
+  "comment_likes",
+  {
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    commentId: integer("comment_id")
+      .notNull()
+      .references(() => comments.id, { onDelete: "cascade" }),
+    createdAt: createdAt(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.commentId] })],
+);
+
+/** Denormalized counts per topic, updated in the same transaction as the change. */
+export const topicCounters = pgTable("topic_counters", {
+  topicId: integer("topic_id")
+    .primaryKey()
+    .references(() => topics.id, { onDelete: "cascade" }),
+  reactions: integer("reactions").notNull().default(0),
+  comments: integer("comments").notNull().default(0),
+  saves: integer("saves").notNull().default(0),
+  updatedAt: updatedAt(),
+});
+
+export type ReportTarget = "comment" | "user" | "topic";
+export type ReportStatus = "open" | "actioned" | "dismissed";
+
+export const reports = pgTable(
+  "reports",
+  {
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+    reporterId: integer("reporter_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    targetType: text("target_type").$type<ReportTarget>().notNull(),
+    targetId: integer("target_id").notNull(),
+    reason: text("reason").notNull(),
+    status: text("status").$type<ReportStatus>().notNull().default("open"),
+    createdAt: createdAt(),
+    resolvedAt: tz("resolved_at"),
+  },
+  (t) => [
+    index("reports_status_idx").on(t.status, t.createdAt),
+    uniqueIndex("reports_once_uq").on(t.reporterId, t.targetType, t.targetId),
+  ],
+);
+
+export const blocks = pgTable(
+  "blocks",
+  {
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    blockedUserId: integer("blocked_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: createdAt(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.blockedUserId] })],
+);
+
+export type NotificationPrefs = { breaking: boolean; digest: boolean; replies: boolean; timeZone: string };
+
+export const pushTokens = pgTable(
+  "push_tokens",
+  {
+    token: text("token").primaryKey(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    platform: text("platform").notNull(),
+    createdAt: createdAt(),
+    lastOkAt: tz("last_ok_at"),
+  },
+  (t) => [index("push_tokens_user_idx").on(t.userId)],
+);
+
+export const notificationSettings = pgTable("notification_settings", {
+  userId: integer("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  prefs: jsonb("prefs").$type<NotificationPrefs>().notNull(),
+  updatedAt: updatedAt(),
+});
+
+/** Every push sent (frequency caps, "one per topic ever", opened rate). */
+export const notifications = pgTable(
+  "notifications",
+  {
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    topicId: integer("topic_id").references(() => topics.id, { onDelete: "set null" }),
+    kind: text("kind").notNull(),
+    sentAt: tz("sent_at").notNull().defaultNow(),
+    openedAt: tz("opened_at"),
+  },
+  (t) => [
+    index("notifications_user_sent_idx").on(t.userId, t.sentAt),
+    uniqueIndex("notifications_user_topic_uq").on(t.userId, t.topicId),
+  ],
 );
 
 export type PostPlatform = "instagram" | "x" | "linkedin" | "blog";

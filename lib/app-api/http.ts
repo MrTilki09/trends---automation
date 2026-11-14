@@ -3,6 +3,10 @@ import { getConfig } from "../config";
 import { logger } from "../logger";
 import { clientIp, RateLimiter } from "../util/rate-limit";
 import { TtlCache } from "../util/ttl-cache";
+import type { z } from "zod";
+import type { User } from "../db/schema";
+import { getDb } from "../db/client";
+import { sentAuth, userFromRequest } from "./auth";
 
 /*
  * Shared plumbing for /api/app/v1/*: CORS, a per-IP rate limit, and a short shared cache for
@@ -83,3 +87,61 @@ export function param(req: NextRequest, name: string, max = 100): string | undef
   const v = req.nextUrl.searchParams.get(name)?.trim();
   return v ? v.slice(0, max) : undefined;
 }
+
+// ---------------------------------------------------------------- signed-in requests
+
+
+/** JSON response for personal data: never cached by shared caches. */
+export function json(body: unknown, status = 200) {
+  return NextResponse.json(body, {
+    status,
+    headers: { ...CORS, "Cache-Control": "private, no-store" },
+  });
+}
+
+/**
+ * Resolves the caller. required: anonymous → 401. Optional: anonymous → null user, but a bad or
+ * expired token still answers 401 so the app refreshes it instead of silently showing logged-out data.
+ */
+export async function caller(
+  req: NextRequest,
+  required: boolean,
+): Promise<{ user: User | null; error?: never } | { user?: never; error: NextResponse }> {
+  const limited = rateLimited(req);
+  if (limited) return { error: limited };
+  const user = await userFromRequest(getDb(), req.headers, cfg?.SESSION_SECRET);
+  if (!user && (required || sentAuth(req.headers))) {
+    return {
+      error: jsonError(401, sentAuth(req.headers) ? "Session expired. Sign in again." : "Sign in first.", {
+        "WWW-Authenticate": "Bearer",
+      }),
+    };
+  }
+  return { user };
+}
+
+/** Writes need an account that isn't banned. */
+export function bannedError(user: User): NextResponse | null {
+  return user.bannedAt ? jsonError(403, "This account can't post or react.") : null;
+}
+
+/** Parses a JSON body with a zod schema; returns a 400 response on bad input. */
+export async function readJson<S extends z.ZodType>(
+  req: NextRequest,
+  schema: S,
+): Promise<{ data: z.infer<S>; error?: never } | { data?: never; error: NextResponse }> {
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return { error: jsonError(400, "Send a JSON body.") };
+  }
+  const parsed = schema.safeParse(body);
+  if (!parsed.success) {
+    const first = parsed.error.issues[0];
+    return { error: jsonError(400, first ? `${first.path.join(".") || "body"}: ${first.message}` : "Invalid body.") };
+  }
+  return { data: parsed.data };
+}
+
+export const sessionSecret = () => cfg?.SESSION_SECRET;

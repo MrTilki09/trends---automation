@@ -7,8 +7,19 @@ import { pruneOldJobs } from "../data/jobs";
  *  - raw items older than RAW_ITEM_RETENTION_DAYS whose topic is `ignored`, still `new`, or missing,
  *  - topics left with no items (except shortlisted ones),
  *  - finished job requests older than the same retention.
- * Shortlisted topics (and later-phase statuses), topics in someone's Saved list, and their items are never deleted.
+ * Shortlisted topics (and later-phase statuses), topics someone saved, reacted to or commented on, and
+ * their items are never deleted.
  */
+/**
+ * A topic people interacted with (saved, reacted, commented) is kept with all its items, so the app's
+ * discussion and the story's sources never disappear under someone. `t` = the topic row.
+ */
+export const NO_ACTIVITY = sql`(
+  NOT EXISTS (SELECT 1 FROM saved_topics s WHERE s.topic_id = t.id)
+  AND NOT EXISTS (SELECT 1 FROM reactions x WHERE x.topic_id = t.id)
+  AND NOT EXISTS (SELECT 1 FROM comments c WHERE c.topic_id = t.id)
+)`;
+
 export async function runRetention(db: DB, retentionDays: number) {
   const cutoff = new Date(Date.now() - retentionDays * 86_400_000);
   const items = await db.execute(sql`
@@ -16,13 +27,13 @@ export async function runRetention(db: DB, retentionDays: number) {
     WHERE r.last_seen_at < ${cutoff}
       AND (r.topic_id IS NULL OR EXISTS (
         SELECT 1 FROM topics t WHERE t.id = r.topic_id AND t.status IN ('new', 'ignored')
-          AND NOT EXISTS (SELECT 1 FROM saved_topics s WHERE s.topic_id = t.id)
+          AND ${NO_ACTIVITY}
       ))`);
   const orphans = await db.execute(sql`
     DELETE FROM topics t
     WHERE t.status IN ('new', 'ignored')
       AND NOT EXISTS (SELECT 1 FROM raw_items r WHERE r.topic_id = t.id)
-      AND NOT EXISTS (SELECT 1 FROM saved_topics s WHERE s.topic_id = t.id)`);
+      AND ${NO_ACTIVITY}`);
   const jobs = await pruneOldJobs(db, retentionDays);
   // Momentum only looks back hours; a week of score history is plenty.
   const history = await db.execute(

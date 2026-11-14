@@ -15,6 +15,7 @@ import { clusterPendingItems } from "../../lib/pipeline/cluster";
 import { upsertRawItems } from "../../lib/pipeline/dedupe";
 import { enrichTopTopics } from "../../lib/pipeline/enrich";
 import { scoreRecentTopics } from "../../lib/pipeline/score";
+import { runNotifications } from "../../lib/notify";
 import { getAdapter } from "../../lib/sources/registry";
 import { mapLimit } from "../../lib/util/concurrency";
 
@@ -125,7 +126,17 @@ export async function runCollect(opts: {
         });
       }
 
-      // 7. Finish.
+      // 7. App push notifications (never fails the run).
+      if (cfg.PUSH_ENABLED) {
+        await step("notify", () =>
+          runNotifications(db, { logger: runLog, accessToken: cfg.EXPO_ACCESS_TOKEN }).catch((err) => {
+            runLog.error({ err }, "notifications failed (run continues)");
+            return { planned: 0, sent: 0 };
+          }),
+        );
+      }
+
+      // 8. Finish.
       const status: RunStatus =
         enabled.length > 0 && stats.sourcesFailed === enabled.length
           ? "failed"

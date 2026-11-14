@@ -66,7 +66,13 @@ export function decodeCursor(s: string | null | undefined): Cursor | null {
 const PUBLISHED = sql.raw("coalesce(t.published_at, t.first_seen_at)");
 
 /** Columns every app topic needs (the list endpoints and the story page). `rank` = the sort key. */
-function topicColumns(rank: SQL): SQL {
+function topicColumns(rank: SQL, viewerId?: number | null): SQL {
+  const viewer =
+    viewerId != null
+      ? sql`,
+    (SELECT x.type FROM reactions x WHERE x.topic_id = t.id AND x.user_id = ${viewerId}) AS v_reaction,
+    EXISTS (SELECT 1 FROM saved_topics x WHERE x.topic_id = t.id AND x.user_id = ${viewerId}) AS v_saved`
+      : sql``;
   return sql`
     t.id, t.title,
     -- Link to the article itself: Google News items only have news.google.com redirect links.
@@ -89,8 +95,13 @@ function topicColumns(rank: SQL): SQL {
        WHERE r.topic_id = t.id AND r.publisher = 'Hacker News') AS hn_comments,
     (SELECT h.score FROM topic_score_history h
        WHERE h.topic_id = t.id AND h.created_at <= now() - make_interval(hours => ${MOMENTUM.hours})
-       ORDER BY h.created_at DESC LIMIT 1) AS past_score`;
+       ORDER BY h.created_at DESC LIMIT 1) AS past_score,
+    coalesce(c.reactions, 0) AS c_reactions, coalesce(c.comments, 0) AS c_comments,
+    coalesce(c.saves, 0) AS c_saves${viewer}`;
 }
+
+/** Every query using topicColumns joins the counters with this. */
+const COUNTERS_JOIN = sql`LEFT JOIN topic_counters c ON c.topic_id = t.id`;
 
 type Row = Record<string, unknown>;
 
@@ -122,7 +133,10 @@ function toFeedTopic(r: Row): FeedTopic {
     momentumChange: change,
     hnPoints: num(r.hn_points),
     hnComments: num(r.hn_comments),
-    counters: { reactions: 0, comments: 0, saves: 0 },
+    counters: { reactions: Number(r.c_reactions ?? 0), comments: Number(r.c_comments ?? 0), saves: Number(r.c_saves ?? 0) },
+    ...("v_saved" in r
+      ? { viewer: { reaction: (r.v_reaction as string | null) ?? null, saved: Boolean(r.v_saved) } }
+      : {}),
   };
 }
 
@@ -140,7 +154,27 @@ export type FeedQuery = {
   lang?: string;
   cursor?: string | null;
   limit?: number;
+  /** Signed-in user: adds viewer state, and personalizes "For you" with their follows. */
+  viewer?: { id: number; follows: { kind: string; value: string }[] } | null;
 };
+
+/** "For you" weights (plan §7): followed topics and languages rank higher; nothing is filtered out. */
+export const FOR_YOU = { followBoost: 0.5, langBoost: 0.2 } as const;
+
+/** SQL multiplier for a user's follows: 1 + 0.5·(matches a follow) + 0.2·(in a followed language). */
+export function personalBoost(follows: { kind: string; value: string }[]): SQL | null {
+  const of = (kind: string) => follows.filter((f) => f.kind === kind).map((f) => f.value);
+  const cats = of("category");
+  const tags = [...of("company"), ...of("tag")];
+  const langs = of("lang");
+  if (!cats.length && !tags.length && !langs.length) return null;
+  const match: SQL[] = [];
+  if (cats.length) match.push(sql`coalesce(t.category, t.llm_category) IN (${list(cats)})`);
+  if (tags.length) match.push(sql`t.tags && ARRAY[${list(tags)}]::text[]`);
+  const followMatch = match.length ? sql`(CASE WHEN ${sql.join(match, sql` OR `)} THEN 1 ELSE 0 END)` : sql`0`;
+  const langMatch = langs.length ? sql`(CASE WHEN t.lang IN (${list(langs)}) THEN 1 ELSE 0 END)` : sql`0`;
+  return sql`(1 + ${FOR_YOU.followBoost}::float8 * ${followMatch} + ${FOR_YOU.langBoost}::float8 * ${langMatch})`;
+}
 
 function feedFilters(q: Pick<FeedQuery, "category" | "tag" | "lang">, windowHours: number): SQL[] {
   const where: SQL[] = [
@@ -182,19 +216,20 @@ export async function getFeed(db: DB, q: FeedQuery): Promise<FeedPage> {
     from = sql`FROM topics t`;
     rank = sql`extract(epoch FROM ${PUBLISHED}) * 1000`;
     if (usable) where.push(sql`(${PUBLISHED}, t.id) < (to_timestamp(${cursor.k} / 1000.0), ${cursor.id})`);
-  } else if (version > 0) {
-    from = sql`FROM topics t JOIN topic_score_history snap ON snap.topic_id = t.id AND snap.run_id = ${version}`;
-    rank = sql`snap.score`;
-    if (usable) where.push(sql`(snap.score, t.id) < (${cursor.k}, ${cursor.id})`);
   } else {
-    from = sql`FROM topics t`;
-    rank = sql`t.score`;
-    if (usable) where.push(sql`(t.score, t.id) < (${cursor.k}, ${cursor.id})`);
+    const base = version > 0 ? sql`snap.score` : sql`t.score`;
+    from =
+      version > 0
+        ? sql`FROM topics t JOIN topic_score_history snap ON snap.topic_id = t.id AND snap.run_id = ${version}`
+        : sql`FROM topics t`;
+    const boost = tab === "for-you" && q.viewer ? personalBoost(q.viewer.follows) : null;
+    rank = boost ? sql`(${base} * ${boost})` : base;
+    if (usable) where.push(sql`(${rank}, t.id) < (${cursor.k}, ${cursor.id})`);
   }
 
   const res = await db.execute(sql`
-    SELECT ${topicColumns(rank)}
-    ${from}
+    SELECT ${topicColumns(rank, q.viewer?.id)}
+    ${from} ${COUNTERS_JOIN}
     WHERE ${sql.join(where, sql` AND `)}
     ORDER BY rank DESC, t.id DESC
     LIMIT ${limit + 1}`);
@@ -227,9 +262,9 @@ export async function countNewStories(
   return { feedVersion: latest, newStories: Number((res.rows[0] as { n: number } | undefined)?.n ?? 0) };
 }
 
-export async function getTopicDetail(db: DB, id: number): Promise<TopicDetail | null> {
+export async function getTopicDetail(db: DB, id: number, viewerId?: number | null): Promise<TopicDetail | null> {
   const res = await db.execute(sql`
-    SELECT ${topicColumns(sql`t.score`)} FROM topics t WHERE t.id = ${id} AND t.status <> 'ignored'`);
+    SELECT ${topicColumns(sql`t.score`, viewerId)} FROM topics t ${COUNTERS_JOIN} WHERE t.id = ${id} AND t.status <> 'ignored'`);
   const row = res.rows[0] as Row | undefined;
   if (!row) return null;
   const items = await db.execute(sql`
@@ -297,7 +332,7 @@ export async function getDiscover(db: DB) {
       FROM topics t CROSS JOIN LATERAL unnest(t.tags) AS tag
       WHERE ${where} GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 120`),
     db.execute(sql`
-      SELECT ${topicColumns(sql`t.score`)} FROM topics t
+      SELECT ${topicColumns(sql`t.score`)} FROM topics t ${COUNTERS_JOIN}
       WHERE t.status = 'shortlisted' AND ${PUBLISHED} > now() - interval '7 days'
       ORDER BY t.score DESC, t.id DESC LIMIT 5`),
   ]);
@@ -314,7 +349,13 @@ export async function getDiscover(db: DB) {
 }
 
 /** Search: tech topics of the last 30 days whose title (or any article title) contains `q`, newest first. */
-export async function searchTopics(db: DB, q: string, cursorStr?: string | null, limitIn?: number) {
+export async function searchTopics(
+  db: DB,
+  q: string,
+  cursorStr?: string | null,
+  limitIn?: number,
+  viewerId?: number | null,
+) {
   const limit = Math.min(50, Math.max(1, limitIn ?? FEED_PAGE_SIZE));
   const term = q.trim().slice(0, 100);
   if (!term) return { items: [], nextCursor: null, feedVersion: null };
@@ -328,7 +369,7 @@ export async function searchTopics(db: DB, q: string, cursorStr?: string | null,
   if (cursor?.tab === "search")
     where.push(sql`(${PUBLISHED}, t.id) < (to_timestamp(${cursor.k} / 1000.0), ${cursor.id})`);
   const res = await db.execute(sql`
-    SELECT ${topicColumns(sql`extract(epoch FROM ${PUBLISHED}) * 1000`)} FROM topics t
+    SELECT ${topicColumns(sql`extract(epoch FROM ${PUBLISHED}) * 1000`, viewerId)} FROM topics t ${COUNTERS_JOIN}
     WHERE ${sql.join(where, sql` AND `)}
     ORDER BY rank DESC, t.id DESC LIMIT ${limit + 1}`);
   const rows = res.rows as Row[];

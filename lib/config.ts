@@ -40,6 +40,11 @@ const envSchema = z.object({
   SCORE_HALF_LIFE_HOURS: z.coerce.number().positive().default(24),
   RAW_ITEM_RETENTION_DAYS: z.coerce.number().int().positive().default(30),
 
+  // App push notifications (Trend Feed). Off until the app is live; EXPO_ACCESS_TOKEN is optional
+  // (only needed when "enhanced push security" is turned on for the Expo project).
+  PUSH_ENABLED: bool,
+  EXPO_ACCESS_TOKEN: optionalString,
+
   // Public API (/api/topics)
   API_CACHE_SECONDS: z.coerce.number().int().min(0).max(3600).default(60),
   API_RATE_LIMIT_PER_MIN: z.coerce.number().int().positive().default(60),
