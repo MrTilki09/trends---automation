@@ -76,6 +76,8 @@ function topicColumns(rank: SQL): SQL {
              t.canonical_url) AS canonical_url,
     t.snippet, t.snippet_publisher, t.image_url,
     coalesce(t.category, t.llm_category) AS category, t.tags, t.lang, ${PUBLISHED} AS published_at,
+    (SELECT r.publisher FROM raw_items r WHERE r.topic_id = t.id AND r.image_url = t.image_url
+       ORDER BY r.id LIMIT 1) AS image_publisher,
     t.publisher_count, t.score, ${rank} AS rank,
     (SELECT array_agg(p ORDER BY w DESC, first) FROM (
        SELECT r.publisher AS p, max(s.weight) AS w, min(coalesce(r.published_at, r.fetched_at)) AS first
@@ -109,6 +111,7 @@ function toFeedTopic(r: Row): FeedTopic {
     snippet: (r.snippet as string | null) ?? null,
     snippetPublisher: (r.snippet_publisher as string | null) ?? null,
     imageUrl: (r.image_url as string | null) ?? null,
+    imagePublisher: (r.image_publisher as string | null) ?? null,
     category: (r.category as string | null) ?? null,
     tags: ((r.tags as string[] | null) ?? []).slice(0, 8),
     lang: (r.lang as string | null) ?? null,
@@ -310,6 +313,7 @@ export async function getDiscover(db: DB) {
   };
 }
 
+/** Search: tech topics of the last 30 days whose title (or any article title) contains `q`, newest first. */
 export async function searchTopics(db: DB, q: string, cursorStr?: string | null, limitIn?: number) {
   const limit = Math.min(50, Math.max(1, limitIn ?? FEED_PAGE_SIZE));
   const term = q.trim().slice(0, 100);
@@ -320,9 +324,11 @@ export async function searchTopics(db: DB, q: string, cursorStr?: string | null,
   const normLike = `%${normalizeTitle(term)}%`;
   where.push(sql`(t.title ILIKE ${like} OR EXISTS (
     SELECT 1 FROM raw_items r3 WHERE r3.topic_id = t.id AND r3.normalized_title LIKE ${normLike}))`);
-  if (cursor?.tab === "search") where.push(sql`(t.score, t.id) < (${cursor.k}, ${cursor.id})`);
+  // Newest first: scores of older topics are no longer updated, so they don't compare across weeks.
+  if (cursor?.tab === "search")
+    where.push(sql`(${PUBLISHED}, t.id) < (to_timestamp(${cursor.k} / 1000.0), ${cursor.id})`);
   const res = await db.execute(sql`
-    SELECT ${topicColumns(sql`t.score`)} FROM topics t
+    SELECT ${topicColumns(sql`extract(epoch FROM ${PUBLISHED}) * 1000`)} FROM topics t
     WHERE ${sql.join(where, sql` AND `)}
     ORDER BY rank DESC, t.id DESC LIMIT ${limit + 1}`);
   const rows = res.rows as Row[];

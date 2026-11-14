@@ -35,6 +35,8 @@ export const FeedTopic = z.object({
   snippetPublisher: z.string().nullable(),
   /** Publisher's feed image; show with credit, null for about half of stories. */
   imageUrl: z.string().nullable(),
+  /** Who published the image (credit line under it). */
+  imagePublisher: z.string().nullable(),
   category: z.string().nullable(),
   tags: z.array(z.string()),
   lang: z.string().nullable(),

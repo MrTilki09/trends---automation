@@ -3,7 +3,7 @@ import { cachedGet, jsonError, param, preflight } from "@/lib/app-api/http";
 import { searchTopics } from "@/lib/data/feed";
 import { getDb } from "@/lib/db/client";
 
-/** GET /api/app/v1/search?q=&cursor= → tech topics of the last 30 days matching q, best first. */
+/** GET /api/app/v1/search?q=&cursor= → tech topics of the last 30 days matching q, newest first. */
 export const dynamic = "force-dynamic";
 
 export const OPTIONS = preflight;
