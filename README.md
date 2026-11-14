@@ -569,6 +569,40 @@ trends.example.com {
 Point the domain's DNS at the server, open ports 80/443, `sudo systemctl reload caddy`. Visitors get the login
 page; API clients use a key (§5b). Do **not** open port 3000 to the internet.
 
+### Trend Feed app API (`/api/app/v1`)
+
+The mobile app talks to the same server through the same Caddy domain. Nothing else to open or proxy:
+`https://trends.example.com/api/app/v1/...` is public by design (read endpoints are anonymous; writes need an
+app sign-in). Its per-IP limits rely on Caddy setting `X-Forwarded-For` (Caddy ≥ 2.5 overwrites what clients
+send), so keep the app behind Caddy like the dashboard.
+
+`.env` for the app:
+
+```
+SESSION_SECRET=…          # required: app sign-in tokens are signed with a key derived from it
+APP_URL=https://trends.example.com   # links in sign-up / reset emails
+MAIL_HOST=… MAIL_USERNAME=… MAIL_PASSWORD=… MAIL_FROM_ADDRESS=…   # sign-up confirmation emails (§5d)
+PUSH_ENABLED=true         # once the app is in the stores: "breaking" pushes after each hourly run
+EXPO_ACCESS_TOKEN=        # only if "enhanced push security" is on for the Expo project
+```
+
+First deploy of a version that adds the app tables, after `docker compose up -d --build`
+(the `migrate` service applies the migrations by itself):
+
+```bash
+# fill snippets, images and publisher counts for the stories already in the database (~1 min)
+docker compose run --rm worker node dist/backfill-app.js
+```
+
+Then set the app's API address to the domain (`EXPO_PUBLIC_API_URL` in the app repo's `eas.json`, profiles
+`preview` and `production`) and build the app. Check it from anywhere:
+
+```bash
+curl -s https://trends.example.com/api/app/v1/discover | head -c 300
+```
+
+Moderate comments on the dashboard's **Moderation** page (owner only).
+
 ### Backups
 
 `scripts/backup.sh` dumps the database to `backups/` (gzip) and deletes dumps older than 14 days.
