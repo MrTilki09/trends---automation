@@ -98,3 +98,79 @@ export const Discover = z.object({
 export type Discover = z.infer<typeof Discover>;
 
 export const ApiError = z.object({ error: z.string() });
+
+// ---------------------------------------------------------------- signed-in (A3–A6)
+
+export const TokenPair = z.object({ accessToken: z.string(), refreshToken: z.string(), expiresIn: z.number() });
+export type TokenPair = z.infer<typeof TokenPair>;
+
+export const FollowKind = z.enum(["category", "company", "tag", "lang"]);
+export const Follow = z.object({ kind: FollowKind, value: z.string() });
+export type Follow = z.infer<typeof Follow>;
+
+export const NotificationPrefs = z.object({
+  breaking: z.boolean(),
+  digest: z.boolean(),
+  replies: z.boolean(),
+  timeZone: z.string(),
+});
+export type NotificationPrefs = z.infer<typeof NotificationPrefs>;
+
+export const Me = z.object({
+  id: z.number().int(),
+  email: z.string().nullable(),
+  displayName: z.string().nullable(),
+  handle: z.string().nullable(),
+  name: z.string(),
+  onboarded: z.boolean(),
+  follows: z.array(Follow),
+  notifications: NotificationPrefs,
+});
+export type Me = z.infer<typeof Me>;
+
+export const ReactionType = z.enum(["hot", "useful", "skeptical", "wow"]);
+export type ReactionType = z.infer<typeof ReactionType>;
+
+export const ReactionResult = z.object({ reaction: ReactionType.nullable(), counters: Counters });
+export const SaveResult = z.object({ saved: z.boolean(), counters: Counters });
+
+export type Comment = {
+  id: number;
+  parentId: number | null;
+  body: string;
+  author: { id: number; name: string };
+  createdAt: string;
+  edited: boolean;
+  likes: number;
+  liked: boolean;
+  mine: boolean;
+  removed: boolean;
+  replies: Comment[];
+};
+export const Comment: z.ZodType<Comment> = z.lazy(() =>
+  z.object({
+    id: z.number().int(),
+    parentId: z.number().int().nullable(),
+    body: z.string(),
+    author: z.object({ id: z.number().int(), name: z.string() }),
+    createdAt: z.string(),
+    edited: z.boolean(),
+    likes: z.number().int(),
+    liked: z.boolean(),
+    mine: z.boolean(),
+    removed: z.boolean(),
+    replies: z.array(Comment),
+  }),
+);
+
+export const CommentPage = z.object({
+  items: z.array(Comment),
+  nextOffset: z.number().int().nullable(),
+  total: z.number().int(),
+});
+export type CommentPage = z.infer<typeof CommentPage>;
+
+export const ReportReason = z.enum(["spam", "harassment", "hate", "sexual", "violence", "misinformation", "other"]);
+export type ReportReason = z.infer<typeof ReportReason>;
+
+export const SavedList = z.object({ items: z.array(FeedTopic) });

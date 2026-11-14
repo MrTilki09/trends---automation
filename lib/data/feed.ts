@@ -384,3 +384,14 @@ export async function searchTopics(
     feedVersion: null,
   };
 }
+
+/** The user's Saved list (same as the website's), newest saves first. */
+export async function getSaved(db: DB, userId: number, limit = 100): Promise<FeedTopic[]> {
+  const res = await db.execute(sql`
+    SELECT ${topicColumns(sql`extract(epoch FROM s.created_at) * 1000`, userId)}
+    FROM saved_topics s JOIN topics t ON t.id = s.topic_id ${COUNTERS_JOIN}
+    WHERE s.user_id = ${userId}
+    ORDER BY s.created_at DESC
+    LIMIT ${Math.min(200, Math.max(1, limit))}`);
+  return (res.rows as Row[]).map(toFeedTopic);
+}
