@@ -1015,6 +1015,9 @@ const COMPANIES: Record<string, string[]> = {
   cloudflare: ["cloudflare"],
 };
 
+/** Company tags detectSignals can produce ("openai", "nvidia", ...). */
+export const COMPANY_NAMES = Object.keys(COMPANIES);
+
 function matcher(keywords: string[]): (padded: string, words: Set<string>) => boolean {
   const exact = keywords.filter((k) => !k.endsWith("*") && !k.includes(" "));
   const phrases = keywords.filter((k) => !k.endsWith("*") && k.includes(" ")).map((k) => ` ${k} `);

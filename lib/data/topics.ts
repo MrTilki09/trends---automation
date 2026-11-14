@@ -85,7 +85,7 @@ const list = (values: string[]) =>
  * Tech topic = tech category, or no clear non-tech category but tagged as tech
  * (by its source, e.g. a Hacker News item, or as a launch / official announcement).
  */
-const TECH_ONLY = sql`(
+export const TECH_ONLY = sql`(
   coalesce(t.category, t.llm_category) IN (${list(TECH_CATEGORIES)})
   OR (coalesce(t.category, t.llm_category, '') NOT IN (${list(NON_TECH_CATEGORIES)})
       AND t.tags && ARRAY[${list(TECH_TAGS)}]::text[])

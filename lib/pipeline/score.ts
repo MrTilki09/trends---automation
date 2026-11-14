@@ -1,7 +1,7 @@
-import { eq, gt, inArray } from "drizzle-orm";
+import { eq, gt, inArray, sql } from "drizzle-orm";
 import { getConfig } from "../config";
 import type { DB } from "../db/client";
-import { rawItems, sources, topics, type ScoreBreakdown } from "../db/schema";
+import { rawItems, sources, topicScoreHistory, topics, type ScoreBreakdown } from "../db/schema";
 import { getAdapter } from "../sources/registry";
 import { normalizeTitle } from "./normalize";
 
@@ -120,8 +120,14 @@ export function scoreTopic(
   };
 }
 
-/** Recomputes scores for every topic seen within the window. Returns the number of topics scored. */
-export async function scoreRecentTopics(db: DB, opts: { windowHours: number; now?: Date }): Promise<number> {
+/**
+ * Recomputes scores for every topic seen within the window. Returns the number of topics scored.
+ * With `runId`, also records each score in topic_score_history (momentum for the app).
+ */
+export async function scoreRecentTopics(
+  db: DB,
+  opts: { windowHours: number; now?: Date; runId?: number },
+): Promise<number> {
   const now = opts.now ?? new Date();
   const cutoff = new Date(now.getTime() - opts.windowHours * 3600_000);
   const cfg = getConfig();
@@ -186,6 +192,7 @@ export async function scoreRecentTopics(db: DB, opts: { windowHours: number; now
     perTopic.set(it.topicId, entry);
   });
 
+  const history: { topicId: number; runId: number; score: number }[] = [];
   await db.transaction(async (tx) => {
     for (const t of recent) {
       const entry = perTopic.get(t.id);
@@ -203,6 +210,16 @@ export async function scoreRecentTopics(db: DB, opts: { windowHours: number; now
         { now, nicheKeywords: cfg.NICHE_KEYWORDS, weights },
       );
       await tx.update(topics).set({ score, scoreBreakdown: breakdown }).where(eq(topics.id, t.id));
+      if (opts.runId != null) history.push({ topicId: t.id, runId: opts.runId, score });
+    }
+    for (let i = 0; i < history.length; i += 1000) {
+      await tx
+        .insert(topicScoreHistory)
+        .values(history.slice(i, i + 1000))
+        .onConflictDoUpdate({
+          target: [topicScoreHistory.topicId, topicScoreHistory.runId],
+          set: { score: sql`excluded.score` },
+        });
     }
   });
   return recent.length;

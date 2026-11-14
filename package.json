@@ -25,7 +25,9 @@
     "db:reindex": "tsx worker/reindex.ts",
     "db:studio": "drizzle-kit studio",
     "migrate": "docker compose -f compose.yaml -f compose.dev.yaml run --rm migrate",
-    "logs": "docker compose -f compose.yaml -f compose.dev.yaml logs -f --tail=100"
+    "logs": "docker compose -f compose.yaml -f compose.dev.yaml logs -f --tail=100",
+    "db:backfill-app": "tsx worker/backfill-app.ts",
+    "collect:once": "tsx worker/collect-once.ts"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",

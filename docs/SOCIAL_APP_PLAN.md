@@ -69,13 +69,13 @@ There are no LLM calls in the app, its API or its worker jobs. Running cost is j
 | Client | **Expo (latest SDK) + TypeScript**, development builds (not Expo Go) | Same React Native, with any native module available. Builds iOS from Windows. |
 | Navigation | Expo Router (file-based tabs + stacks) | Deep links for free: `trendfeed://topic/123` maps to a file. |
 | UI and motion | Reanimated, Gesture Handler, FlashList, expo-image | Handles the full-screen story view, card animations and smooth lists. |
-| Styling | NativeWind (Tailwind) | Same mental model as the dashboard's Tailwind. |
+| Styling | StyleSheet + design tokens (`src/theme.ts`) | NativeWind's current release supports up to Expo SDK 57; the app is on SDK 58. Revisit when it catches up. |
 | Data fetching | TanStack Query, with the feed cache persisted on the device | Caching, infinite scroll, offline feed. |
 | Push | `expo-notifications` + Expo push service | One API for iOS and Android; the worker sends with a plain HTTP call. |
 | Builds and release | EAS Build + EAS Submit | Cloud builds for iOS and Android, uploads to TestFlight and Play. No Mac needed. |
 | OTA updates | EAS Update | Ship JavaScript fixes without waiting for store review. |
 | Backend | **Extend Trend Pool** with a versioned app API (`/api/app/v1/*`) | Users, auth, saved topics and topic data already live here. |
-| Repo layout | Monorepo: this repo + `mobile/` (Expo app) + `lib/app-api/` (shared zod schemas and types) | One PR can change the API and the app together. |
+| Repo layout | Two repos: the API in this repo (`/api/app/v1`, schemas in `lib/app-api/schemas.ts`); the Expo app in its own repo `trend-feed`, which keeps an identical copy of the schemas | The app has its own release cycle (stores, OTA). |
 | Database | **The same Postgres**, with additive changes only (§4, §6) | Social data needs foreign keys to `topics` and `users`. |
 | App auth | Session tokens (access 15 min + refresh 30 days) on top of member accounts | API keys are server-to-server; a key shipped inside an app can be extracted. |
 | Anonymous browsing | Yes: the feed and story pages work without an account | Lowest friction. |

@@ -1,8 +1,9 @@
 import { and, eq, gt, inArray, isNull, sql } from "drizzle-orm";
 import type { DB } from "../db/client";
-import { rawItems, topics } from "../db/schema";
+import { rawItems, sources, topics } from "../db/schema";
 import { classify, topByFrequency } from "./classify";
 import { extractKeywords } from "./normalize";
+import { pickDisplay } from "./snippet";
 
 /*
  * Clustering = grouping raw items that describe the same real-world story into one topic.
@@ -170,8 +171,15 @@ export async function refreshTopicAggregates(db: DB, topicIds: number[]): Promis
         tags: rawItems.tags,
         lang: rawItems.lang,
         summary: rawItems.summary,
+        snippet: rawItems.snippet,
+        imageUrl: rawItems.imageUrl,
+        publisher: rawItems.publisher,
+        publishedAt: rawItems.publishedAt,
+        fetchedAt: rawItems.fetchedAt,
+        sourceWeight: sources.weight,
       })
       .from(rawItems)
+      .innerJoin(sources, eq(sources.id, rawItems.sourceId))
       .where(inArray(rawItems.topicId, ids));
     const byTopic = new Map<number, typeof rows>();
     for (const r of rows) {
@@ -187,9 +195,11 @@ export async function refreshTopicAggregates(db: DB, topicIds: number[]): Promis
         tags: allTags,
         summaries: items.map((r) => r.summary ?? "").filter(Boolean),
       });
+      const display = pickDisplay(items);
       await db
         .update(topics)
         .set({
+          ...display,
           keywords: extractKeywords(titles),
           // Generous, so the Pool's tag filter finds a topic by any common label of its articles.
           tags: topByFrequency(allTags, 30),

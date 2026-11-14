@@ -97,7 +97,7 @@ export async function runCollect(opts: {
 
       // 5. Score.
       stats.topicsScored = await step("score", () =>
-        scoreRecentTopics(db, { windowHours: cfg.CLUSTER_WINDOW_HOURS }),
+        scoreRecentTopics(db, { windowHours: cfg.CLUSTER_WINDOW_HOURS, runId }),
       );
 
       // 6. Optional LLM enrichment (never fails the run).
@@ -112,7 +112,7 @@ export async function runCollect(opts: {
               niche: cfg.NICHE_DESCRIPTION,
               timeoutMs: cfg.LLM_TIMEOUT_MS,
             });
-            if (enriched > 0) await scoreRecentTopics(db, { windowHours: cfg.CLUSTER_WINDOW_HOURS });
+            if (enriched > 0) await scoreRecentTopics(db, { windowHours: cfg.CLUSTER_WINDOW_HOURS, runId });
             return enriched > 0
               ? { status: "ok" as const, enriched }
               : { status: "skipped" as const, enriched: 0 };
@@ -186,6 +186,7 @@ async function collectSource(
       items,
       defaultLang: typeof cfgLang === "string" ? cfgLang : undefined,
       sourceTags: sourceTagsOf(source),
+      source: { name: source.name, type: source.type },
     });
     fetched = res.fetched;
     created = res.new;

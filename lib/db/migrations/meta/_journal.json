@@ -50,6 +50,13 @@
       "when": 1792592351872,
       "tag": "0006_user_brand_name",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794674385441,
+      "tag": "0007_app_feed",
+      "breakpoints": true
     }
   ]
 }

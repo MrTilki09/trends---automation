@@ -24,10 +24,19 @@ export async function runRetention(db: DB, retentionDays: number) {
       AND NOT EXISTS (SELECT 1 FROM raw_items r WHERE r.topic_id = t.id)
       AND NOT EXISTS (SELECT 1 FROM saved_topics s WHERE s.topic_id = t.id)`);
   const jobs = await pruneOldJobs(db, retentionDays);
+  // Momentum only looks back hours; a week of score history is plenty.
+  const history = await db.execute(
+    sql`DELETE FROM topic_score_history WHERE created_at < now() - interval '7 days'`,
+  );
   // Keep the counters on remaining topics honest after items were removed.
   await db.execute(sql`
     UPDATE topics t SET item_count = a.c, source_count = a.s
     FROM (SELECT topic_id, count(*)::int c, count(DISTINCT source_id)::int s FROM raw_items GROUP BY topic_id) a
     WHERE t.id = a.topic_id AND (t.item_count <> a.c OR t.source_count <> a.s)`);
-  return { rawItemsDeleted: items.rowCount ?? 0, topicsDeleted: orphans.rowCount ?? 0, jobsDeleted: jobs };
+  return {
+    rawItemsDeleted: items.rowCount ?? 0,
+    topicsDeleted: orphans.rowCount ?? 0,
+    jobsDeleted: jobs,
+    scoreHistoryDeleted: history.rowCount ?? 0,
+  };
 }

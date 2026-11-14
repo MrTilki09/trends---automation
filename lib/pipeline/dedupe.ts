@@ -4,6 +4,7 @@ import { rawItems } from "../db/schema";
 import type { RawItemInput } from "../sources/types";
 import { detectSignals, normalizeTags } from "./classify";
 import { canonicalizeUrl, guessLang, normalizeTitle } from "./normalize";
+import { displayFields } from "./snippet";
 
 /** Most tags kept per item (source tags + signals + the feed's own labels). */
 export const MAX_ITEM_TAGS = 30;
@@ -46,6 +47,8 @@ export async function upsertRawItems(
     defaultLang?: string;
     /** Tags configured on the source (e.g. "turkey", "startups"), added to every item. */
     sourceTags?: string[];
+    /** Name/type of the source, for the app's display fields (publisher, snippet cleanup). */
+    source?: { name: string; type: string };
   },
 ): Promise<{ fetched: number; new: number }> {
   const items = dedupeBatch(params.items);
@@ -55,6 +58,15 @@ export async function upsertRawItems(
     const chunk = items.slice(i, i + 200).map((it) => {
       const lang = it.lang ?? params.defaultLang ?? guessLang(it.title);
       const normalizedTitle = normalizeTitle(it.title, lang);
+      const display = displayFields({
+        title: it.title,
+        summary: it.summary,
+        url: it.url,
+        author: it.author,
+        raw: it.raw,
+        sourceName: params.source?.name ?? "",
+        sourceType: params.source?.type ?? "",
+      });
       return {
         sourceId: params.sourceId,
         runId: params.runId,
@@ -75,6 +87,9 @@ export async function upsertRawItems(
         ),
         metrics: it.metrics,
         raw: it.raw ?? null,
+        imageUrl: display.imageUrl,
+        snippet: display.snippet,
+        publisher: display.publisher || null,
         fetchedAt: now,
         lastSeenAt: now,
       };
@@ -90,6 +105,9 @@ export async function upsertRawItems(
           // Keep tags/lang current too (also fills them in for items stored before they existed).
           tags: sql`excluded.tags`,
           lang: sql`excluded.lang`,
+          imageUrl: sql`coalesce(excluded.image_url, ${rawItems.imageUrl})`,
+          snippet: sql`coalesce(excluded.snippet, ${rawItems.snippet})`,
+          publisher: sql`excluded.publisher`,
         },
       })
       // xmax = 0 is Postgres' way of telling "this row was inserted, not updated".

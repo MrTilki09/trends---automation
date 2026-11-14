@@ -132,6 +132,14 @@ export const topics = pgTable(
     llmRelevance: doublePrecision("llm_relevance"),
     llmCategory: text("llm_category"),
     llmEnrichedAt: tz("llm_enriched_at"),
+    /** Best publisher image among the topic's items (from the feed, never scraped). */
+    imageUrl: text("image_url"),
+    /** Cleaned publisher snippet of the topic's best item (lib/pipeline/snippet.ts); null = none. */
+    snippet: text("snippet"),
+    /** Publisher credited for `snippet`. */
+    snippetPublisher: text("snippet_publisher"),
+    /** Distinct publishers (HN / Google News feeds count once; Google News items count their real publisher). */
+    publisherCount: integer("publisher_count").notNull().default(0),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -142,6 +150,13 @@ export const topics = pgTable(
     index("topics_published_at_idx").on(t.publishedAt),
     index("topics_category_idx").on(t.category),
     index("topics_tags_idx").using("gin", t.tags),
+    // Cursor paging for the app feed: (score, id) and (published, id), ignored topics excluded.
+    index("topics_feed_score_idx")
+      .on(t.score.desc(), t.id.desc())
+      .where(sql`${t.status} <> 'ignored'`),
+    index("topics_feed_published_idx")
+      .on(sql`coalesce(${t.publishedAt}, ${t.firstSeenAt}) DESC`, t.id.desc())
+      .where(sql`${t.status} <> 'ignored'`),
   ],
 );
 
@@ -169,6 +184,12 @@ export const rawItems = pgTable(
       .default(sql`'{}'::text[]`),
     metrics: jsonb("metrics").$type<Record<string, number>>().notNull().default({}),
     raw: jsonb("raw"),
+    /** Image from the feed (media:content / enclosure), http(s) only. */
+    imageUrl: text("image_url"),
+    /** Display snippet: `summary` without boilerplate, ≤ 300 chars; null when it only repeats the title. */
+    snippet: text("snippet"),
+    /** Who published it: the source name, or the real publisher for Google News items. */
+    publisher: text("publisher"),
     // fetched_at = first time we saw the item; last_seen_at = most recent run that returned it.
     fetchedAt: tz("fetched_at").notNull().defaultNow(),
     lastSeenAt: tz("last_seen_at").notNull().defaultNow(),
@@ -182,6 +203,23 @@ export const rawItems = pgTable(
     index("raw_items_last_seen_idx").on(t.lastSeenAt),
     // Trigram index (pg_trgm) for fuzzy title search in the dashboard.
     index("raw_items_normalized_title_trgm_idx").using("gin", sql`${t.normalizedTitle} gin_trgm_ops`),
+  ],
+);
+
+/** One row per topic per collect run: the score after that run. Feeds momentum ("rising"). Kept 7 days. */
+export const topicScoreHistory = pgTable(
+  "topic_score_history",
+  {
+    topicId: integer("topic_id")
+      .notNull()
+      .references(() => topics.id, { onDelete: "cascade" }),
+    runId: integer("run_id").notNull(),
+    score: doublePrecision("score").notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.topicId, t.runId] }),
+    index("topic_score_history_created_idx").on(t.createdAt),
   ],
 );
 
