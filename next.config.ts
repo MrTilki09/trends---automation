@@ -8,6 +8,13 @@ const nextConfig: NextConfig = {
   // Production builds use Turbopack with defaults. Declaring it explicitly tells Next.js that the
   // webpack() hook below is intentional (it only applies to `next dev --webpack`).
   turbopack: {},
+  // App links: phones fetch these exact paths (no redirects allowed); served by API routes.
+  async rewrites() {
+    return [
+      { source: "/.well-known/apple-app-site-association", destination: "/api/well-known/aasa" },
+      { source: "/.well-known/assetlinks.json", destination: "/api/well-known/assetlinks" },
+    ];
+  },
   webpack(config, { dev }) {
     if (dev && process.env.WATCHPACK_POLLING === "true") {
       // Dev in Docker on Windows/macOS has to poll for file changes (compose.dev.yaml). Polling every

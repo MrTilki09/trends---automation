@@ -145,3 +145,20 @@ describe("push planning", () => {
     expect(res).toEqual({ sent: 1, deadTokens: ["ExponentPushToken[b]"] });
   });
 });
+
+describe("app links (/.well-known)", async () => {
+  const { appleAppSiteAssociation, assetLinks } = await import("../lib/app-links");
+  it("lists the iOS app only when team and bundle id are set", () => {
+    expect(appleAppSiteAssociation({ APP_IOS_TEAM_ID: undefined, APP_IOS_BUNDLE_ID: "x" })).toEqual({
+      applinks: { details: [] },
+    });
+    expect(appleAppSiteAssociation({ APP_IOS_TEAM_ID: "ABCDE12345", APP_IOS_BUNDLE_ID: "tr.example.app" })).toEqual({
+      applinks: { details: [{ appIDs: ["ABCDE12345.tr.example.app"], components: [{ "/": "/topic/*" }] }] },
+    });
+  });
+  it("lists the Android app with upper-case fingerprints", () => {
+    expect(assetLinks({ APP_ANDROID_PACKAGE: "tr.example.app", APP_ANDROID_SHA256: [] })).toEqual([]);
+    const [entry] = assetLinks({ APP_ANDROID_PACKAGE: "tr.example.app", APP_ANDROID_SHA256: ["ab:cd"] });
+    expect(entry?.target).toEqual({ namespace: "android_app", package_name: "tr.example.app", sha256_cert_fingerprints: ["AB:CD"] });
+  });
+});

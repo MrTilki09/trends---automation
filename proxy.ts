@@ -18,6 +18,8 @@ export function proxy(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
   // Public: sign-in, sign-up, the emailed confirmation link, and the API (which checks its own key).
   if (PUBLIC_PATHS.has(pathname) || pathname.startsWith("/api/")) return NextResponse.next();
+  // App links: shared story pages and the files phones fetch to verify the app owns this domain.
+  if (pathname.startsWith("/topic/") || pathname.startsWith("/.well-known/")) return NextResponse.next();
   if (PUBLIC_READ_PATHS.has(pathname) && (req.method === "GET" || req.method === "HEAD")) {
     return NextResponse.next();
   }
