@@ -1,0 +1,59 @@
+{
+ "total_count": 1985385,
+ "items": [
+  {
+   "id": 1450963843,
+   "full_name": "huamidev/GestaltX",
+   "name": "GestaltX",
+   "html_url": "https://github.com/huamidev/GestaltX",
+   "description": "An MobileGestalt editor for iOS 27.x, featuring region-code tweaks, device presets, backups.",
+   "fork": false,
+   "created_at": "2026-11-09T05:15:48Z",
+   "pushed_at": "2026-11-14T09:27:55Z",
+   "homepage": "",
+   "stargazers_count": 7554,
+   "forks_count": 2636,
+   "language": "Swift",
+   "topics": [],
+   "owner": {
+    "login": "huamidev"
+   }
+  },
+  {
+   "id": 1452123445,
+   "full_name": "Kianuni/Erosion-CN",
+   "name": "Erosion-CN",
+   "html_url": "https://github.com/Kianuni/Erosion-CN",
+   "description": "iOS / iPadOS 系统配置与 MobileGestalt 研究工具箱（简体中文防白苹果安全加固版）",
+   "fork": false,
+   "created_at": "2026-11-10T02:37:31Z",
+   "pushed_at": "2026-11-14T06:38:10Z",
+   "homepage": null,
+   "stargazers_count": 2053,
+   "forks_count": 421,
+   "language": "Swift",
+   "topics": [],
+   "owner": {
+    "login": "Kianuni"
+   }
+  },
+  {
+   "id": 1453517867,
+   "full_name": "apex-compute/ANR",
+   "name": "ANR",
+   "html_url": "https://github.com/apex-compute/ANR",
+   "description": "Apex Neural Rendering (ANR) by Apex Compute",
+   "fork": false,
+   "created_at": "2026-11-11T04:27:17Z",
+   "pushed_at": "2026-11-14T21:17:21Z",
+   "homepage": "https://apexcompute.com/neural-rendering",
+   "stargazers_count": 1818,
+   "forks_count": 29,
+   "language": "C++",
+   "topics": [],
+   "owner": {
+    "login": "apex-compute"
+   }
+  }
+ ]
+}

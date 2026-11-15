@@ -3,6 +3,8 @@ import Parser from "rss-parser";
 import { z } from "zod";
 import { mapLimit } from "../util/concurrency";
 import { getText } from "./http";
+import { cleanImageUrl, firstHtmlImage, linkCardImage, widest } from "./images";
+import { decodeEntities, stripHtml } from "./text";
 import type { RawItemInput, SourceAdapter } from "./types";
 
 export const rssConfig = z.object({
@@ -83,6 +85,7 @@ type FeedItem = Parser.Item & {
   mediaThumbnail?: unknown[];
   id?: string;
   author?: unknown;
+  "content:encoded"?: string;
 };
 
 /**
@@ -100,25 +103,6 @@ function splitGoogleNewsTitle(title: string, link: string | undefined, source: u
 
 export function sha1(s: string): string {
   return createHash("sha1").update(s).digest("hex");
-}
-
-/** Some feeds escape twice ("CISOs &amp;amp; Orgs"); decode what is left after XML parsing. */
-function decodeEntities(s: string): string {
-  return s
-    .replace(/&#(\d+);/g, (_, n: string) => String.fromCodePoint(Number(n)))
-    .replace(/&#x([0-9a-f]+);/gi, (_, n: string) => String.fromCodePoint(parseInt(n, 16)))
-    .replace(/&(quot|apos|#39|lt|gt|amp);/g, (_, e: string) =>
-      e === "quot" ? '"' : e === "apos" || e === "#39" ? "'" : e === "lt" ? "<" : e === "gt" ? ">" : "&",
-    );
-}
-
-function stripHtml(s: string | undefined): string | undefined {
-  if (!s) return undefined;
-  const text = s
-    .replace(/<[^>]*>/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-  return text ? text.slice(0, 1000) : undefined;
 }
 
 /**
@@ -305,20 +289,38 @@ export function urlSections(link: string | undefined, feedUrl: string | undefine
   return out;
 }
 
-/** First image URL of an item (media:content / media:thumbnail / enclosure / YouTube group). */
-function imageOf(item: FeedItem): string | undefined {
-  for (const m of item.mediaContent ?? []) {
-    const a = (m as { $?: Record<string, string> }).$;
-    if (
-      a?.url &&
-      (a.medium === "image" || a.type?.startsWith("image") || /\.(jpe?g|png|webp|gif)(\?|$)/i.test(a.url))
-    )
-      return a.url;
-  }
-  const thumb = attr(item.mediaThumbnail, "url") ?? attr(item.mediaGroup?.["media:thumbnail"], "url");
-  if (thumb) return thumb;
-  if (item.enclosure?.url && (item.enclosure.type ?? "").startsWith("image")) return item.enclosure.url;
-  return undefined;
+/**
+ * The item's best image, in the publisher's own order of intent: media:content / media:thumbnail
+ * (widest variant, e.g. not ZDNet's 300×300 crop), YouTube's thumbnail, an image enclosure, the
+ * first real <img> in the item's HTML (WordPress feeds), and finally the preview card GitHub or
+ * YouTube publish for the linked page (Hacker News, Lobsters, Lemmy items).
+ */
+function imageOf(item: FeedItem, link: string | undefined): string | undefined {
+  type Media = { $?: Record<string, string> };
+  const isImage = (a: Record<string, string>) =>
+    a.medium === "image" ||
+    a.type?.startsWith("image") ||
+    /\.(jpe?g|png|webp|gif|avif)(\?|$)/i.test(a.url ?? "");
+  const media = (item.mediaContent ?? [])
+    .map((m) => (m as Media).$ ?? {})
+    .filter((a) => a.url && isImage(a))
+    .map((a) => ({ url: a.url, width: a.width }));
+  const thumbs = [
+    ...(item.mediaThumbnail ?? []),
+    ...([item.mediaGroup?.["media:thumbnail"]].flat() as unknown[]),
+  ]
+    .map((m) => (m as Media | undefined)?.$ ?? {})
+    .map((a) => ({ url: a.url, width: a.width }));
+  const enclosure =
+    item.enclosure?.url && (item.enclosure.type ?? "").startsWith("image") ? item.enclosure.url : undefined;
+  return (
+    widest(media, link) ??
+    widest(thumbs, link) ??
+    cleanImageUrl(enclosure, link) ??
+    firstHtmlImage(item["content:encoded"], link) ??
+    firstHtmlImage(item.content, link) ??
+    linkCardImage(link)
+  );
 }
 
 /** All tag-like labels of an item, as the feed wrote them (normalized later, in the pipeline). */
@@ -489,14 +491,16 @@ export async function parseFeed(
       externalId: idSource.length > 200 ? sha1(idSource) : idSource,
       url,
       title,
-      summary: stripHtml(item.contentSnippet ?? item.summary ?? item.content),
+      summary:
+        stripHtml(item.contentSnippet || item.summary || item.content) ??
+        stripHtml(textOf(item.mediaGroup?.["media:description"])),
       author,
       publishedAt: date && !Number.isNaN(date.getTime()) ? date : undefined,
       lang: opts.lang,
       tags,
       metrics,
       // `tags` is kept raw so `npm run db:reindex` can re-normalize it later.
-      raw: { feedTitle: feed.title, guid: item.guid, link: item.link, tags, image: imageOf(item) },
+      raw: { feedTitle: feed.title, guid: item.guid, link: item.link, tags, image: imageOf(item, url) },
     });
   }
   return out;

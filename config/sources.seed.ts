@@ -457,20 +457,26 @@ export const sourceSeeds: SourceSeed[] = [
   ),
   rss("hn-best", "Hacker News Best (hnrss)", "https://hnrss.org/best", "en", ["tech"], 0.9),
   // Lemmy (federated Reddit alternative): one source for its tech communities, like the Reddit source.
-  rss(
-    "lemmy-tech",
-    "Lemmy (tech communities)",
-    [
-      "https://lemmy.world/feeds/c/technology.xml?sort=Active",
-      "https://lemmy.ml/feeds/c/technology.xml?sort=Active",
-      { url: "https://lemdro.id/feeds/c/android.xml?sort=Active", tags: ["android"] },
-      { url: "https://programming.dev/feeds/c/programming.xml?sort=Active", tags: ["dev"] },
-      { url: "https://lemmy.world/feeds/c/selfhosted.xml?sort=Active", tags: ["selfhosted"] },
-      { url: "https://lemmy.ml/feeds/c/linux.xml?sort=Active", tags: ["linux"] },
-    ],
-    "en",
-    ["tech"],
-  ),
+  // The API (not RSS) gives each link's preview image + description and the score/comment counts.
+  {
+    key: "lemmy",
+    name: "Lemmy (tech communities)",
+    type: "lemmy",
+    weight: 1,
+    config: {
+      communities: [
+        { host: "lemmy.world", name: "technology" },
+        { host: "lemmy.ml", name: "technology" },
+        { host: "lemdro.id", name: "android", tags: ["android"] },
+        { host: "programming.dev", name: "programming", tags: ["dev"] },
+        { host: "lemmy.world", name: "selfhosted", tags: ["selfhosted"] },
+        { host: "lemmy.ml", name: "linux", tags: ["linux"] },
+      ],
+      sort: "Hot",
+      limit: 20,
+      tags: ["tech"],
+    },
+  },
 
   // Turkish tech, startups and general news
   rss(
@@ -588,7 +594,14 @@ export const sourceSeeds: SourceSeed[] = [
   // Developers
   rss("infoq", "InfoQ", "https://feed.infoq.com/", "en", ["tech", "dev"]),
   rss("thenewstack", "The New Stack", "https://thenewstack.io/feed/", "en", ["tech", "dev"]),
-  rss("devto", "DEV Community", "https://dev.to/feed", "en", ["tech", "dev"], 0.6),
+  // The API, not dev.to's RSS feed: cover image, description, tags and reaction counts.
+  {
+    key: "devto",
+    name: "DEV Community (top of the day)",
+    type: "devto",
+    weight: 0.6,
+    config: { top: 1, perPage: 30, tags: ["tech", "dev"] },
+  },
   rss("lwn", "LWN", "https://lwn.net/headlines/rss", "en", ["tech", "dev"]),
 
   // AI: news, newsletters and writers
@@ -900,7 +913,17 @@ export const sourceSeeds: SourceSeed[] = [
   rss("singularityhub", "Singularity Hub", "https://singularityhub.com/feed/", "en", ["tech", "science"]),
 
   // Space
-  rss("nasa", "NASA News", "https://www.nasa.gov/news-release/feed/", "en", ["space", "official", "nasa"]),
+  // NASA's images are public domain (no NASA logo/insignia use implied).
+  rss(
+    "nasa",
+    "NASA (news, image of the day)",
+    [
+      "https://www.nasa.gov/news-release/feed/",
+      { url: "https://www.nasa.gov/feeds/iotd-feed/", tags: ["image of the day"] },
+    ],
+    "en",
+    ["space", "official", "nasa"],
+  ),
   rss("nasaspaceflight", "NASASpaceflight", "https://www.nasaspaceflight.com/feed/", "en", ["space"]),
   rss("spaceflightnow", "Spaceflight Now", "https://spaceflightnow.com/feed/", "en", ["space"]),
   rss("universetoday", "Universe Today", "https://www.universetoday.com/feed/", "en", ["space", "science"]),
@@ -1089,6 +1112,44 @@ export const sourceSeeds: SourceSeed[] = [
   rss("gamer-tr", "Gamer.com.tr", "https://www.gamer.com.tr/feed/", "tr", ["gaming", "turkey"]),
   rss("merlininkazani", "Merlin'in Kazanı", "https://www.merlininkazani.com/rss", "tr", ["gaming", "turkey"]),
 
+  // ---- Image-first sources (Nov 2026): every item comes with its own image and description ----
+
+  // Links people share most on Mastodon today, as preview cards (image, description, publisher).
+  // General news too: no "tech" tag, the categorizer decides what counts as tech.
+  {
+    key: "mastodon-trends",
+    name: "Mastodon (trending links)",
+    type: "mastodon_trends",
+    weight: 0.9,
+    config: {
+      instances: ["mastodon.social", "fosstodon.org", "hachyderm.io", "techhub.social", "infosec.exchange"],
+      limit: 20,
+      tags: [],
+    },
+  },
+  {
+    key: "hf-papers",
+    name: "Hugging Face Daily Papers",
+    type: "hf_papers",
+    weight: 0.8,
+    config: { limit: 50, tags: ["ai", "research"] },
+  },
+  {
+    key: "github-new-repos",
+    name: "GitHub (new repos by stars)",
+    type: "github_repos",
+    weight: 0.8,
+    config: { days: 7, minStars: 50, perPage: 30, tags: ["tech", "dev", "open source", "github"] },
+  },
+  // What the public reads about (people, companies, products, films); mostly not tech.
+  {
+    key: "wikipedia-mostread",
+    name: "Wikipedia (most read, EN)",
+    type: "wikipedia_mostread",
+    weight: 0.5,
+    config: { lang: "en", limit: 25, tags: ["wikipedia", "most read"] },
+  },
+
   // Reddit through our own Devvit app (reddit-bridge/). Disabled until REDDIT_DEVVIT_URL/TOKEN are set.
   {
     key: "reddit-devvit",
@@ -1155,4 +1216,7 @@ export const retiredSourceKeys = [
   "rss-theverge-ai",
   "rss-arstechnica-ai",
   "rss-wired-ai",
+  // RSS replaced by the platform's API (images, descriptions, counts).
+  "rss-devto",
+  "rss-lemmy-tech",
 ];

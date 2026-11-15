@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { mapLimit } from "../util/concurrency";
 import { getJson } from "./http";
+import { linkCardImage } from "./images";
+import { htmlToText } from "./text";
 import type { RawItemInput, SourceAdapter } from "./types";
 
 // Official Firebase API: https://github.com/HackerNews/API
@@ -16,6 +18,8 @@ const hnItem = z.object({
   type: z.string().optional(),
   title: z.string().optional(),
   url: z.string().optional(),
+  /** The poster's own text (Ask HN, most Show HN), as HTML. */
+  text: z.string().optional(),
   by: z.string().optional(),
   time: z.number().optional(),
   score: z.number().optional(),
@@ -40,12 +44,14 @@ export function parseHnItem(json: unknown): RawItemInput | null {
     externalId: String(it.id),
     url: it.url ?? `https://news.ycombinator.com/item?id=${it.id}`,
     title: it.title,
+    summary: htmlToText(it.text),
     author: it.by,
     publishedAt: it.time ? new Date(it.time * 1000) : undefined,
     lang: "en",
     tags: hnTags(it.title),
     metrics: { points: it.score ?? 0, comments: it.descendants ?? 0 },
-    raw: { ...it, hnUrl: `https://news.ycombinator.com/item?id=${it.id}` },
+    // HN has no images; a link to GitHub or YouTube gets the preview card those sites publish.
+    raw: { ...it, hnUrl: `https://news.ycombinator.com/item?id=${it.id}`, image: linkCardImage(it.url) },
   };
 }
 

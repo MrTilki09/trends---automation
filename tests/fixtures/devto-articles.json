@@ -1,0 +1,74 @@
+[
+ {
+  "type_of": "article",
+  "id": 5032399,
+  "title": "Benchmarking the Gemini Decisions API",
+  "description": "The Gemini Decisions API scores a fixed set of answers in one pass and returns probabilities. An ADK triage agent built on it, a 48-ticket benchmark against Gemini 3.8 Flash, Gemini 4 Hydrogen, Gemini 3.5 Flash-Lite and Gemma 4 E2B, and a test of 1 to 100 questions in one request.",
+  "url": "https://dev.to/gde/benchmarking-the-gemini-decisions-api-l31",
+  "comments_count": 4,
+  "public_reactions_count": 14,
+  "published_timestamp": "2026-11-13T23:45:04Z",
+  "language": "en",
+  "cover_image": "https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fraw.githubusercontent.com%2Fxbill9%2Fdecisions-api%2Fmain%2Fdocs%2Farticle%2Fdevto-cover.df71ccfa.jpg",
+  "social_image": "https://media2.dev.to/dynamic/image/width=1200,height=627,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fraw.githubusercontent.com%2Fxbill9%2Fdecisions-api%2Fmain%2Fdocs%2Farticle%2Fdevto-cover.df71ccfa.jpg",
+  "canonical_url": "https://dev.to/gde/benchmarking-the-gemini-decisions-api-l31",
+  "tag_list": [
+   "gemini",
+   "adk",
+   "gemma",
+   "ai"
+  ],
+  "user": {
+   "name": "xbill",
+   "username": "xbill"
+  }
+ },
+ {
+  "type_of": "article",
+  "id": 5034047,
+  "title": "Devcon 8 Mumbai: Four Days at Ethereum's Biggest Builder Gathering",
+  "description": "A little late in sharing this, but I wanted to capture all the details as best as I can.  I spent 3–6...",
+  "url": "https://dev.to/yashksaini/devcon-8-mumbai-four-days-at-ethereums-biggest-builder-gathering-3jn",
+  "comments_count": 1,
+  "public_reactions_count": 9,
+  "published_timestamp": "2026-11-14T06:59:34Z",
+  "language": "en",
+  "cover_image": "https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Farticles%2F4r1fh7b39mmqp8u0thov.png",
+  "social_image": "https://media2.dev.to/dynamic/image/width=1200,height=627,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Farticles%2F4r1fh7b39mmqp8u0thov.png",
+  "canonical_url": "https://dev.to/yashksaini/devcon-8-mumbai-four-days-at-ethereums-biggest-builder-gathering-3jn",
+  "tag_list": [
+   "ethereum",
+   "productivity",
+   "opensource",
+   "web3"
+  ],
+  "user": {
+   "name": "Yash Kumar Saini",
+   "username": "yashksaini"
+  }
+ },
+ {
+  "type_of": "article",
+  "id": 5036931,
+  "title": "Avengers: Doomsday is 5 weeks away, so I built hexagon README badges. What are you building?",
+  "description": "Marvel fans of DEV, show me your Doomsday-hype side projects. Mine is a tiny Vercel service that makes glowing, Avengers-themed hexagon badges.",
+  "url": "https://dev.to/amananandrai/avengers-doomsday-is-5-weeks-away-so-i-built-hexagon-readme-badges-what-are-you-building-32d6",
+  "comments_count": 0,
+  "public_reactions_count": 5,
+  "published_timestamp": "2026-11-14T17:14:52Z",
+  "language": "en",
+  "cover_image": "https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fraw.githubusercontent.com%2Famananandrai%2Fhex-badges%2Fmain%2Fdocs%2Fcover.png",
+  "social_image": "https://media2.dev.to/dynamic/image/width=1200,height=627,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fraw.githubusercontent.com%2Famananandrai%2Fhex-badges%2Fmain%2Fdocs%2Fcover.png",
+  "canonical_url": "https://dev.to/amananandrai/avengers-doomsday-is-5-weeks-away-so-i-built-hexagon-readme-badges-what-are-you-building-32d6",
+  "tag_list": [
+   "discuss",
+   "watercooler",
+   "webdev",
+   "opensource"
+  ],
+  "user": {
+   "name": "amananandrai",
+   "username": "amananandrai"
+  }
+ }
+]
