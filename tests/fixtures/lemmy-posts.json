@@ -1,0 +1,88 @@
+{
+ "posts": [
+  {
+   "post": {
+    "id": 54406609,
+    "name": "COMAC's electric aircraft completes first piloted test flight",
+    "url": "https://www.chinadaily.com.cn/a/202611/14/WS6af7f2e0e4b03ebf8519c602.html",
+    "published": "2026-11-14T18:26:59.142168Z",
+    "deleted": false,
+    "removed": false,
+    "nsfw": false,
+    "embed_title": "COMAC's electric aircraft completes first piloted test flight",
+    "thumbnail_url": "https://lemmy.world/pictrs/image/83416663-7670-4648-8623-21dc277e6797.png",
+    "ap_id": "https://lemmy.world/post/54406609"
+   },
+   "counts": {
+    "comments": 16,
+    "score": 79,
+    "upvotes": 79
+   },
+   "community": {
+    "name": "technology",
+    "title": "Technology",
+    "actor_id": "https://lemmy.world/c/technology"
+   },
+   "creator": {
+    "name": "someone"
+   }
+  },
+  {
+   "post": {
+    "id": 54399886,
+    "name": "Old tech blamed for the ground stop that caused flight chaos: 'It got overloaded'",
+    "url": "https://laist.com/news/old-tech-blamed-for-the-ground-stop-that-caused-flight-chaos-it-got-overloaded",
+    "body": "Grifters promise us fake \"AI\" while our (unfortunately) critical, tech infrastructure rots. Ride a bicycle instead.",
+    "published": "2026-11-14T14:44:14.576312Z",
+    "deleted": false,
+    "removed": false,
+    "nsfw": false,
+    "embed_title": "Old tech blamed for the ground stop that caused flight chaos: 'It got overloaded'",
+    "embed_description": "The nationwide ground stop that paralyzed the U.S. aviation system on Friday has ended, according to Federal Aviation Administration.",
+    "thumbnail_url": "https://lemmy.world/pictrs/image/441e41a7-84fa-4473-b27d-efd0d1c70ff7.jpeg",
+    "ap_id": "https://lemmy.dbzer0.com/post/78434521"
+   },
+   "counts": {
+    "comments": 33,
+    "score": 95,
+    "upvotes": 108
+   },
+   "community": {
+    "name": "technology",
+    "title": "Technology",
+    "actor_id": "https://lemmy.world/c/technology"
+   },
+   "creator": {
+    "name": "someone"
+   }
+  },
+  {
+   "post": {
+    "id": 54394866,
+    "name": "‘Enough is enough’: rising number of deadly ebike battery fires spark fear in New York City",
+    "url": "https://www.theguardian.com/us-news/2026/nov/14/new-york-city-ebike-battery-fires-deaths",
+    "published": "2026-11-14T12:16:32.018107Z",
+    "deleted": false,
+    "removed": false,
+    "nsfw": false,
+    "embed_title": "‘Enough is enough’: rising number of deadly ebike battery fires spark fear in New York City",
+    "embed_description": "City has failed to build infrastructure that could reduce threat, and saw 400 fires, 83 injuries and 12 deaths this year",
+    "thumbnail_url": "https://lemmy.world/pictrs/image/03b9bd89-aa56-47a2-aea8-f8a3f79e8a62.jpeg",
+    "ap_id": "https://programming.dev/post/59388542"
+   },
+   "counts": {
+    "comments": 28,
+    "score": 106,
+    "upvotes": 109
+   },
+   "community": {
+    "name": "technology",
+    "title": "Technology",
+    "actor_id": "https://lemmy.world/c/technology"
+   },
+   "creator": {
+    "name": "someone"
+   }
+  }
+ ]
+}

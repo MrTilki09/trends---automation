@@ -16,11 +16,13 @@ export const googleTrendsConfig = z.object({
 // Region tag per country, so trends line up with the "turkey" tag of Turkish feeds.
 const GEO_TAGS: Record<string, string> = { TR: "turkey", US: "usa", GB: "uk", DE: "germany" };
 
-type NewsItem = { title?: string; url?: string; source?: string };
+type NewsItem = { title?: string; url?: string; source?: string; picture?: string };
 type TrendItem = {
   title?: string;
   pubDate?: string;
   approxTraffic?: string;
+  picture?: string;
+  pictureSource?: string;
   newsItems?: Record<string, string[]>[];
 };
 
@@ -28,6 +30,8 @@ const parser = new Parser<Record<string, never>, TrendItem>({
   customFields: {
     item: [
       ["ht:approx_traffic", "approxTraffic"],
+      ["ht:picture", "picture"],
+      ["ht:picture_source", "pictureSource"],
       ["ht:news_item", "newsItems", { keepArray: true }],
     ],
   },
@@ -58,6 +62,7 @@ export async function parseGoogleTrends(xml: string, geo: string, lang?: string)
       title: first(n["ht:news_item_title"]),
       url: first(n["ht:news_item_url"]),
       source: first(n["ht:news_item_source"]),
+      picture: first(n["ht:news_item_picture"]),
     }));
     const published = item.pubDate ? new Date(item.pubDate) : undefined;
     const valid = published && !Number.isNaN(published.getTime());
@@ -79,7 +84,15 @@ export async function parseGoogleTrends(xml: string, geo: string, lang?: string)
         lang,
         tags: ["search trend", GEO_TAGS[geo] ?? geo.toLowerCase()],
         metrics: { approxTraffic: parseApproxTraffic(item.approxTraffic) },
-        raw: { geo, approxTraffic: item.approxTraffic, news },
+        // Google's picture for a trend is a ~300 px thumbnail of a news photo: too small for a post
+        // image, so it is kept as `thumbnail` (with its credit), not `image`.
+        raw: {
+          geo,
+          approxTraffic: item.approxTraffic,
+          news,
+          thumbnail: item.picture?.trim() || news.find((n) => n.picture)?.picture,
+          thumbnailSource: item.pictureSource?.trim() || news.find((n) => n.picture)?.source,
+        },
       },
     ];
   });

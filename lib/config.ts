@@ -112,6 +112,8 @@ const envSchema = z.object({
     .optional()
     .or(z.literal("").transform(() => undefined)),
   REDDIT_DEVVIT_TOKEN: z.string().optional(),
+  // Optional: raises the GitHub search limit for the "new repos" source (works without it).
+  GITHUB_TOKEN: optionalString,
 });
 
 export type AppConfig = z.infer<typeof envSchema>;
