@@ -11,19 +11,24 @@ import { clientIp } from "@/lib/util/rate-limit";
 import { emailLimiter } from "../limits";
 
 /**
- * POST /api/app/v1/auth/signup {email, password} → 202 {sentTo}
+ * POST /api/app/v1/auth/signup {email, password, confirm} → 202 {sentTo}
+ * `confirm` must repeat the password (checked here too, not only in the app).
  * Same Trend Pool member accounts as the website: the confirmation link opens the website's /verify
  * page. Same answer whether or not the email already has an account (no account probing).
  */
 export const dynamic = "force-dynamic";
 export const OPTIONS = preflight;
 
-const Body = z.object({ email: z.string().max(254), password: z.string().max(200) });
+const Body = z.object({
+  email: z.string().max(254),
+  password: z.string().max(200),
+  confirm: z.string({ error: "Repeat your password." }).max(200),
+});
 
 export async function POST(req: NextRequest) {
   const body = await readJson(req, Body);
   if (body.error) return body.error;
-  const valid = validateSignup({ ...body.data, confirm: body.data.password });
+  const valid = validateSignup(body.data);
   if (!valid.ok) return jsonError(400, valid.error);
   const rl = emailLimiter.take(clientIp(req.headers));
   if (!rl.allowed) {

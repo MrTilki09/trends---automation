@@ -12,6 +12,10 @@ const LOCAL = /^(localhost|127\.\d+\.\d+\.\d+|\[::1\]|::1|0\.0\.0\.0)$|\.localho
 // A plain host[:port]: letters, digits, dots and dashes (rejects anything that isn't a hostname).
 const HOST = /^[a-z0-9.-]+(:\d{1,5})?$/i;
 
+// Private network addresses (a phone testing against a dev machine on the same Wi-Fi). Dev servers there
+// speak plain http, so a link must not be upgraded to https.
+const PRIVATE_IP = /^(10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+)$/;
+
 const hostnameOf = (host: string) => host.replace(/:\d+$/, "").replace(/^\[|\]$/g, "");
 export const isLocalHost = (host: string) => LOCAL.test(hostnameOf(host));
 
@@ -27,7 +31,9 @@ export function emailLinkOrigin(appUrl: string | undefined, headers: Headers): s
   const forwarded = headers.get("x-forwarded-host")?.split(",")[0]?.trim();
   const host = forwarded || headers.get("host")?.trim() || "";
   if (host && HOST.test(host) && !isLocalHost(host)) {
-    const proto = headers.get("x-forwarded-proto")?.split(",")[0]?.trim() === "http" ? "http" : "https";
+    const sentProto = headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
+    const proto =
+      sentProto === "http" || (!sentProto && PRIVATE_IP.test(hostnameOf(host))) ? "http" : "https";
     return `${proto}://${host}`;
   }
   return configured || `http://${host && HOST.test(host) ? host : "localhost:3000"}`;

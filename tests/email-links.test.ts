@@ -31,6 +31,14 @@ describe("origin of emailed links", () => {
     expect(emailLinkOrigin(undefined, h({ host: "localhost:3000" }))).toBe("http://localhost:3000");
   });
 
+  it("uses plain http for a dev machine on the local network (phone on the same Wi-Fi)", () => {
+    expect(emailLinkOrigin("http://localhost:3000", h({ host: "192.168.1.86:3100" }))).toBe(
+      "http://192.168.1.86:3100",
+    );
+    // …but a proxy's own answer wins.
+    expect(emailLinkOrigin(undefined, h({ host: "10.0.0.5", "x-forwarded-proto": "https" }))).toBe("https://10.0.0.5");
+  });
+
   it("ignores a Host header that isn't a hostname", () => {
     expect(emailLinkOrigin(undefined, h({ host: "evil.com/path?x=" }))).toBe("http://localhost:3000");
   });
