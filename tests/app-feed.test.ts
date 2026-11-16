@@ -47,6 +47,15 @@ describe("cleanSnippet", () => {
     );
   });
 
+  it("drops text that is only links (Hacker News posts that list URLs)", () => {
+    expect(
+      cleanSnippet("https://x.com/SpaceX/status/2121316300702056595 https://youtu.be/jHlpfNSpBmw?t=3233", "Starship"),
+    ).toBeNull();
+    expect(
+      cleanSnippet("A long enough sentence about the launch with a link at the end https://example.com/a", "t"),
+    ).toContain("A long enough sentence");
+  });
+
   it("cuts long text at a sentence boundary, else at a word with an ellipsis", () => {
     const sentence = "This is a sentence that goes on for a while. ";
     expect(cutAtSentence(sentence.repeat(10), 300).endsWith(".")).toBe(true);

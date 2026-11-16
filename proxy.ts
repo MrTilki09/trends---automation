@@ -12,7 +12,8 @@ import { getConfig } from "@/lib/config";
 const PUBLIC_PATHS = new Set(["/login", "/signup", "/verify", "/forgot", "/reset"]);
 // The home page is public and read-only: anyone may view the Pool and export it. Only GET/HEAD:
 // every button on it (save, shortlist, run now) is a POST and still needs a signed-in account.
-const PUBLIC_READ_PATHS = new Set(["/", "/pool", "/pool/export"]);
+// Legal pages must be public: store reviewers and signed-out users read them.
+const PUBLIC_READ_PATHS = new Set(["/", "/pool", "/pool/export", "/privacy", "/terms", "/delete-account"]);
 
 export function proxy(req: NextRequest) {
   const { pathname, search } = req.nextUrl;

@@ -37,6 +37,9 @@ export function cleanSnippet(
   let s = summary.replace(/\s+/g, " ").trim();
   for (let pass = 0; pass < 2; pass++) for (const re of BOILERPLATE) s = s.replace(re, "").trim();
   if (opts.stripCreditPrefix) s = s.replace(TECHMEME_PREFIX, "").trim();
+  // Text that is mostly links (e.g. a Hacker News post that only lists URLs) isn't a snippet.
+  const withoutLinks = s.replace(/https?:\/\/\S+/g, "").replace(/\s+/g, " ").trim();
+  if (withoutLinks.length < SNIPPET_MIN) return null;
   if (!s) return null;
 
   // Only repeats the headline (optionally followed by a short publisher name)?
