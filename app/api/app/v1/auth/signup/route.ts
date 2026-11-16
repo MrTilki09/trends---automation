@@ -3,7 +3,7 @@ import { z } from "zod";
 import { json, jsonError, preflight, readJson } from "@/lib/app-api/http";
 import { createVerificationToken, signUp, validateSignup } from "@/lib/auth/accounts";
 import { APP_NAME } from "@/lib/app-links";
-import { emailLinkOrigin } from "@/lib/auth/links";
+import { appUrlMismatch, emailLinkOrigin } from "@/lib/auth/links";
 import { getConfig } from "@/lib/config";
 import { getDb } from "@/lib/db/client";
 import { logger } from "@/lib/logger";
@@ -37,6 +37,8 @@ export async function POST(req: NextRequest) {
   }
 
   const cfg = getConfig();
+  const seenHost = appUrlMismatch(cfg.APP_URL, req.headers);
+  if (seenHost) logger.warn({ appUrl: cfg.APP_URL, requestHost: seenHost }, "APP_URL host differs from the request: email links may be broken");
   const db = getDb();
   const outcome = await signUp(db, valid.email, body.data.password);
   const origin = emailLinkOrigin(cfg.APP_URL, req.headers);

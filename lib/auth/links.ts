@@ -38,3 +38,22 @@ export function emailLinkOrigin(appUrl: string | undefined, headers: Headers): s
   }
   return configured || `http://${host && HOST.test(host) ? host : "localhost:3000"}`;
 }
+
+/**
+ * The public host a request came in on, when APP_URL points somewhere else (e.g. a typo like
+ * "trends." for "trend."), so callers can log it: emailed links follow APP_URL and would be broken.
+ * null = no mismatch, or nothing to compare (local request, no APP_URL).
+ */
+export function appUrlMismatch(appUrl: string | undefined, headers: Headers): string | null {
+  const configured = appUrl?.trim();
+  if (!configured) return null;
+  let configuredHost: string;
+  try {
+    configuredHost = new URL(configured).host.toLowerCase();
+  } catch {
+    return null;
+  }
+  const host = (headers.get("x-forwarded-host")?.split(",")[0]?.trim() || headers.get("host")?.trim() || "").toLowerCase();
+  if (!host || !HOST.test(host) || isLocalHost(host) || PRIVATE_IP.test(hostnameOf(host))) return null;
+  return host !== configuredHost ? host : null;
+}

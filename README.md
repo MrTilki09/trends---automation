@@ -602,7 +602,7 @@ send), so keep the app behind Caddy like the dashboard.
 
 ```
 SESSION_SECRET=…          # required: app sign-in tokens are signed with a key derived from it
-APP_URL=https://trends.example.com   # links in sign-up / reset emails
+APP_URL=https://trend.developerfox.com.tr   # exactly the public host: links in sign-up / reset emails use it
 MAIL_HOST=… MAIL_USERNAME=… MAIL_PASSWORD=… MAIL_FROM_ADDRESS=…   # sign-up confirmation emails (§5d)
 PUSH_ENABLED=true         # once the app is in the stores: "breaking" pushes after each hourly run
 EXPO_ACCESS_TOKEN=        # only if "enhanced push security" is on for the Expo project
@@ -624,6 +624,10 @@ curl -s https://trends.example.com/api/app/v1/discover | head -c 300
 ```
 
 Moderate comments on the dashboard's **Moderation** page (owner only).
+
+`APP_URL` must be exactly the host visitors and the app use. A different host (even one letter off)
+sends confirmation links nobody can open; the web log then shows "APP_URL host differs from the
+request". The app can always ask for a fresh link: sign in → "Send the confirmation link again".
 
 ### Backups
 

@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { validateNewPassword } from "../lib/auth/accounts";
-import { emailLinkOrigin } from "../lib/auth/links";
+import { appUrlMismatch, emailLinkOrigin } from "../lib/auth/links";
 import { alreadyRegisteredMail, resetPasswordMail, verificationMail } from "../lib/mail";
 
 const h = (init: Record<string, string>) => new Headers(init);
-const PUBLIC = "https://trends.developerfox.com.tr";
+const PUBLIC = "https://trend.developerfox.com.tr";
 
 describe("origin of emailed links", () => {
   it("uses APP_URL when it is a public address", () => {
@@ -15,13 +15,13 @@ describe("origin of emailed links", () => {
     // APP_URL copied from a dev .env, the visitor came through Caddy / Cloudflare.
     const viaProxy = h({
       host: "localhost:3000",
-      "x-forwarded-host": "trends.developerfox.com.tr",
+      "x-forwarded-host": "trend.developerfox.com.tr",
       "x-forwarded-proto": "https",
     });
     expect(emailLinkOrigin("http://localhost:3000", viaProxy)).toBe(PUBLIC);
     expect(emailLinkOrigin(undefined, viaProxy)).toBe(PUBLIC);
     // Proxy that keeps the public Host header; https unless the proxy says http.
-    expect(emailLinkOrigin("", h({ host: "trends.developerfox.com.tr" }))).toBe(PUBLIC);
+    expect(emailLinkOrigin("", h({ host: "trend.developerfox.com.tr" }))).toBe(PUBLIC);
   });
 
   it("keeps localhost links for local testing", () => {
@@ -41,6 +41,19 @@ describe("origin of emailed links", () => {
 
   it("ignores a Host header that isn't a hostname", () => {
     expect(emailLinkOrigin(undefined, h({ host: "evil.com/path?x=" }))).toBe("http://localhost:3000");
+  });
+});
+
+describe("APP_URL sanity check", () => {
+  it("flags an APP_URL whose host isn't the one visitors use", () => {
+    const viaProxy = h({ host: "localhost:3000", "x-forwarded-host": "trend.developerfox.com.tr" });
+    expect(appUrlMismatch("https://trends.developerfox.com.tr", viaProxy)).toBe("trend.developerfox.com.tr");
+    expect(appUrlMismatch(PUBLIC, viaProxy)).toBeNull();
+  });
+  it("stays quiet for local requests and when APP_URL is unset", () => {
+    expect(appUrlMismatch(PUBLIC, h({ host: "localhost:3000" }))).toBeNull();
+    expect(appUrlMismatch(PUBLIC, h({ host: "192.168.1.86:3100" }))).toBeNull();
+    expect(appUrlMismatch(undefined, h({ host: "trend.developerfox.com.tr" }))).toBeNull();
   });
 });
 
