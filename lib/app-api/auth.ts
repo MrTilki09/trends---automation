@@ -4,7 +4,7 @@ import type { DB } from "../db/client";
 import { appSessions, users, type User } from "../db/schema";
 
 /*
- * App sign-in (Trend Feed). Two tokens per device:
+ * App sign-in (Surfaced app). Two tokens per device:
  *   - access token: `ta1.<base64url(json)>.<hmac>` signed with a key derived from SESSION_SECRET,
  *     valid 15 minutes, checked without a DB lookup for the signature (the session row is still
  *     checked, so logout and account deletion take effect at once);

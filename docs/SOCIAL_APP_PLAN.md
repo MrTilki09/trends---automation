@@ -1,4 +1,7 @@
-# Trend Feed — Social App Build Plan (rev. 2)
+# Surfaced — Social App Build Plan (rev. 2)
+
+> The app is called **Surfaced** (formerly the working name "Trend Feed"). The bundle id
+> `tr.com.developerfox.trendfeed` and Expo slug `trend-feed` keep the old name; they can't change.
 
 > Build brief for the coding agent. Read it fully before writing code.
 > Build in the milestone order in §12. Finish each milestone, including its acceptance check, before starting the next.
@@ -67,7 +70,7 @@ There are no LLM calls in the app, its API or its worker jobs. Running cost is j
 | Decision | Choice | Why |
 |---|---|---|
 | Client | **Expo (latest SDK) + TypeScript**, development builds (not Expo Go) | Same React Native, with any native module available. Builds iOS from Windows. |
-| Navigation | Expo Router (file-based tabs + stacks) | Deep links for free: `trendfeed://topic/123` maps to a file. |
+| Navigation | Expo Router (file-based tabs + stacks) | Deep links for free: `surfaced://topic/123` maps to a file. |
 | UI and motion | Reanimated, Gesture Handler, FlashList, expo-image | Handles the full-screen story view, card animations and smooth lists. |
 | Styling | StyleSheet + design tokens (`src/theme.ts`) | NativeWind's current release supports up to Expo SDK 57; the app is on SDK 58. Revisit when it catches up. |
 | Data fetching | TanStack Query, with the feed cache persisted on the device | Caching, infinite scroll, offline feed. |
@@ -266,7 +269,7 @@ Drizzle migration; no existing column changes type.
 - **Delivery:** the worker POSTs to the Expo push API in batches of 100 and reads the receipts.
   - Remove tokens that come back `DeviceNotRegistered`.
   - An Expo access token goes in `.env`, never committed.
-- **Deep links:** `trendfeed://topic/:id` (Expo Router route `app/topic/[id].tsx`), plus universal / App Links on
+- **Deep links:** `surfaced://topic/:id` (Expo Router route `app/topic/[id].tsx`), plus universal / App Links on
   the public domain later.
 
 ---

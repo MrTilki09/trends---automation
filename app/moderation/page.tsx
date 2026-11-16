@@ -8,7 +8,7 @@ import type { ReportStatus } from "@/lib/db/schema";
 import { relativeTime } from "@/lib/utils";
 import { dismissReportAction, hideCommentAction, restoreCommentAction, setBannedAction } from "./actions";
 
-/** Reports from the Trend Feed app. A comment with 3 open reports is hidden until you decide here. */
+/** Reports from the Surfaced app. A comment with 3 open reports is hidden until you decide here. */
 export default async function ModerationPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
   await requireOwner();
   const { status: raw } = await searchParams;

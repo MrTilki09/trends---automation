@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { z } from "zod";
 import { json, jsonError, preflight, readJson } from "@/lib/app-api/http";
 import { createVerificationToken, signUp, validateSignup } from "@/lib/auth/accounts";
+import { APP_NAME } from "@/lib/app-links";
 import { emailLinkOrigin } from "@/lib/auth/links";
 import { getConfig } from "@/lib/config";
 import { getDb } from "@/lib/db/client";
@@ -41,11 +42,11 @@ export async function POST(req: NextRequest) {
   const origin = emailLinkOrigin(cfg.APP_URL, req.headers);
   try {
     if (outcome.kind === "registered") {
-      await sendMail(alreadyRegisteredMail(outcome.email, origin, cfg.MAIL_FROM_NAME));
+      await sendMail({ ...alreadyRegisteredMail(outcome.email, origin, APP_NAME), fromName: APP_NAME });
     } else if (outcome.kind !== "taken") {
       const token = await createVerificationToken(db, outcome.userId);
       const link = `${origin}/verify?${new URLSearchParams({ token })}`;
-      await sendMail(verificationMail(outcome.email, link, cfg.MAIL_FROM_NAME));
+      await sendMail({ ...verificationMail(outcome.email, link, APP_NAME), fromName: APP_NAME });
     }
   } catch (err) {
     logger.error({ err }, "app signup email failed");

@@ -8,7 +8,7 @@ export default defineConfig({
     migrate: "worker/migrate.ts",
     seed: "worker/seed.ts",
     reindex: "worker/reindex.ts",
-    // App (Trend Feed): one-off fill of snippets/images/publishers, and a foreground collection run.
+    // App (Surfaced): one-off fill of snippets/images/publishers, and a foreground collection run.
     "backfill-app": "worker/backfill-app.ts",
     "collect-once": "worker/collect-once.ts",
   },

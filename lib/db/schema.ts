@@ -317,7 +317,7 @@ export const savedTopics = pgTable(
   (t) => [primaryKey({ columns: [t.userId, t.topicId] })],
 );
 
-/* ------------------------------------------------------------------ app (Trend Feed) */
+/* ------------------------------------------------------------------ app (Surfaced) */
 
 /** App sign-in sessions: one per device. Only a SHA-256 of the refresh token is stored. */
 export const appSessions = pgTable(

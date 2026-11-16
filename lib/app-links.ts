@@ -1,7 +1,11 @@
 import type { AppConfig } from "./config";
 
+/** The mobile app's name (working name: Trend Feed) and its URL scheme. */
+export const APP_NAME = "Surfaced";
+export const APP_SCHEME = "surfaced";
+
 /*
- * App links for the Trend Feed app: a shared story is https://<this domain>/topic/:id. With the app
+ * App links for the Surfaced app: a shared story is https://<this domain>/topic/:id. With the app
  * installed, iOS (Universal Links) and Android (App Links) open it in the app; otherwise the browser
  * shows the public /topic/:id page. The phones check that this domain vouches for the app through
  * the two /.well-known files below.

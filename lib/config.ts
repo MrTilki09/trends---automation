@@ -40,8 +40,8 @@ const envSchema = z.object({
   SCORE_HALF_LIFE_HOURS: z.coerce.number().positive().default(24),
   RAW_ITEM_RETENTION_DAYS: z.coerce.number().int().positive().default(30),
 
-  // App links (Trend Feed): share links https://<domain>/topic/:id open the app when it's installed.
-  // Fill these in after the first EAS build (README §6, "Trend Feed app API"). Empty = the
+  // App links (Surfaced app): share links https://<domain>/topic/:id open the app when it's installed.
+  // Fill these in after the first EAS build (README §6, "Surfaced app API"). Empty = the
   // /.well-known files list no app yet, and the /topic page shows no store buttons.
   APP_IOS_TEAM_ID: optionalString, // Apple Developer Team ID, e.g. ABCDE12345
   APP_IOS_BUNDLE_ID: optionalString, // e.g. tr.com.developerfox.trendfeed
@@ -50,7 +50,7 @@ const envSchema = z.object({
   APP_STORE_URL: optionalString,
   PLAY_STORE_URL: optionalString,
 
-  // App push notifications (Trend Feed). Off until the app is live; EXPO_ACCESS_TOKEN is optional
+  // App push notifications (Surfaced app). Off until the app is live; EXPO_ACCESS_TOKEN is optional
   // (only needed when "enhanced push security" is turned on for the Expo project).
   PUSH_ENABLED: bool,
   EXPO_ACCESS_TOKEN: optionalString,

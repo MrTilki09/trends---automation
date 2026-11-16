@@ -3,6 +3,7 @@ import type { DB } from "./db/client";
 import { notifications, pushTokens, type NotificationPrefs } from "./db/schema";
 import { DEFAULT_NOTIFICATION_PREFS } from "./data/app-users";
 import { momentumOf } from "./data/feed";
+import { APP_SCHEME } from "./app-links";
 import { TECH_ONLY } from "./data/topics";
 import type { Logger } from "./logger";
 
@@ -211,7 +212,7 @@ export async function runNotifications(
         to: t.token,
         title: p.title,
         body: p.body,
-        data: { url: `trendfeed://topic/${p.topicId}`, topicId: p.topicId },
+        data: { url: `${APP_SCHEME}://topic/${p.topicId}`, topicId: p.topicId },
       })),
   );
   try {

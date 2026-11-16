@@ -8,7 +8,8 @@ import { logger } from "./logger";
  * local development but means nobody can verify an account in production.
  */
 
-export type Mail = { to: string; subject: string; text: string; html: string };
+/** `fromName` overrides MAIL_FROM_NAME (e.g. "Surfaced" for mail sent from the app's sign-up). */
+export type Mail = { to: string; subject: string; text: string; html: string; fromName?: string };
 
 let transporter: Transporter | undefined;
 
@@ -37,7 +38,7 @@ export async function sendMail(mail: Mail, cfg: AppConfig = getConfig()): Promis
     return;
   }
   await t.sendMail({
-    from: { name: cfg.MAIL_FROM_NAME, address: cfg.MAIL_FROM_ADDRESS },
+    from: { name: mail.fromName ?? cfg.MAIL_FROM_NAME, address: cfg.MAIL_FROM_ADDRESS },
     to: mail.to,
     subject: mail.subject,
     text: mail.text,

@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { z } from "zod";
 import { json, jsonError, preflight, readJson } from "@/lib/app-api/http";
 import { createVerificationToken, normalizeEmail, unverifiedMemberId } from "@/lib/auth/accounts";
+import { APP_NAME } from "@/lib/app-links";
 import { emailLinkOrigin } from "@/lib/auth/links";
 import { getConfig } from "@/lib/config";
 import { getDb } from "@/lib/db/client";
@@ -29,7 +30,7 @@ export async function POST(req: NextRequest) {
     try {
       const token = await createVerificationToken(db, userId);
       const link = `${emailLinkOrigin(cfg.APP_URL, req.headers)}/verify?${new URLSearchParams({ token })}`;
-      await sendMail(verificationMail(email, link, cfg.MAIL_FROM_NAME));
+      await sendMail({ ...verificationMail(email, link, APP_NAME), fromName: APP_NAME });
     } catch (err) {
       logger.error({ err }, "app resend email failed");
       return jsonError(502, "We could not send the email. Try again in a few minutes.");

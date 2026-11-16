@@ -591,9 +591,9 @@ trends.example.com {
 Point the domain's DNS at the server, open ports 80/443, `sudo systemctl reload caddy`. Visitors get the login
 page; API clients use a key (§5b). Do **not** open port 3000 to the internet.
 
-### Trend Feed app API (`/api/app/v1`)
+### Surfaced app API (`/api/app/v1`)
 
-The mobile app talks to the same server through the same Caddy domain. Nothing else to open or proxy:
+The mobile app (Surfaced) talks to the same server through the same Caddy domain. Nothing else to open or proxy:
 `https://trends.example.com/api/app/v1/...` is public by design (read endpoints are anonymous; writes need an
 app sign-in). Its per-IP limits rely on Caddy setting `X-Forwarded-For` (Caddy ≥ 2.5 overwrites what clients
 send), so keep the app behind Caddy like the dashboard.

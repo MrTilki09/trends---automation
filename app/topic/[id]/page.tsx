@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { APP_NAME, APP_SCHEME } from "@/lib/app-links";
 import { getConfig } from "@/lib/config";
 import { getTopicDetail } from "@/lib/data/feed";
 import { getDb } from "@/lib/db/client";
 import { relativeTime } from "@/lib/utils";
 
 /*
- * Public page for a shared story: https://<domain>/topic/:id. With the Trend Feed app installed,
+ * Public page for a shared story: https://<domain>/topic/:id. With the Surfaced app installed,
  * the phone opens the app instead (Universal Links / App Links); everyone else lands here.
  * Shows only what the app shows: headline, the publisher's snippet with credit, the sources.
  */
@@ -21,18 +22,18 @@ async function load(idParam: string) {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const detail = await load((await params).id);
-  if (!detail) return { title: "Story not found · Trend Feed" };
+  if (!detail) return { title: `Story not found · ${APP_NAME}` };
   const { topic } = detail;
   const description =
     topic.snippet && topic.snippetPublisher
       ? `${topic.snippet} (${topic.snippetPublisher})`
       : `Trending on ${topic.publisherCount} source${topic.publisherCount === 1 ? "" : "s"}.`;
   return {
-    title: `${topic.title} · Trend Feed`,
+    title: `${topic.title} · ${APP_NAME}`,
     description,
     openGraph: {
       type: "article",
-      siteName: "Trend Feed",
+      siteName: APP_NAME,
       title: topic.title,
       description,
       ...(topic.imageUrl ? { images: [{ url: topic.imageUrl, alt: `Image: ${topic.imagePublisher ?? "publisher"}` }] } : {}),
@@ -84,10 +85,10 @@ export default async function SharedTopicPage({ params }: Props) {
 
       <div className="flex flex-wrap gap-3">
         <a
-          href={`trendfeed://topic/${topic.id}`}
+          href={`${APP_SCHEME}://topic/${topic.id}`}
           className="rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
         >
-          Open in the Trend Feed app
+          Open in the {APP_NAME} app
         </a>
         {topic.url && (
           <a href={topic.url} rel="noopener nofollow" className="rounded-md border px-4 py-2.5 text-sm font-medium hover:bg-muted">
@@ -132,7 +133,7 @@ export default async function SharedTopicPage({ params }: Props) {
         </section>
       )}
       <p className="text-xs text-muted-foreground">
-        Trend Feed shows the tech stories trending across hundreds of sources. Text and images belong to their
+        {APP_NAME} shows the tech stories trending across hundreds of sources. Text and images belong to their
         publishers; links go to the original articles.
       </p>
     </article>
