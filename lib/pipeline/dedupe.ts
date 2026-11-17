@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import type { DB } from "../db/client";
 import { rawItems } from "../db/schema";
+import { sourceImagesAllowed, withoutRawImage } from "../sources/images";
 import type { RawItemInput } from "../sources/types";
 import { detectSignals, normalizeTags } from "./classify";
 import { canonicalizeUrl, guessLang, normalizeTitle } from "./normalize";
@@ -47,10 +48,15 @@ export async function upsertRawItems(
     defaultLang?: string;
     /** Tags configured on the source (e.g. "turkey", "startups"), added to every item. */
     sourceTags?: string[];
-    /** Name/type of the source, for the app's display fields (publisher, snippet cleanup). */
-    source?: { name: string; type: string };
+    /**
+     * Name/type of the source, for the app's display fields (publisher, snippet cleanup).
+     * `config` decides whether the source's images are kept (sourceImagesAllowed); without a
+     * source, images are not kept.
+     */
+    source?: { name: string; type: string; config?: unknown };
   },
 ): Promise<{ fetched: number; new: number }> {
+  const keepImages = params.source ? sourceImagesAllowed(params.source) : false;
   const items = dedupeBatch(params.items);
   let created = 0;
   const now = new Date();
@@ -86,8 +92,9 @@ export async function upsertRawItems(
           MAX_ITEM_TAGS,
         ),
         metrics: it.metrics,
-        raw: it.raw ?? null,
-        imageUrl: display.imageUrl,
+        // Publisher photos aren't ours to republish: don't store them at all (lib/sources/images.ts).
+        raw: (keepImages ? it.raw : withoutRawImage(it.raw)) ?? null,
+        imageUrl: keepImages ? display.imageUrl : null,
         snippet: display.snippet,
         publisher: display.publisher || null,
         fetchedAt: now,
@@ -105,7 +112,8 @@ export async function upsertRawItems(
           // Keep tags/lang current too (also fills them in for items stored before they existed).
           tags: sql`excluded.tags`,
           lang: sql`excluded.lang`,
-          imageUrl: sql`coalesce(excluded.image_url, ${rawItems.imageUrl})`,
+          // A source whose images we don't keep sends null, which also clears any old image.
+          imageUrl: keepImages ? sql`coalesce(excluded.image_url, ${rawItems.imageUrl})` : sql`NULL`,
           snippet: sql`coalesce(excluded.snippet, ${rawItems.snippet})`,
           publisher: sql`excluded.publisher`,
         },

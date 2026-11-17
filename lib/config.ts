@@ -76,6 +76,10 @@ const envSchema = z.object({
     .url()
     .optional()
     .or(z.literal("").transform(() => undefined)),
+  // Images in the Surfaced app API. "off" (default): no images reach the app at all.
+  // "allowed": only images from sources we may republish (company newsrooms, GitHub cards, or
+  // sources with config.imagesAllowed = true). Publisher photos are never stored either way.
+  APP_IMAGES: z.enum(["off", "allowed"]).default("off"),
   // Outgoing email (signup verification). Same names as Laravel's MAIL_* settings.
   MAIL_HOST: optionalString,
   MAIL_PORT: z.coerce.number().int().positive().default(587),

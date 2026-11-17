@@ -5,6 +5,7 @@ import { closeDb, getDb, getPool } from "../lib/db/client";
 import { logger } from "../lib/logger";
 import { refreshTopicAggregates } from "../lib/pipeline/cluster";
 import { displayFields } from "../lib/pipeline/snippet";
+import { sourceImagesAllowed } from "../lib/sources/images";
 
 const BATCH = 1000;
 
@@ -23,16 +24,19 @@ async function main() {
       raw: unknown;
       name: string;
       type: string;
+      config: unknown;
     }>(
-      `SELECT r.id, r.title, r.summary, r.url, r.author, r.raw, s.name, s.type
+      `SELECT r.id, r.title, r.summary, r.url, r.author, r.raw, s.name, s.type, s.config
        FROM raw_items r JOIN sources s ON s.id = r.source_id
        WHERE r.id > $1 ORDER BY r.id LIMIT $2`,
       [lastId, BATCH],
     );
     if (rows.length === 0) break;
-    const fields = rows.map((r) =>
-      displayFields({ ...r, sourceName: r.name, sourceType: r.type }),
-    );
+    const fields = rows.map((r) => {
+      const f = displayFields({ ...r, sourceName: r.name, sourceType: r.type });
+      // Only images from sources we may republish (see worker/clear-images.ts for the rest).
+      return { ...f, imageUrl: sourceImagesAllowed(r) ? f.imageUrl : null };
+    });
     await pool.query(
       `UPDATE raw_items r SET snippet = v.snippet, image_url = v.image_url, publisher = v.publisher
        FROM unnest($1::int[], $2::text[], $3::text[], $4::text[]) AS v(id, snippet, image_url, publisher)

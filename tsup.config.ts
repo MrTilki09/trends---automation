@@ -11,6 +11,8 @@ export default defineConfig({
     // App (Surfaced): one-off fill of snippets/images/publishers, and a foreground collection run.
     "backfill-app": "worker/backfill-app.ts",
     "collect-once": "worker/collect-once.ts",
+    // One-off: remove stored publisher images we may not republish.
+    "clear-images": "worker/clear-images.ts",
   },
   format: ["cjs"],
   platform: "node",

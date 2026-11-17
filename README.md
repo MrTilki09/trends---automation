@@ -604,6 +604,7 @@ send), so keep the app behind Caddy like the dashboard.
 SESSION_SECRET=…          # required: app sign-in tokens are signed with a key derived from it
 APP_URL=https://trend.developerfox.com.tr   # exactly the public host: links in sign-up / reset emails use it
 MAIL_HOST=… MAIL_USERNAME=… MAIL_PASSWORD=… MAIL_FROM_ADDRESS=…   # sign-up confirmation emails (§5d)
+APP_IMAGES=off            # default: no images reach the app ("allowed" = newsroom/GitHub images only)
 PUSH_ENABLED=true         # once the app is in the stores: "breaking" pushes after each hourly run
 EXPO_ACCESS_TOKEN=        # only if "enhanced push security" is on for the Expo project
 ```
@@ -614,6 +615,17 @@ First deploy of a version that adds the app tables, after `docker compose up -d 
 ```bash
 # fill snippets, images and publisher counts for the stories already in the database (~1 min)
 docker compose run --rm worker node dist/backfill-app.js
+```
+
+**Images.** Publisher photos are often agency photos licensed to that publisher only, so they aren't
+republished: the collector stores images only from company newsrooms (tag `official`) and GitHub repo
+cards, and the app API sends none at all while `APP_IMAGES=off` (the default). To turn images on for a
+source you have permission for, set `"imagesAllowed": true` in its config. Databases that collected
+images before this change: remove the stored publisher images once (`--dry-run` only counts):
+
+```bash
+docker compose run --rm worker node dist/clear-images.js --dry-run
+docker compose run --rm worker node dist/clear-images.js
 ```
 
 Then set the app's API address to the domain (`EXPO_PUBLIC_API_URL` in the app repo's `eas.json`, profiles

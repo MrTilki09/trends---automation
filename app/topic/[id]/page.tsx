@@ -36,9 +36,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: APP_NAME,
       title: topic.title,
       description,
-      ...(topic.imageUrl ? { images: [{ url: topic.imageUrl, alt: `Image: ${topic.imagePublisher ?? "publisher"}` }] } : {}),
+      // No publisher images on the public web page or in link previews: text and credit only.
     },
-    twitter: { card: topic.imageUrl ? "summary_large_image" : "summary", title: topic.title, description },
+    twitter: { card: "summary", title: topic.title, description },
   };
 }
 
@@ -64,15 +64,6 @@ export default async function SharedTopicPage({ params }: Props) {
           {topic.publisherCount >= 2 ? ` · on ${topic.publisherCount} sources` : ""}
         </p>
         <h1 className="text-2xl font-semibold leading-tight tracking-tight">{topic.title}</h1>
-        {topic.imageUrl && (
-          <figure className="space-y-1">
-            {/* eslint-disable-next-line @next/next/no-img-element -- publisher's own feed image, not optimized by us */}
-            <img src={topic.imageUrl} alt="" className="w-full rounded-lg border object-cover" />
-            {topic.imagePublisher && (
-              <figcaption className="text-xs text-muted-foreground">Image: {topic.imagePublisher}</figcaption>
-            )}
-          </figure>
-        )}
         {topic.snippet && (
           <blockquote className="rounded-lg border bg-muted/40 p-4 text-[15px] leading-relaxed">
             {topic.snippet}

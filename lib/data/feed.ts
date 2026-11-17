@@ -1,5 +1,6 @@
 import { sql, type SQL } from "drizzle-orm";
 import type { FeedPage, FeedTab, FeedTopic, Momentum, TopicDetail } from "../app-api/schemas";
+import { getConfig } from "../config";
 import type { DB } from "../db/client";
 import { canonicalTag, COMPANY_NAMES, TECH_CATEGORIES } from "../pipeline/classify";
 import { normalizeTitle } from "../pipeline/normalize";
@@ -65,6 +66,22 @@ export function decodeCursor(s: string | null | undefined): Cursor | null {
 
 const PUBLISHED = sql.raw("coalesce(t.published_at, t.first_seen_at)");
 
+/**
+ * Whether the app may show images from source `s` (a `sources` alias). Images are still collected
+ * and stored for every source, but the app API only hands out images we're allowed to republish:
+ * a company's own newsroom (tag "official", published for the press) and GitHub's generated repo
+ * cards. Publisher photos are often agency photos (AP, Reuters, Getty) licensed to that publisher
+ * only, so everything else is text-only. Override per source with `config.imagesAllowed`
+ * (true/false), e.g. after checking a publisher's terms or getting permission.
+ */
+export function imageAllowedSql(s: string): SQL {
+  // APP_IMAGES=off (the default) blocks every image from the app API.
+  if (getConfig().APP_IMAGES !== "allowed") return sql`false`;
+  const a = sql.raw(s);
+  return sql`coalesce((${a}.config->>'imagesAllowed')::boolean,
+    (${a}.config->'tags') @> '["official"]'::jsonb OR ${a}.type = 'github_repos')`;
+}
+
 /** Columns every app topic needs (the list endpoints and the story page). `rank` = the sort key. */
 function topicColumns(rank: SQL, viewerId?: number | null): SQL {
   const viewer =
@@ -80,10 +97,10 @@ function topicColumns(rank: SQL, viewerId?: number | null): SQL {
               WHERE r.topic_id = t.id AND r.url IS NOT NULL AND r.url NOT LIKE 'https://news.google.com/%'
               ORDER BY s.weight DESC, coalesce(r.published_at, r.fetched_at) LIMIT 1),
              t.canonical_url) AS canonical_url,
-    t.snippet, t.snippet_publisher, t.image_url,
+    t.snippet, t.snippet_publisher,
+    -- Only images from sources we may republish (imageAllowedSql); prefer the topic's chosen image.
+    img.image_url, img.publisher AS image_publisher,
     coalesce(t.category, t.llm_category) AS category, t.tags, t.lang, ${PUBLISHED} AS published_at,
-    (SELECT r.publisher FROM raw_items r WHERE r.topic_id = t.id AND r.image_url = t.image_url
-       ORDER BY r.id LIMIT 1) AS image_publisher,
     t.publisher_count, t.score, ${rank} AS rank,
     (SELECT array_agg(p ORDER BY w DESC, first) FROM (
        SELECT r.publisher AS p, max(s.weight) AS w, min(coalesce(r.published_at, r.fetched_at)) AS first
@@ -100,8 +117,15 @@ function topicColumns(rank: SQL, viewerId?: number | null): SQL {
     coalesce(c.saves, 0) AS c_saves${viewer}`;
 }
 
-/** Every query using topicColumns joins the counters with this. */
-const COUNTERS_JOIN = sql`LEFT JOIN topic_counters c ON c.topic_id = t.id`;
+/** Every query using topicColumns joins the counters and the allowed image with this (a function: it reads APP_IMAGES). */
+function countersJoin(): SQL {
+  return sql`LEFT JOIN topic_counters c ON c.topic_id = t.id
+  LEFT JOIN LATERAL (
+    SELECT r.image_url, r.publisher FROM raw_items r JOIN sources s ON s.id = r.source_id
+    WHERE r.topic_id = t.id AND r.image_url IS NOT NULL AND ${imageAllowedSql("s")}
+    ORDER BY (r.image_url = t.image_url) DESC, s.weight DESC, r.id
+    LIMIT 1) img ON true`;
+}
 
 type Row = Record<string, unknown>;
 
@@ -229,7 +253,7 @@ export async function getFeed(db: DB, q: FeedQuery): Promise<FeedPage> {
 
   const res = await db.execute(sql`
     SELECT ${topicColumns(rank, q.viewer?.id)}
-    ${from} ${COUNTERS_JOIN}
+    ${from} ${countersJoin()}
     WHERE ${sql.join(where, sql` AND `)}
     ORDER BY rank DESC, t.id DESC
     LIMIT ${limit + 1}`);
@@ -264,11 +288,12 @@ export async function countNewStories(
 
 export async function getTopicDetail(db: DB, id: number, viewerId?: number | null): Promise<TopicDetail | null> {
   const res = await db.execute(sql`
-    SELECT ${topicColumns(sql`t.score`, viewerId)} FROM topics t ${COUNTERS_JOIN} WHERE t.id = ${id} AND t.status <> 'ignored'`);
+    SELECT ${topicColumns(sql`t.score`, viewerId)} FROM topics t ${countersJoin()} WHERE t.id = ${id} AND t.status <> 'ignored'`);
   const row = res.rows[0] as Row | undefined;
   if (!row) return null;
   const items = await db.execute(sql`
-    SELECT r.id, r.title, r.url, coalesce(r.publisher, s.name) AS publisher, r.snippet, r.image_url,
+    SELECT r.id, r.title, r.url, coalesce(r.publisher, s.name) AS publisher, r.snippet,
+           CASE WHEN ${imageAllowedSql("s")} THEN r.image_url END AS image_url,
            coalesce(r.published_at, r.fetched_at) AS published_at
     FROM raw_items r JOIN sources s ON s.id = r.source_id
     WHERE r.topic_id = ${id}
@@ -332,7 +357,7 @@ export async function getDiscover(db: DB) {
       FROM topics t CROSS JOIN LATERAL unnest(t.tags) AS tag
       WHERE ${where} GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 120`),
     db.execute(sql`
-      SELECT ${topicColumns(sql`t.score`)} FROM topics t ${COUNTERS_JOIN}
+      SELECT ${topicColumns(sql`t.score`)} FROM topics t ${countersJoin()}
       WHERE t.status = 'shortlisted' AND ${PUBLISHED} > now() - interval '7 days'
       ORDER BY t.score DESC, t.id DESC LIMIT 5`),
   ]);
@@ -369,7 +394,7 @@ export async function searchTopics(
   if (cursor?.tab === "search")
     where.push(sql`(${PUBLISHED}, t.id) < (to_timestamp(${cursor.k} / 1000.0), ${cursor.id})`);
   const res = await db.execute(sql`
-    SELECT ${topicColumns(sql`extract(epoch FROM ${PUBLISHED}) * 1000`, viewerId)} FROM topics t ${COUNTERS_JOIN}
+    SELECT ${topicColumns(sql`extract(epoch FROM ${PUBLISHED}) * 1000`, viewerId)} FROM topics t ${countersJoin()}
     WHERE ${sql.join(where, sql` AND `)}
     ORDER BY rank DESC, t.id DESC LIMIT ${limit + 1}`);
   const rows = res.rows as Row[];
@@ -389,7 +414,7 @@ export async function searchTopics(
 export async function getSaved(db: DB, userId: number, limit = 100): Promise<FeedTopic[]> {
   const res = await db.execute(sql`
     SELECT ${topicColumns(sql`extract(epoch FROM s.created_at) * 1000`, userId)}
-    FROM saved_topics s JOIN topics t ON t.id = s.topic_id ${COUNTERS_JOIN}
+    FROM saved_topics s JOIN topics t ON t.id = s.topic_id ${countersJoin()}
     WHERE s.user_id = ${userId}
     ORDER BY s.created_at DESC
     LIMIT ${Math.min(200, Math.max(1, limit))}`);

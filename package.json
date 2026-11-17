@@ -27,6 +27,7 @@
     "migrate": "docker compose -f compose.yaml -f compose.dev.yaml run --rm migrate",
     "logs": "docker compose -f compose.yaml -f compose.dev.yaml logs -f --tail=100",
     "db:backfill-app": "tsx worker/backfill-app.ts",
+    "db:clear-images": "tsx worker/clear-images.ts",
     "collect:once": "tsx worker/collect-once.ts"
   },
   "dependencies": {

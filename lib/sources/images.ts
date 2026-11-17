@@ -16,6 +16,28 @@ const JUNK = [
   /(^|[/_-])(icon|icons|logo|badge|button|share|sprite)([/_.-]|$)/i,
   /\.svg(\?|$)/i,
 ];
+/**
+ * Whether we may keep and republish images from a source. Publisher photos are often agency photos
+ * (AP, Reuters, Getty) licensed to that publisher only, so by default only a company's own newsroom
+ * (tag "official", published for the press) and GitHub's generated repo cards qualify.
+ * `config.imagesAllowed` (true/false) overrides it per source, e.g. after getting permission.
+ * Keep in sync with `imageAllowedSql` in lib/data/feed.ts.
+ */
+export function sourceImagesAllowed(source: { type: string; config?: unknown }): boolean {
+  const cfg = (source.config ?? {}) as { imagesAllowed?: unknown; tags?: unknown };
+  if (typeof cfg.imagesAllowed === "boolean") return cfg.imagesAllowed;
+  const tags = Array.isArray(cfg.tags) ? cfg.tags : [];
+  return tags.includes("official") || source.type === "github_repos";
+}
+
+/** `raw` without its stored image URL (for sources whose images we don't keep). */
+export function withoutRawImage(raw: unknown): unknown {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw) || !("image" in raw)) return raw;
+  const rest: Record<string, unknown> = { ...(raw as Record<string, unknown>) };
+  delete rest.image;
+  return rest;
+}
+
 // Smaller than this (when the size is stated) = a thumbnail or decoration, not a post image.
 const MIN_SIDE = 200;
 

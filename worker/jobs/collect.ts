@@ -197,7 +197,7 @@ async function collectSource(
       items,
       defaultLang: typeof cfgLang === "string" ? cfgLang : undefined,
       sourceTags: sourceTagsOf(source),
-      source: { name: source.name, type: source.type },
+      source: { name: source.name, type: source.type, config: source.config },
     });
     fetched = res.fetched;
     created = res.new;
