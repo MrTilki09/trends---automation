@@ -19,6 +19,12 @@ import { TECH_ONLY } from "./topics";
 export const FEED_PAGE_SIZE = 20;
 export const FEED_WINDOW_HOURS = 72;
 export const SEARCH_WINDOW_HOURS = 24 * 30;
+/**
+ * Google Play's News policy: the app may not show content older than three months. Story pages,
+ * share pages and Saved lists hide anything older (feed and search windows are shorter already).
+ */
+export const MAX_CONTENT_AGE_DAYS = 90;
+const NOT_TOO_OLD = sql`${sql.raw("coalesce(t.published_at, t.first_seen_at)")} > now() - make_interval(days => ${MAX_CONTENT_AGE_DAYS})`;
 
 /** Momentum thresholds: change of score over MOMENTUM_HOURS (scores also decay ~16% per 6 h). */
 export const MOMENTUM = { hours: 6, risingAt: 0.1, fadingAt: -0.3, minPast: 0.05 } as const;
@@ -288,7 +294,8 @@ export async function countNewStories(
 
 export async function getTopicDetail(db: DB, id: number, viewerId?: number | null): Promise<TopicDetail | null> {
   const res = await db.execute(sql`
-    SELECT ${topicColumns(sql`t.score`, viewerId)} FROM topics t ${countersJoin()} WHERE t.id = ${id} AND t.status <> 'ignored'`);
+    SELECT ${topicColumns(sql`t.score`, viewerId)} FROM topics t ${countersJoin()}
+    WHERE t.id = ${id} AND t.status <> 'ignored' AND ${NOT_TOO_OLD}`);
   const row = res.rows[0] as Row | undefined;
   if (!row) return null;
   const items = await db.execute(sql`
@@ -415,7 +422,7 @@ export async function getSaved(db: DB, userId: number, limit = 100): Promise<Fee
   const res = await db.execute(sql`
     SELECT ${topicColumns(sql`extract(epoch FROM s.created_at) * 1000`, userId)}
     FROM saved_topics s JOIN topics t ON t.id = s.topic_id ${countersJoin()}
-    WHERE s.user_id = ${userId}
+    WHERE s.user_id = ${userId} AND ${NOT_TOO_OLD}
     ORDER BY s.created_at DESC
     LIMIT ${Math.min(200, Math.max(1, limit))}`);
   return (res.rows as Row[]).map(toFeedTopic);

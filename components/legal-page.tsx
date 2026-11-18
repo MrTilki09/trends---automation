@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 /** Simple readable layout for the public legal pages (/privacy, /terms, /delete-account). */
@@ -14,6 +15,10 @@ export function LegalPage({ title, updated, children }: { title: string; updated
         {updated && <p className="text-sm text-muted-foreground">Last updated: {updated}</p>}
       </header>
       {children}
+      <footer className="border-t pt-4 text-sm text-muted-foreground">
+        <Link href="/contact">Contact us</Link> · <Link href="/privacy">Privacy</Link> ·{" "}
+        <Link href="/terms">Terms</Link> · <Link href="/delete-account">Delete your account</Link>
+      </footer>
     </article>
   );
 }

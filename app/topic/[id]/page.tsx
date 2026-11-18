@@ -124,8 +124,9 @@ export default async function SharedTopicPage({ params }: Props) {
         </section>
       )}
       <p className="text-xs text-muted-foreground">
-        {APP_NAME} shows the tech stories trending across hundreds of sources. Text and images belong to their
-        publishers; links go to the original articles.
+        {APP_NAME} shows the tech stories trending across hundreds of sources. Text belongs to its publishers;
+        links go to the original articles. <a href="/contact" className="underline">Contact us</a> ·{" "}
+        <a href="/privacy" className="underline">Privacy</a>
       </p>
     </article>
   );
